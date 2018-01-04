@@ -16,9 +16,44 @@ inspecode:
 
   ##########
   ##    Cppcheck timed out.
-  #cppcheck:         ### for C++
+  cppcheck:         ### for C++
   #  thresholds:
   #    num-issues: 999
+  - input: 'ccmain/**'
+    thresholds:
+      num-issues: 999
+  - input: 'ccstruct/**'
+    thresholds:
+      num-issues: 999
+  - input: 'ccutil/**'
+    thresholds:
+      num-issues: 999
+  - input: 'classify/**'
+    thresholds:
+      num-issues: 999
+  - input: 'testing/**'
+    thresholds:
+      num-issues: 999
+  - input: 'textord/**'
+    thresholds:
+      num-issues: 999
+  - input: 'training/**'
+    thresholds:
+      num-issues: 999
+  - input: 'lstm/**'
+    thresholds:
+      num-issues: 999
+  - ignore:
+    - 'ccmain/**'
+    - 'ccstruct/**'
+    - 'ccutil/**'
+    - 'classify/**'
+    - 'testing/**'
+    - 'textord/**'
+    - 'training/**'
+    - 'lstm/**'
+    thresholds:
+      num-issues: 999
 
   cpplint:          ### for C++
     options:
@@ -78,6 +113,8 @@ inspecode:
   #  thresholds:
   #    num-issues: 999
 
-  unused:           ### for C++
-    thresholds:
-      num-issues: 999
+  ##########
+  ## unused ... temporary stop because long exec time
+  #unused:           ### for C++
+  #  thresholds:
+  #    num-issues: 477
