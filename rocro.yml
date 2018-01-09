@@ -22,17 +22,26 @@ inspecode:
   - ignore: 'ccutil/**'
     thresholds:
       num-issues: 19
-  - input:  'ccutil/**'
+  - input:  'ccutil/[a-e]**'
+    thresholds:
+      num-issues: 999
+  - input:  'ccutil/[f-n]**'
+    thresholds:
+      num-issues: 999
+  - input:  'ccutil/[o-t]**'
     ignore: 'ccutil/tesscallback.h'
+    thresholds:
+      num-issues: 999
+  - input:  'ccutil/[u-z]**'
     ignore: 'ccutil/universalambigs.cpp'
     thresholds:
       num-issues: 999
   - input:  'ccutil/tesscallback.h'
     thresholds:
-      num-issues: 999
+      num-issues: 0
   - input:  'ccutil/universalambigs.cpp'
     thresholds:
-      num-issues: 999
+      num-issues: 0
 
   cpplint:          ### for C++
     options:
