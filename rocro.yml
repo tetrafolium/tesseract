@@ -22,26 +22,30 @@ inspecode:
   - ignore: 'ccutil/**'
     thresholds:
       num-issues: 19
-  - input:  'ccutil/[a-e]**'
+  - input:  'ccutil/[abc]*.cpp'
     thresholds:
       num-issues: 999
-  - input:  'ccutil/[f-n]**'
+  - input:  'ccutil/[def]*.cpp'
     thresholds:
       num-issues: 999
-  - input:  'ccutil/[o-t]**'
-    ignore: 'ccutil/tesscallback.h'
+  - input:  'ccutil/[ghi]*.cpp'
     thresholds:
       num-issues: 999
-  - input:  'ccutil/[u-z]**'
-    ignore: 'ccutil/universalambigs.cpp'
+  #- input:  'ccutil/[jkl]*.cpp'
+  #  thresholds:
+  #    num-issues: 999
+  - input:  'ccutil/[mno]*.cpp'
     thresholds:
       num-issues: 999
-  - input:  'ccutil/tesscallback.h'
+  - input:  'ccutil/[pqrs]*.cpp'
     thresholds:
-      num-issues: 0
-  - input:  'ccutil/universalambigs.cpp'
+      num-issues: 999
+  - input:  'ccutil/[tuv]*.cpp'
     thresholds:
-      num-issues: 0
+      num-issues: 999
+  #- input:  'ccutil/[wxyz]*.cpp'
+  #  thresholds:
+  #    num-issues: 999
 
   cpplint:          ### for C++
     options:
