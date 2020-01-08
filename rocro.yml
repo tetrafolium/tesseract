@@ -31,9 +31,9 @@ inspecode:
   - input:  'ccutil/[ghi]*.cpp'
     thresholds:
       num-issues: 999
-  #- input:  'ccutil/[jkl]*.cpp'
-  #  thresholds:
-  #    num-issues: 999
+  - input:  'ccutil/[jkl]*.cpp'
+    thresholds:
+      num-issues: 999
   - input:  'ccutil/[mno]*.cpp'
     thresholds:
       num-issues: 999
@@ -43,9 +43,9 @@ inspecode:
   - input:  'ccutil/[tuv]*.cpp'
     thresholds:
       num-issues: 999
-  #- input:  'ccutil/[wxyz]*.cpp'
-  #  thresholds:
-  #    num-issues: 999
+  - input:  'ccutil/[wxyz]*.cpp'
+    thresholds:
+      num-issues: 999
 
   cpplint:          ### for C++
     options:
