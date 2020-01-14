@@ -14,38 +14,9 @@ inspecode:
     thresholds:
       num-issues: 346
 
-  ##########
-  ##    Cppcheck timed out.
   cppcheck:         ### for C++
-  #  thresholds:
-  #    num-issues: 999
-  - ignore: 'ccutil/**'
     thresholds:
-      num-issues: 19
-  - input:  'ccutil/[abc]*.cpp'
-    thresholds:
-      num-issues: 0
-  - input:  'ccutil/[def]*.cpp'
-    thresholds:
-      num-issues: 2
-  - input:  'ccutil/[ghi]*.cpp'
-    thresholds:
-      num-issues: 1
-  - input:  'ccutil/[jkl]*.cpp'
-    thresholds:
-      num-issues: 0   # excluded all analyzable files by input/ignore patterns
-  - input:  'ccutil/[mno]*.cpp'
-    thresholds:
-      num-issues: 1
-  - input:  'ccutil/[pqrs]*.cpp'
-    thresholds:
-      num-issues: 1
-  - input:  'ccutil/[tuv]*.cpp'
-    thresholds:
-      num-issues: 1
-  - input:  'ccutil/[wxyz]*.cpp'
-    thresholds:
-      num-issues: 0   # excluded all analyzable files by input/ignore patterns
+      num-issues: 25
 
   cpplint:          ### for C++
     options:
