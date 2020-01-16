@@ -10,9 +10,10 @@ inspecode:
     thresholds:
       num-issues: 560
 
-  cpd:              ### for C++
-    thresholds:
-      num-issues: 346
+  ########## [temporary disabled] ... tractrix/codelift-plugins#1419
+  #cpd:              ### for C++
+  #  thresholds:
+  #    num-issues: 346
 
   cppcheck:         ### for C++
     thresholds:
