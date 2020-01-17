@@ -17,7 +17,7 @@ inspecode:
 
   cppcheck:         ### for C++
     thresholds:
-      num-issues: 25
+      num-issues: 22
 
   cpplint:          ### for C++
     options:
