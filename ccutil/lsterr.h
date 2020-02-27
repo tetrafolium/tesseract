@@ -23,7 +23,7 @@
 #include          "errcode.h"    //must be last include
 
 const ERRCODE DONT_CONSTRUCT_LIST_BY_COPY =
-"Can't create a list by assignment";
+    "Can't create a list by assignment";
 const ERRCODE DONT_ASSIGN_LISTS = "Can't assign to lists";
 const ERRCODE SERIALISE_LINKS = "Attempted to (de)serialise a link element";
 

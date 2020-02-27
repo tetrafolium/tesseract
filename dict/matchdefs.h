@@ -64,9 +64,9 @@ typedef FLOAT32 CERTAINTY;
 /** define a data structure to hold a single match result */
 typedef struct
 {
-  CLASS_ID Class;
-  RATING Rating;
-  CERTAINTY Certainty;
+    CLASS_ID Class;
+    RATING Rating;
+    CERTAINTY Certainty;
 }
 
 

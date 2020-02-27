@@ -33,25 +33,27 @@
 typedef LIST MFOUTLINE;
 
 typedef enum {
-  north, south, east, west, northeast, northwest, southeast, southwest
+    north, south, east, west, northeast, northwest, southeast, southwest
 } DIRECTION;
 
 typedef struct {
-  FPOINT Point;
-  FLOAT32 Slope;
-  unsigned Padding:20;
-  BOOL8 Hidden:TRUE;
-  BOOL8 ExtremityMark:TRUE;
-  DIRECTION Direction:4;
-  DIRECTION PreviousDirection:4;
+    FPOINT Point;
+    FLOAT32 Slope;
+    unsigned Padding:20;
+BOOL8 Hidden:
+    TRUE;
+BOOL8 ExtremityMark:
+    TRUE;
+    DIRECTION Direction:4;
+    DIRECTION PreviousDirection:4;
 } MFEDGEPT;
 
 typedef enum {
-  outer, hole
+    outer, hole
 } OUTLINETYPE;
 
 typedef enum {
-  baseline, character
+    baseline, character
 } NORM_METHOD;
 
 /**----------------------------------------------------------------------------

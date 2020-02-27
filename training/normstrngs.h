@@ -30,25 +30,25 @@ namespace tesseract {
 
 // The standard unicode normalizations.
 enum class UnicodeNormMode {
-  kNFD,
-  kNFC,
-  kNFKD,
-  kNFKC,
+    kNFD,
+    kNFC,
+    kNFKD,
+    kNFKC,
 };
 
 // To normalize away differences in punctuation that are ambiguous, like
 // curly quotes and different widths of dash.
 enum class OCRNorm {
-  kNone,
-  kNormalize,
+    kNone,
+    kNormalize,
 };
 
 // To validate and normalize away some subtle differences that can occur in
 // Indic scripts, eg ensuring that an explicit virama is always followed by
 // a zero-width non-joiner.
 enum class GraphemeNorm {
-  kNone,
-  kNormalize,
+    kNone,
+    kNormalize,
 };
 
 // Normalizes a UTF8 string according to the given modes. Returns true on

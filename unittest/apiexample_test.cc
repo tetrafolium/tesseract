@@ -21,15 +21,15 @@
 #include <fstream>
 #include <locale>
 
-TEST(TesseractTest, ApiExample) 
+TEST(TesseractTest, ApiExample)
 {
     char *outText;
     std::locale loc("C"); // You can also use "" for the default system locale
     std::ifstream file("../testing/phototest.txt");
     file.imbue(loc); // Use it for file input
     std::string gtText((std::istreambuf_iterator<char>(file)),
-             std::istreambuf_iterator<char>());
-	
+                       std::istreambuf_iterator<char>());
+
     tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
     // Initialize tesseract-ocr with English, without specifying tessdata path
     ASSERT_FALSE(api->Init(nullptr, "eng")) << "Could not initialize tesseract.";
@@ -51,6 +51,6 @@ TEST(TesseractTest, ApiExample)
 }
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

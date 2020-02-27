@@ -40,9 +40,9 @@
  * @note History: 4/3/89, DSJ, Created.
  */
 void DoError(int Error, const char *Message) {
-  if (Message != NULL) {
-    tprintf("\nError: %s!\n", Message);
-  }
+    if (Message != NULL) {
+        tprintf("\nError: %s!\n", Message);
+    }
 
-  err_exit();
+    err_exit();
 }                                /* DoError */

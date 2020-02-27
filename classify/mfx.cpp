@@ -70,30 +70,30 @@ MICROFEATURE ExtractMicroFeature(MFOUTLINE Start, MFOUTLINE End);
  * @note History: 7/21/89, DSJ, Created.
  */
 MICROFEATURES BlobMicroFeatures(TBLOB* Blob, const DENORM& cn_denorm) {
-  MICROFEATURES MicroFeatures = NIL_LIST;
-  LIST Outlines;
-  LIST RemainingOutlines;
-  MFOUTLINE Outline;
+    MICROFEATURES MicroFeatures = NIL_LIST;
+    LIST Outlines;
+    LIST RemainingOutlines;
+    MFOUTLINE Outline;
 
-  if (Blob != NULL) {
-    Outlines = ConvertBlob(Blob);
+    if (Blob != NULL) {
+        Outlines = ConvertBlob(Blob);
 
-    RemainingOutlines = Outlines;
-    iterate(RemainingOutlines) {
-      Outline = (MFOUTLINE) first_node (RemainingOutlines);
-      CharNormalizeOutline(Outline, cn_denorm);
+        RemainingOutlines = Outlines;
+        iterate(RemainingOutlines) {
+            Outline = (MFOUTLINE) first_node (RemainingOutlines);
+            CharNormalizeOutline(Outline, cn_denorm);
+        }
+
+        RemainingOutlines = Outlines;
+        iterate(RemainingOutlines) {
+            Outline = (MFOUTLINE) first_node(RemainingOutlines);
+            FindDirectionChanges(Outline, classify_min_slope, classify_max_slope);
+            MarkDirectionChanges(Outline);
+            MicroFeatures = ConvertToMicroFeatures(Outline, MicroFeatures);
+        }
+        FreeOutlines(Outlines);
     }
-
-    RemainingOutlines = Outlines;
-    iterate(RemainingOutlines) {
-      Outline = (MFOUTLINE) first_node(RemainingOutlines);
-      FindDirectionChanges(Outline, classify_min_slope, classify_max_slope);
-      MarkDirectionChanges(Outline);
-      MicroFeatures = ConvertToMicroFeatures(Outline, MicroFeatures);
-    }
-    FreeOutlines(Outlines);
-  }
-  return MicroFeatures;
+    return MicroFeatures;
 }                                /* BlobMicroFeatures */
 
 
@@ -118,14 +118,14 @@ MICROFEATURES BlobMicroFeatures(TBLOB* Blob, const DENORM& cn_denorm) {
  * @note History: 7/27/89, DSJ, Created.
  */
 FLOAT32 ComputeOrientation(MFEDGEPT *Start, MFEDGEPT *End) {
-  FLOAT32 Orientation;
+    FLOAT32 Orientation;
 
-  Orientation = NormalizeAngle (AngleFrom (Start->Point, End->Point));
+    Orientation = NormalizeAngle (AngleFrom (Start->Point, End->Point));
 
-  /* ensure that round-off errors do not put circular param out of range */
-  if ((Orientation < 0) || (Orientation >= 1))
-    Orientation = 0;
-  return (Orientation);
+    /* ensure that round-off errors do not put circular param out of range */
+    if ((Orientation < 0) || (Orientation >= 1))
+        Orientation = 0;
+    return (Orientation);
 }                                /* ComputeOrientation */
 
 /**
@@ -139,28 +139,28 @@ FLOAT32 ComputeOrientation(MFEDGEPT *Start, MFEDGEPT *End) {
  */
 MICROFEATURES ConvertToMicroFeatures(MFOUTLINE Outline,
                                      MICROFEATURES MicroFeatures) {
-  MFOUTLINE Current;
-  MFOUTLINE Last;
-  MFOUTLINE First;
-  MICROFEATURE NewFeature;
+    MFOUTLINE Current;
+    MFOUTLINE Last;
+    MFOUTLINE First;
+    MICROFEATURE NewFeature;
 
-  if (DegenerateOutline (Outline))
-    return (MicroFeatures);
+    if (DegenerateOutline (Outline))
+        return (MicroFeatures);
 
-  First = NextExtremity (Outline);
-  Last = First;
-  do {
-    Current = NextExtremity (Last);
-    if (!PointAt(Current)->Hidden) {
-      NewFeature = ExtractMicroFeature (Last, Current);
-      if (NewFeature != NULL)
-        MicroFeatures = push (MicroFeatures, NewFeature);
+    First = NextExtremity (Outline);
+    Last = First;
+    do {
+        Current = NextExtremity (Last);
+        if (!PointAt(Current)->Hidden) {
+            NewFeature = ExtractMicroFeature (Last, Current);
+            if (NewFeature != NULL)
+                MicroFeatures = push (MicroFeatures, NewFeature);
+        }
+        Last = Current;
     }
-    Last = Current;
-  }
-  while (Last != First);
+    while (Last != First);
 
-  return (MicroFeatures);
+    return (MicroFeatures);
 }                                /* ConvertToMicroFeatures */
 
 /**
@@ -181,19 +181,19 @@ MICROFEATURES ConvertToMicroFeatures(MFOUTLINE Outline,
  * - 11/17/89, DSJ, Added handling for Start and End same point.
  */
 MICROFEATURE ExtractMicroFeature(MFOUTLINE Start, MFOUTLINE End) {
-  MICROFEATURE NewFeature;
-  MFEDGEPT *P1, *P2;
+    MICROFEATURE NewFeature;
+    MFEDGEPT *P1, *P2;
 
-  P1 = PointAt(Start);
-  P2 = PointAt(End);
+    P1 = PointAt(Start);
+    P2 = PointAt(End);
 
-  NewFeature = NewMicroFeature ();
-  NewFeature[XPOSITION] = AverageOf(P1->Point.x, P2->Point.x);
-  NewFeature[YPOSITION] = AverageOf(P1->Point.y, P2->Point.y);
-  NewFeature[MFLENGTH] = DistanceBetween(P1->Point, P2->Point);
-  NewFeature[ORIENTATION] = NormalizedAngleFrom(&P1->Point, &P2->Point, 1.0);
-  NewFeature[FIRSTBULGE] = 0.0f;  // deprecated
-  NewFeature[SECONDBULGE] = 0.0f;  // deprecated
+    NewFeature = NewMicroFeature ();
+    NewFeature[XPOSITION] = AverageOf(P1->Point.x, P2->Point.x);
+    NewFeature[YPOSITION] = AverageOf(P1->Point.y, P2->Point.y);
+    NewFeature[MFLENGTH] = DistanceBetween(P1->Point, P2->Point);
+    NewFeature[ORIENTATION] = NormalizedAngleFrom(&P1->Point, &P2->Point, 1.0);
+    NewFeature[FIRSTBULGE] = 0.0f;  // deprecated
+    NewFeature[SECONDBULGE] = 0.0f;  // deprecated
 
-  return NewFeature;
+    return NewFeature;
 }                                /* ExtractMicroFeature */

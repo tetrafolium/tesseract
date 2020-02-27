@@ -21,32 +21,32 @@
 #include "unicharset.h"
 
 int main(int argc, char** argv) {
-  // Print usage
-  if (argc < 4) {
-    printf("Usage: %s unicharset-in-1 ... unicharset-in-n unicharset-out\n",
-           argv[0]);
-    exit(1);
-  }
-
-  UNICHARSET input_unicharset, result_unicharset;
-  for (int arg = 1; arg < argc - 1; ++arg) {
-    // Load the input unicharset
-    if (input_unicharset.load_from_file(argv[arg])) {
-      printf("Loaded unicharset of size %d from file %s\n",
-             input_unicharset.size(), argv[arg]);
-      result_unicharset.AppendOtherUnicharset(input_unicharset);
-    } else {
-      printf("Failed to load unicharset from file %s!!\n", argv[arg]);
-      exit(1);
+    // Print usage
+    if (argc < 4) {
+        printf("Usage: %s unicharset-in-1 ... unicharset-in-n unicharset-out\n",
+               argv[0]);
+        exit(1);
     }
-  }
 
-  // Save the combined unicharset.
-  if (result_unicharset.save_to_file(argv[argc - 1])) {
-    printf("Wrote unicharset file %s.\n", argv[argc - 1]);
-  } else {
-    printf("Cannot save unicharset file %s.\n", argv[argc - 1]);
-    exit(1);
-  }
-  return 0;
+    UNICHARSET input_unicharset, result_unicharset;
+    for (int arg = 1; arg < argc - 1; ++arg) {
+        // Load the input unicharset
+        if (input_unicharset.load_from_file(argv[arg])) {
+            printf("Loaded unicharset of size %d from file %s\n",
+                   input_unicharset.size(), argv[arg]);
+            result_unicharset.AppendOtherUnicharset(input_unicharset);
+        } else {
+            printf("Failed to load unicharset from file %s!!\n", argv[arg]);
+            exit(1);
+        }
+    }
+
+    // Save the combined unicharset.
+    if (result_unicharset.save_to_file(argv[argc - 1])) {
+        printf("Wrote unicharset file %s.\n", argv[argc - 1]);
+    } else {
+        printf("Cannot save unicharset file %s.\n", argv[argc - 1]);
+        exit(1);
+    }
+    return 0;
 }

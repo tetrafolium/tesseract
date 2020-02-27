@@ -31,29 +31,29 @@ char *tessoptarg;
  **********************************************************************/
 
 int tessopt (                         //parse args
-inT32 argc,                      //arg count
-char *argv[],                    //args
-const char *arglist                    //string of arg chars
+    inT32 argc,                      //arg count
+    char *argv[],                    //args
+    const char *arglist                    //string of arg chars
 ) {
-  const char *arg;                     //arg char
+    const char *arg;                     //arg char
 
-  if (tessoptind == 0)
-    tessoptind = 1;
-  if (tessoptind < argc && argv[tessoptind][0] == '-') {
-    arg = strchr (arglist, argv[tessoptind][1]);
-    if (arg == NULL || *arg == ':')
-      return '?';                //dud option
-    tessoptind++;
-    tessoptarg = argv[tessoptind];
-    if (arg[1] == ':') {
-      if (argv[tessoptind - 1][2] != '\0')
-                                 //immediately after
-        tessoptarg = argv[tessoptind - 1] + 2;
-      else
+    if (tessoptind == 0)
+        tessoptind = 1;
+    if (tessoptind < argc && argv[tessoptind][0] == '-') {
+        arg = strchr (arglist, argv[tessoptind][1]);
+        if (arg == NULL || *arg == ':')
+            return '?';                //dud option
         tessoptind++;
+        tessoptarg = argv[tessoptind];
+        if (arg[1] == ':') {
+            if (argv[tessoptind - 1][2] != '\0')
+                //immediately after
+                tessoptarg = argv[tessoptind - 1] + 2;
+            else
+                tessoptind++;
+        }
+        return *arg;
     }
-    return *arg;
-  }
-  else
-    return EOF;
+    else
+        return EOF;
 }

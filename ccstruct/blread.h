@@ -24,10 +24,10 @@
 #include          "ocrblock.h"
 
 bool read_unlv_file(                    //print list of sides
-                     STRING name,        //basename of file
-                     inT32 xsize,        //image size
-                     inT32 ysize,        //image size
-                     BLOCK_LIST *blocks  //output list
-                    );
+    STRING name,        //basename of file
+    inT32 xsize,        //image size
+    inT32 ysize,        //image size
+    BLOCK_LIST *blocks  //output list
+);
 void FullPageBlock(int width, int height, BLOCK_LIST *blocks);
 #endif

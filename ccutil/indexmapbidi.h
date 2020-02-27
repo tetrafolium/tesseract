@@ -40,44 +40,44 @@ class IndexMapBiDi;
 // NOTE: there are currently no methods to setup an IndexMap on its own!
 // It must be initialized by copying from an IndexMapBiDi or by DeSerialize.
 class IndexMap {
- public:
-  virtual ~IndexMap() {}
+public:
+    virtual ~IndexMap() {}
 
-  // SparseToCompact takes a sparse index to an index in the compact space.
-  // Uses a binary search to find the result. For faster speed use
-  // IndexMapBiDi, but that takes more memory.
-  virtual int SparseToCompact(int sparse_index) const;
+    // SparseToCompact takes a sparse index to an index in the compact space.
+    // Uses a binary search to find the result. For faster speed use
+    // IndexMapBiDi, but that takes more memory.
+    virtual int SparseToCompact(int sparse_index) const;
 
-  // CompactToSparse takes a compact index to the corresponding index in the
-  // sparse space.
-  int CompactToSparse(int compact_index) const {
-    return compact_map_[compact_index];
-  }
-  // The size of the sparse space.
-  virtual int SparseSize() const {
-    return sparse_size_;
-  }
-  // The size of the compact space.
-  int CompactSize() const {
-    return compact_map_.size();
-  }
+    // CompactToSparse takes a compact index to the corresponding index in the
+    // sparse space.
+    int CompactToSparse(int compact_index) const {
+        return compact_map_[compact_index];
+    }
+    // The size of the sparse space.
+    virtual int SparseSize() const {
+        return sparse_size_;
+    }
+    // The size of the compact space.
+    int CompactSize() const {
+        return compact_map_.size();
+    }
 
-  // Copy from the input.
-  void CopyFrom(const IndexMap& src);
-  void CopyFrom(const IndexMapBiDi& src);
+    // Copy from the input.
+    void CopyFrom(const IndexMap& src);
+    void CopyFrom(const IndexMapBiDi& src);
 
-  // Writes to the given file. Returns false in case of error.
-  bool Serialize(FILE* fp) const;
-  // Reads from the given file. Returns false in case of error.
-  // If swap is true, assumes a big/little-endian swap is needed.
-  bool DeSerialize(bool swap, FILE* fp);
+    // Writes to the given file. Returns false in case of error.
+    bool Serialize(FILE* fp) const;
+    // Reads from the given file. Returns false in case of error.
+    // If swap is true, assumes a big/little-endian swap is needed.
+    bool DeSerialize(bool swap, FILE* fp);
 
- protected:
-  // The sparse space covers integers in the range [0, sparse_size_-1].
-  int sparse_size_;
-  // The compact space covers integers in the range [0, compact_map_.size()-1].
-  // Each element contains the corresponding sparse index.
-  GenericVector<inT32> compact_map_;
+protected:
+    // The sparse space covers integers in the range [0, sparse_size_-1].
+    int sparse_size_;
+    // The compact space covers integers in the range [0, compact_map_.size()-1].
+    // Each element contains the corresponding sparse index.
+    GenericVector<inT32> compact_map_;
 };
 
 // Bidirectional many-to-one mapping between a sparse and a compact discrete
@@ -100,79 +100,79 @@ class IndexMap {
 //    CompleteMerges();
 //    Allows a many-to-one mapping by merging compact space indices.
 class IndexMapBiDi : public IndexMap {
- public:
-  virtual ~IndexMapBiDi() {}
+public:
+    virtual ~IndexMapBiDi() {}
 
-  // Top-level init function in a single call to initialize a map to select
-  // a single contiguous subrange [start, end) of the sparse space to be mapped
-  // 1 to 1 to the compact space, with all other elements of the sparse space
-  // left unmapped.
-  // No need to call Setup after this.
-  void InitAndSetupRange(int sparse_size, int start, int end);
+    // Top-level init function in a single call to initialize a map to select
+    // a single contiguous subrange [start, end) of the sparse space to be mapped
+    // 1 to 1 to the compact space, with all other elements of the sparse space
+    // left unmapped.
+    // No need to call Setup after this.
+    void InitAndSetupRange(int sparse_size, int start, int end);
 
-  // Initializes just the sparse_map_ to the given size with either all
-  // forward indices mapped (all_mapped = true) or none (all_mapped = false).
-  // Call Setup immediately after, or make calls to SetMap first to adjust the
-  // mapping and then call Setup before using the map.
-  void Init(int size, bool all_mapped);
-  // Sets a given index in the sparse_map_ to be mapped or not.
-  void SetMap(int sparse_index, bool mapped);
-  // Sets up the sparse_map_ and compact_map_ properly after Init and
-  // some calls to SetMap. Assumes an ordered 1-1 map from set indices
-  // in the sparse space to the compact space.
-  void Setup();
+    // Initializes just the sparse_map_ to the given size with either all
+    // forward indices mapped (all_mapped = true) or none (all_mapped = false).
+    // Call Setup immediately after, or make calls to SetMap first to adjust the
+    // mapping and then call Setup before using the map.
+    void Init(int size, bool all_mapped);
+    // Sets a given index in the sparse_map_ to be mapped or not.
+    void SetMap(int sparse_index, bool mapped);
+    // Sets up the sparse_map_ and compact_map_ properly after Init and
+    // some calls to SetMap. Assumes an ordered 1-1 map from set indices
+    // in the sparse space to the compact space.
+    void Setup();
 
-  // Merges the two compact space indices. May be called many times, but
-  // the merges must be concluded by a call to CompleteMerges.
-  // Returns true if a merge was actually performed.
-  bool Merge(int compact_index1, int compact_index2);
-  // Returns true if the given compact index has been deleted.
-  bool IsCompactDeleted(int index) const {
-    return MasterCompactIndex(index) < 0;
-  }
-  // Completes one or more Merge operations by further compacting the
-  // compact space.
-  void CompleteMerges();
+    // Merges the two compact space indices. May be called many times, but
+    // the merges must be concluded by a call to CompleteMerges.
+    // Returns true if a merge was actually performed.
+    bool Merge(int compact_index1, int compact_index2);
+    // Returns true if the given compact index has been deleted.
+    bool IsCompactDeleted(int index) const {
+        return MasterCompactIndex(index) < 0;
+    }
+    // Completes one or more Merge operations by further compacting the
+    // compact space.
+    void CompleteMerges();
 
-  // SparseToCompact takes a sparse index to an index in the compact space.
-  virtual int SparseToCompact(int sparse_index) const {
-    return sparse_map_[sparse_index];
-  }
-  // The size of the sparse space.
-  virtual int SparseSize() const {
-    return sparse_map_.size();
-  }
+    // SparseToCompact takes a sparse index to an index in the compact space.
+    virtual int SparseToCompact(int sparse_index) const {
+        return sparse_map_[sparse_index];
+    }
+    // The size of the sparse space.
+    virtual int SparseSize() const {
+        return sparse_map_.size();
+    }
 
-  // Copy from the input.
-  void CopyFrom(const IndexMapBiDi& src);
+    // Copy from the input.
+    void CopyFrom(const IndexMapBiDi& src);
 
-  // Writes to the given file. Returns false in case of error.
-  bool Serialize(FILE* fp) const;
-  // Reads from the given file. Returns false in case of error.
-  // If swap is true, assumes a big/little-endian swap is needed.
-  bool DeSerialize(bool swap, FILE* fp);
+    // Writes to the given file. Returns false in case of error.
+    bool Serialize(FILE* fp) const;
+    // Reads from the given file. Returns false in case of error.
+    // If swap is true, assumes a big/little-endian swap is needed.
+    bool DeSerialize(bool swap, FILE* fp);
 
-  // Bulk calls to SparseToCompact.
-  // Maps the given array of sparse indices to an array of compact indices.
-  // Assumes the input is sorted. The output indices are sorted and uniqued.
-  // Return value is the number of "missed" features, being features that
-  // don't map to the compact feature space.
-  int MapFeatures(const GenericVector<int>& sparse,
-                  GenericVector<int>* compact) const;
+    // Bulk calls to SparseToCompact.
+    // Maps the given array of sparse indices to an array of compact indices.
+    // Assumes the input is sorted. The output indices are sorted and uniqued.
+    // Return value is the number of "missed" features, being features that
+    // don't map to the compact feature space.
+    int MapFeatures(const GenericVector<int>& sparse,
+                    GenericVector<int>* compact) const;
 
- private:
-  // Returns the master compact index for a given compact index.
-  // During a multiple merge operation, several compact indices may be
-  // combined, so we need to be able to find the master of all.
-  int MasterCompactIndex(int compact_index) const {
-    while (compact_index >= 0 &&
-           sparse_map_[compact_map_[compact_index]] != compact_index)
-      compact_index = sparse_map_[compact_map_[compact_index]];
-    return compact_index;
-  }
+private:
+    // Returns the master compact index for a given compact index.
+    // During a multiple merge operation, several compact indices may be
+    // combined, so we need to be able to find the master of all.
+    int MasterCompactIndex(int compact_index) const {
+        while (compact_index >= 0 &&
+                sparse_map_[compact_map_[compact_index]] != compact_index)
+            compact_index = sparse_map_[compact_map_[compact_index]];
+        return compact_index;
+    }
 
-  // Direct look-up of the compact index for each element in sparse space.
-  GenericVector<inT32> sparse_map_;
+    // Direct look-up of the compact index for each element in sparse space.
+    GenericVector<inT32> sparse_map_;
 };
 
 }  // namespace tesseract.

@@ -27,9 +27,9 @@
 
 typedef struct
 {
-  uinT16 ProtoId;
-  uinT16 dummy;
-  PROTO_STRUCT Proto;
+    uinT16 ProtoId;
+    uinT16 dummy;
+    PROTO_STRUCT Proto;
 }
 
 
@@ -38,46 +38,46 @@ typedef TEMP_PROTO_STRUCT *TEMP_PROTO;
 
 typedef struct
 {
-  uinT8 NumTimesSeen;
-  uinT8 ProtoVectorSize;
-  PROTO_ID MaxProtoId;
-  BIT_VECTOR Protos;
-  int FontinfoId;  // font information inferred from pre-trained templates
+    uinT8 NumTimesSeen;
+    uinT8 ProtoVectorSize;
+    PROTO_ID MaxProtoId;
+    BIT_VECTOR Protos;
+    int FontinfoId;  // font information inferred from pre-trained templates
 } TEMP_CONFIG_STRUCT;
 typedef TEMP_CONFIG_STRUCT *TEMP_CONFIG;
 
 typedef struct
 {
-  UNICHAR_ID *Ambigs;
-  int FontinfoId;  // font information inferred from pre-trained templates
+    UNICHAR_ID *Ambigs;
+    int FontinfoId;  // font information inferred from pre-trained templates
 } PERM_CONFIG_STRUCT;
 typedef PERM_CONFIG_STRUCT *PERM_CONFIG;
 
 typedef union
 {
-  TEMP_CONFIG Temp;
-  PERM_CONFIG Perm;
+    TEMP_CONFIG Temp;
+    PERM_CONFIG Perm;
 } ADAPTED_CONFIG;
 
 typedef struct
 {
-  uinT8 NumPermConfigs;
-  uinT8 MaxNumTimesSeen;  // maximum number of times any TEMP_CONFIG was seen
-  uinT8 dummy[2];         // (cut at matcher_min_examples_for_prototyping)
-  BIT_VECTOR PermProtos;
-  BIT_VECTOR PermConfigs;
-  LIST TempProtos;
-  ADAPTED_CONFIG Config[MAX_NUM_CONFIGS];
+    uinT8 NumPermConfigs;
+    uinT8 MaxNumTimesSeen;  // maximum number of times any TEMP_CONFIG was seen
+    uinT8 dummy[2];         // (cut at matcher_min_examples_for_prototyping)
+    BIT_VECTOR PermProtos;
+    BIT_VECTOR PermConfigs;
+    LIST TempProtos;
+    ADAPTED_CONFIG Config[MAX_NUM_CONFIGS];
 } ADAPT_CLASS_STRUCT;
 typedef ADAPT_CLASS_STRUCT *ADAPT_CLASS;
 
 typedef struct
 {
-  INT_TEMPLATES Templates;
-  int NumNonEmptyClasses;
-  uinT8 NumPermClasses;
-  uinT8 dummy[3];
-  ADAPT_CLASS Class[MAX_NUM_CLASSES];
+    INT_TEMPLATES Templates;
+    int NumNonEmptyClasses;
+    uinT8 NumPermClasses;
+    uinT8 dummy[3];
+    ADAPT_CLASS Class[MAX_NUM_CLASSES];
 } ADAPT_TEMPLATES_STRUCT;
 typedef ADAPT_TEMPLATES_STRUCT *ADAPT_TEMPLATES;
 
@@ -108,8 +108,8 @@ typedef ADAPT_TEMPLATES_STRUCT *ADAPT_TEMPLATES;
 ((TempConfig)->NumTimesSeen++)
 
 void AddAdaptedClass(ADAPT_TEMPLATES Templates,
-                    ADAPT_CLASS Class,
-                    CLASS_ID ClassId);
+                     ADAPT_CLASS Class,
+                     CLASS_ID ClassId);
 
 void FreeTempProto(void *arg);
 

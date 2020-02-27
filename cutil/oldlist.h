@@ -126,8 +126,8 @@
 #define NIL_LIST  (LIST) 0
 struct list_rec
 {
-  struct list_rec *node;
-  struct list_rec *next;
+    struct list_rec *node;
+    struct list_rec *next;
 };
 typedef list_rec *LIST;
 

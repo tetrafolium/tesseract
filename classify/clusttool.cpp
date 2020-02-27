@@ -45,15 +45,15 @@ using tesseract::TFile;
  * @note History: 6/6/89, DSJ, Created.
  */
 uinT16 ReadSampleSize(TFile *fp) {
-  int SampleSize = 0;
+    int SampleSize = 0;
 
-  const int kMaxLineSize = 100;
-  char line[kMaxLineSize];
-  if (fp->FGets(line, kMaxLineSize) == nullptr ||
-      sscanf(line, "%d", &SampleSize) != 1 || (SampleSize < 0) ||
-      (SampleSize > MAXSAMPLESIZE))
-    DoError (ILLEGALSAMPLESIZE, "Illegal sample size");
-  return (SampleSize);
+    const int kMaxLineSize = 100;
+    char line[kMaxLineSize];
+    if (fp->FGets(line, kMaxLineSize) == nullptr ||
+            sscanf(line, "%d", &SampleSize) != 1 || (SampleSize < 0) ||
+            (SampleSize > MAXSAMPLESIZE))
+        DoError (ILLEGALSAMPLESIZE, "Illegal sample size");
+    return (SampleSize);
 }
 
 /**
@@ -71,32 +71,32 @@ uinT16 ReadSampleSize(TFile *fp) {
  * @note History: 6/6/89, DSJ, Created.
  */
 PARAM_DESC *ReadParamDesc(TFile *fp, uinT16 N) {
-  PARAM_DESC *ParamDesc;
-  char linear_token[TOKENSIZE], essential_token[TOKENSIZE];
+    PARAM_DESC *ParamDesc;
+    char linear_token[TOKENSIZE], essential_token[TOKENSIZE];
 
-  ParamDesc = (PARAM_DESC *) Emalloc (N * sizeof (PARAM_DESC));
-  for (int i = 0; i < N; i++) {
-    const int kMaxLineSize = TOKENSIZE * 4;
-    char line[kMaxLineSize];
-    if (fp->FGets(line, kMaxLineSize) == nullptr ||
-        sscanf(line, "%" QUOTED_TOKENSIZE "s %" QUOTED_TOKENSIZE "s %f %f",
-               linear_token, essential_token, &ParamDesc[i].Min,
-               &ParamDesc[i].Max) != 4)
-      DoError(ILLEGALCIRCULARSPEC, "Illegal Parameter specification");
-    if (linear_token[0] == 'c')
-      ParamDesc[i].Circular = TRUE;
-    else
-      ParamDesc[i].Circular = FALSE;
+    ParamDesc = (PARAM_DESC *) Emalloc (N * sizeof (PARAM_DESC));
+    for (int i = 0; i < N; i++) {
+        const int kMaxLineSize = TOKENSIZE * 4;
+        char line[kMaxLineSize];
+        if (fp->FGets(line, kMaxLineSize) == nullptr ||
+                sscanf(line, "%" QUOTED_TOKENSIZE "s %" QUOTED_TOKENSIZE "s %f %f",
+                       linear_token, essential_token, &ParamDesc[i].Min,
+                       &ParamDesc[i].Max) != 4)
+            DoError(ILLEGALCIRCULARSPEC, "Illegal Parameter specification");
+        if (linear_token[0] == 'c')
+            ParamDesc[i].Circular = TRUE;
+        else
+            ParamDesc[i].Circular = FALSE;
 
-    if (linear_token[0] == 'e')
-      ParamDesc[i].NonEssential = FALSE;
-    else
-      ParamDesc[i].NonEssential = TRUE;
-    ParamDesc[i].Range = ParamDesc[i].Max - ParamDesc[i].Min;
-    ParamDesc[i].HalfRange = ParamDesc[i].Range / 2;
-    ParamDesc[i].MidRange = (ParamDesc[i].Max + ParamDesc[i].Min) / 2;
-  }
-  return (ParamDesc);
+        if (linear_token[0] == 'e')
+            ParamDesc[i].NonEssential = FALSE;
+        else
+            ParamDesc[i].NonEssential = TRUE;
+        ParamDesc[i].Range = ParamDesc[i].Max - ParamDesc[i].Min;
+        ParamDesc[i].HalfRange = ParamDesc[i].Range / 2;
+        ParamDesc[i].MidRange = (ParamDesc[i].Max + ParamDesc[i].Min) / 2;
+    }
+    return (ParamDesc);
 }
 
 /**
@@ -116,67 +116,67 @@ PARAM_DESC *ReadParamDesc(TFile *fp, uinT16 N) {
  * @note History: 6/6/89, DSJ, Created.
  */
 PROTOTYPE *ReadPrototype(TFile *fp, uinT16 N) {
-  char sig_token[TOKENSIZE], shape_token[TOKENSIZE];
-  PROTOTYPE *Proto;
-  int SampleCount;
-  int i;
+    char sig_token[TOKENSIZE], shape_token[TOKENSIZE];
+    PROTOTYPE *Proto;
+    int SampleCount;
+    int i;
 
-  const int kMaxLineSize = TOKENSIZE * 4;
-  char line[kMaxLineSize];
-  if (fp->FGets(line, kMaxLineSize) == nullptr ||
-      sscanf(line, "%" QUOTED_TOKENSIZE "s %" QUOTED_TOKENSIZE "s %d",
-             sig_token, shape_token, &SampleCount) != 3) {
-    tprintf("Invalid prototype: %s\n", line);
-    return nullptr;
-  }
-  Proto = (PROTOTYPE *)Emalloc(sizeof(PROTOTYPE));
-  Proto->Cluster = NULL;
-  if (sig_token[0] == 's')
-    Proto->Significant = TRUE;
-  else
-    Proto->Significant = FALSE;
+    const int kMaxLineSize = TOKENSIZE * 4;
+    char line[kMaxLineSize];
+    if (fp->FGets(line, kMaxLineSize) == nullptr ||
+            sscanf(line, "%" QUOTED_TOKENSIZE "s %" QUOTED_TOKENSIZE "s %d",
+                   sig_token, shape_token, &SampleCount) != 3) {
+        tprintf("Invalid prototype: %s\n", line);
+        return nullptr;
+    }
+    Proto = (PROTOTYPE *)Emalloc(sizeof(PROTOTYPE));
+    Proto->Cluster = NULL;
+    if (sig_token[0] == 's')
+        Proto->Significant = TRUE;
+    else
+        Proto->Significant = FALSE;
 
-  Proto->Style = ReadProtoStyle(shape_token);
+    Proto->Style = ReadProtoStyle(shape_token);
 
-  if (SampleCount < 0) DoError(ILLEGALSAMPLECOUNT, "Illegal sample count");
-  Proto->NumSamples = SampleCount;
+    if (SampleCount < 0) DoError(ILLEGALSAMPLECOUNT, "Illegal sample count");
+    Proto->NumSamples = SampleCount;
 
-  Proto->Mean = ReadNFloats(fp, N, NULL);
-  if (Proto->Mean == NULL) DoError(ILLEGALMEANSPEC, "Illegal prototype mean");
+    Proto->Mean = ReadNFloats(fp, N, NULL);
+    if (Proto->Mean == NULL) DoError(ILLEGALMEANSPEC, "Illegal prototype mean");
 
-  switch (Proto->Style) {
+    switch (Proto->Style) {
     case spherical:
-      if (ReadNFloats(fp, 1, &(Proto->Variance.Spherical)) == NULL)
-        DoError(ILLEGALVARIANCESPEC, "Illegal prototype variance");
-      Proto->Magnitude.Spherical =
-          1.0 / sqrt((double)(2.0 * PI * Proto->Variance.Spherical));
-      Proto->TotalMagnitude = pow(Proto->Magnitude.Spherical, (float)N);
-      Proto->LogMagnitude = log((double)Proto->TotalMagnitude);
-      Proto->Weight.Spherical = 1.0 / Proto->Variance.Spherical;
-      Proto->Distrib = NULL;
-      break;
+        if (ReadNFloats(fp, 1, &(Proto->Variance.Spherical)) == NULL)
+            DoError(ILLEGALVARIANCESPEC, "Illegal prototype variance");
+        Proto->Magnitude.Spherical =
+            1.0 / sqrt((double)(2.0 * PI * Proto->Variance.Spherical));
+        Proto->TotalMagnitude = pow(Proto->Magnitude.Spherical, (float)N);
+        Proto->LogMagnitude = log((double)Proto->TotalMagnitude);
+        Proto->Weight.Spherical = 1.0 / Proto->Variance.Spherical;
+        Proto->Distrib = NULL;
+        break;
     case elliptical:
-      Proto->Variance.Elliptical = ReadNFloats(fp, N, NULL);
-      if (Proto->Variance.Elliptical == NULL)
-        DoError(ILLEGALVARIANCESPEC, "Illegal prototype variance");
-      Proto->Magnitude.Elliptical = (FLOAT32 *)Emalloc(N * sizeof(FLOAT32));
-      Proto->Weight.Elliptical = (FLOAT32 *)Emalloc(N * sizeof(FLOAT32));
-      Proto->TotalMagnitude = 1.0;
-      for (i = 0; i < N; i++) {
-        Proto->Magnitude.Elliptical[i] =
-            1.0 / sqrt((double)(2.0 * PI * Proto->Variance.Elliptical[i]));
-        Proto->Weight.Elliptical[i] = 1.0 / Proto->Variance.Elliptical[i];
-        Proto->TotalMagnitude *= Proto->Magnitude.Elliptical[i];
-      }
-      Proto->LogMagnitude = log((double)Proto->TotalMagnitude);
-      Proto->Distrib = NULL;
-      break;
+        Proto->Variance.Elliptical = ReadNFloats(fp, N, NULL);
+        if (Proto->Variance.Elliptical == NULL)
+            DoError(ILLEGALVARIANCESPEC, "Illegal prototype variance");
+        Proto->Magnitude.Elliptical = (FLOAT32 *)Emalloc(N * sizeof(FLOAT32));
+        Proto->Weight.Elliptical = (FLOAT32 *)Emalloc(N * sizeof(FLOAT32));
+        Proto->TotalMagnitude = 1.0;
+        for (i = 0; i < N; i++) {
+            Proto->Magnitude.Elliptical[i] =
+                1.0 / sqrt((double)(2.0 * PI * Proto->Variance.Elliptical[i]));
+            Proto->Weight.Elliptical[i] = 1.0 / Proto->Variance.Elliptical[i];
+            Proto->TotalMagnitude *= Proto->Magnitude.Elliptical[i];
+        }
+        Proto->LogMagnitude = log((double)Proto->TotalMagnitude);
+        Proto->Distrib = NULL;
+        break;
     default:
-      Efree(Proto);
-      tprintf("Invalid prototype style\n");
-      return nullptr;
-  }
-  return Proto;
+        Efree(Proto);
+        tprintf("Invalid prototype style\n");
+        return nullptr;
+    }
+    return Proto;
 }
 
 /**
@@ -189,18 +189,18 @@ PROTOTYPE *ReadPrototype(TFile *fp, uinT16 N) {
  * @note History: 6/8/89, DSJ, Created.
  */
 PROTOSTYLE ReadProtoStyle(const char *shape) {
-  switch (shape[0]) {
+    switch (shape[0]) {
     case 's':
-      return spherical;
+        return spherical;
     case 'e':
-      return elliptical;
+        return elliptical;
     case 'a':
-      return automatic;
+        return automatic;
     default:
-      break;
-  }
-  tprintf("Invalid prototype style specification:%s\n", shape);
-  return elliptical;
+        break;
+    }
+    tprintf("Invalid prototype style specification:%s\n", shape);
+    return elliptical;
 }
 
 /**
@@ -218,31 +218,31 @@ PROTOSTYLE ReadProtoStyle(const char *shape) {
  * @note History: 6/6/89, DSJ, Created.
  */
 FLOAT32 *ReadNFloats(TFile *fp, uinT16 N, FLOAT32 Buffer[]) {
-  const int kMaxLineSize = 1024;
-  char line[kMaxLineSize];
-  if (fp->FGets(line, kMaxLineSize) == nullptr) {
-    tprintf("Hit EOF in ReadNFloats!\n");
-    return nullptr;
-  }
-  bool needs_free = false;
-
-  if (Buffer == NULL) {
-    Buffer = static_cast<FLOAT32 *>(Emalloc(N * sizeof(FLOAT32)));
-    needs_free = true;
-  }
-
-  char *startptr = line;
-  for (int i = 0; i < N; i++) {
-    char *endptr;
-    Buffer[i] = strtof(startptr, &endptr);
-    if (endptr == startptr) {
-      tprintf("Read of %d floats failed!\n", N);
-      if (needs_free) Efree(Buffer);
-      return nullptr;
+    const int kMaxLineSize = 1024;
+    char line[kMaxLineSize];
+    if (fp->FGets(line, kMaxLineSize) == nullptr) {
+        tprintf("Hit EOF in ReadNFloats!\n");
+        return nullptr;
     }
-    startptr = endptr;
-  }
-  return Buffer;
+    bool needs_free = false;
+
+    if (Buffer == NULL) {
+        Buffer = static_cast<FLOAT32 *>(Emalloc(N * sizeof(FLOAT32)));
+        needs_free = true;
+    }
+
+    char *startptr = line;
+    for (int i = 0; i < N; i++) {
+        char *endptr;
+        Buffer[i] = strtof(startptr, &endptr);
+        if (endptr == startptr) {
+            tprintf("Read of %d floats failed!\n", N);
+            if (needs_free) Efree(Buffer);
+            return nullptr;
+        }
+        startptr = endptr;
+    }
+    return Buffer;
 }
 
 /**
@@ -257,21 +257,21 @@ FLOAT32 *ReadNFloats(TFile *fp, uinT16 N, FLOAT32 Buffer[]) {
  * @note History: 6/6/89, DSJ, Created.
  */
 void WriteParamDesc(FILE *File, uinT16 N, const PARAM_DESC ParamDesc[]) {
-  int i;
+    int i;
 
-  for (i = 0; i < N; i++) {
-    if (ParamDesc[i].Circular)
-      fprintf (File, "circular ");
-    else
-      fprintf (File, "linear   ");
+    for (i = 0; i < N; i++) {
+        if (ParamDesc[i].Circular)
+            fprintf (File, "circular ");
+        else
+            fprintf (File, "linear   ");
 
-    if (ParamDesc[i].NonEssential)
-      fprintf (File, "non-essential ");
-    else
-      fprintf (File, "essential     ");
+        if (ParamDesc[i].NonEssential)
+            fprintf (File, "non-essential ");
+        else
+            fprintf (File, "essential     ");
 
-    fprintf (File, "%10.6f %10.6f\n", ParamDesc[i].Min, ParamDesc[i].Max);
-  }
+        fprintf (File, "%10.6f %10.6f\n", ParamDesc[i].Min, ParamDesc[i].Max);
+    }
 }
 
 /**
@@ -286,42 +286,42 @@ void WriteParamDesc(FILE *File, uinT16 N, const PARAM_DESC ParamDesc[]) {
  * @note History: 6/12/89, DSJ, Created.
  */
 void WritePrototype(FILE *File, uinT16 N, PROTOTYPE *Proto) {
-  int i;
+    int i;
 
-  if (Proto->Significant)
-    fprintf (File, "significant   ");
-  else
-    fprintf (File, "insignificant ");
-  WriteProtoStyle (File, (PROTOSTYLE) Proto->Style);
-  fprintf (File, "%6d\n\t", Proto->NumSamples);
-  WriteNFloats (File, N, Proto->Mean);
-  fprintf (File, "\t");
+    if (Proto->Significant)
+        fprintf (File, "significant   ");
+    else
+        fprintf (File, "insignificant ");
+    WriteProtoStyle (File, (PROTOSTYLE) Proto->Style);
+    fprintf (File, "%6d\n\t", Proto->NumSamples);
+    WriteNFloats (File, N, Proto->Mean);
+    fprintf (File, "\t");
 
-  switch (Proto->Style) {
+    switch (Proto->Style) {
     case spherical:
-      WriteNFloats (File, 1, &(Proto->Variance.Spherical));
-      break;
+        WriteNFloats (File, 1, &(Proto->Variance.Spherical));
+        break;
     case elliptical:
-      WriteNFloats (File, N, Proto->Variance.Elliptical);
-      break;
+        WriteNFloats (File, N, Proto->Variance.Elliptical);
+        break;
     case mixed:
-      for (i = 0; i < N; i++)
-      switch (Proto->Distrib[i]) {
-        case normal:
-          fprintf (File, " %9s", "normal");
-          break;
-        case uniform:
-          fprintf (File, " %9s", "uniform");
-          break;
-        case D_random:
-          fprintf (File, " %9s", "random");
-          break;
-        case DISTRIBUTION_COUNT:
-          ASSERT_HOST(!"Distribution count not allowed!");
-      }
-      fprintf (File, "\n\t");
-      WriteNFloats (File, N, Proto->Variance.Elliptical);
-  }
+        for (i = 0; i < N; i++)
+            switch (Proto->Distrib[i]) {
+            case normal:
+                fprintf (File, " %9s", "normal");
+                break;
+            case uniform:
+                fprintf (File, " %9s", "uniform");
+                break;
+            case D_random:
+                fprintf (File, " %9s", "random");
+                break;
+            case DISTRIBUTION_COUNT:
+                ASSERT_HOST(!"Distribution count not allowed!");
+            }
+        fprintf (File, "\n\t");
+        WriteNFloats (File, N, Proto->Variance.Elliptical);
+    }
 }
 
 /**
@@ -336,9 +336,9 @@ void WritePrototype(FILE *File, uinT16 N, PROTOTYPE *Proto) {
  * @note History: 6/6/89, DSJ, Created.
  */
 void WriteNFloats(FILE * File, uinT16 N, FLOAT32 Array[]) {
-  for (int i = 0; i < N; i++)
-    fprintf(File, " %9.6f", Array[i]);
-  fprintf(File, "\n");
+    for (int i = 0; i < N; i++)
+        fprintf(File, " %9.6f", Array[i]);
+    fprintf(File, "\n");
 }
 
 /**
@@ -353,20 +353,20 @@ void WriteNFloats(FILE * File, uinT16 N, FLOAT32 Array[]) {
  * @note History: 6/8/89, DSJ, Created.
  */
 void WriteProtoStyle(FILE *File, PROTOSTYLE ProtoStyle) {
-  switch (ProtoStyle) {
+    switch (ProtoStyle) {
     case spherical:
-      fprintf (File, "spherical");
-      break;
+        fprintf (File, "spherical");
+        break;
     case elliptical:
-      fprintf (File, "elliptical");
-      break;
+        fprintf (File, "elliptical");
+        break;
     case mixed:
-      fprintf (File, "mixed");
-      break;
+        fprintf (File, "mixed");
+        break;
     case automatic:
-      fprintf (File, "automatic");
-      break;
-  }
+        fprintf (File, "automatic");
+        break;
+    }
 }
 
 /**
@@ -389,18 +389,18 @@ void WriteProtoStyle(FILE *File, PROTOSTYLE ProtoStyle) {
 void WriteProtoList(FILE *File, uinT16 N, PARAM_DESC ParamDesc[],
                     LIST ProtoList, BOOL8 WriteSigProtos,
                     BOOL8 WriteInsigProtos) {
-  PROTOTYPE *Proto;
+    PROTOTYPE *Proto;
 
-  /* write file header */
-  fprintf(File,"%0d\n",N);
-  WriteParamDesc(File,N,ParamDesc);
+    /* write file header */
+    fprintf(File,"%0d\n",N);
+    WriteParamDesc(File,N,ParamDesc);
 
-  /* write prototypes */
-  iterate(ProtoList)
+    /* write prototypes */
+    iterate(ProtoList)
     {
-      Proto = (PROTOTYPE *) first_node ( ProtoList );
-      if ((Proto->Significant && WriteSigProtos) ||
-          (!Proto->Significant && WriteInsigProtos))
-        WritePrototype(File, N, Proto);
+        Proto = (PROTOTYPE *) first_node ( ProtoList );
+        if ((Proto->Significant && WriteSigProtos) ||
+                (!Proto->Significant && WriteInsigProtos))
+            WritePrototype(File, N, Proto);
     }
 }

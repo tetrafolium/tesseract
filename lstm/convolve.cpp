@@ -26,8 +26,8 @@
 namespace tesseract {
 
 Convolve::Convolve(const STRING& name, int ni, int half_x, int half_y)
-  : Network(NT_CONVOLVE, name, ni, ni * (2*half_x + 1) * (2*half_y + 1)),
-    half_x_(half_x), half_y_(half_y) {
+    : Network(NT_CONVOLVE, name, ni, ni * (2*half_x + 1) * (2*half_y + 1)),
+      half_x_(half_x), half_y_(half_y) {
 }
 
 Convolve::~Convolve() {
@@ -35,18 +35,18 @@ Convolve::~Convolve() {
 
 // Writes to the given file. Returns false in case of error.
 bool Convolve::Serialize(TFile* fp) const {
-  if (!Network::Serialize(fp)) return false;
-  if (fp->FWrite(&half_x_, sizeof(half_x_), 1) != 1) return false;
-  if (fp->FWrite(&half_y_, sizeof(half_y_), 1) != 1) return false;
-  return true;
+    if (!Network::Serialize(fp)) return false;
+    if (fp->FWrite(&half_x_, sizeof(half_x_), 1) != 1) return false;
+    if (fp->FWrite(&half_y_, sizeof(half_y_), 1) != 1) return false;
+    return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 bool Convolve::DeSerialize(TFile* fp) {
-  if (fp->FReadEndian(&half_x_, sizeof(half_x_), 1) != 1) return false;
-  if (fp->FReadEndian(&half_y_, sizeof(half_y_), 1) != 1) return false;
-  no_ = ni_ * (2*half_x_ + 1) * (2*half_y_ + 1);
-  return true;
+    if (fp->FReadEndian(&half_x_, sizeof(half_x_), 1) != 1) return false;
+    if (fp->FReadEndian(&half_y_, sizeof(half_y_), 1) != 1) return false;
+    no_ = ni_ * (2*half_x_ + 1) * (2*half_y_ + 1);
+    return true;
 }
 
 // Runs forward propagation of activations on the input line.
@@ -54,33 +54,33 @@ bool Convolve::DeSerialize(TFile* fp) {
 void Convolve::Forward(bool debug, const NetworkIO& input,
                        const TransposedArray* input_transpose,
                        NetworkScratch* scratch, NetworkIO* output) {
-  output->Resize(input, no_);
-  int y_scale = 2 * half_y_ + 1;
-  StrideMap::Index dest_index(output->stride_map());
-  do {
-    // Stack x_scale groups of y_scale * ni_ inputs together.
-    int t = dest_index.t();
-    int out_ix = 0;
-    for (int x = -half_x_; x <= half_x_; ++x, out_ix += y_scale * ni_) {
-      StrideMap::Index x_index(dest_index);
-      if (!x_index.AddOffset(x, FD_WIDTH)) {
-        // This x is outside the image.
-        output->Randomize(t, out_ix, y_scale * ni_, randomizer_);
-      } else {
-        int out_iy = out_ix;
-        for (int y = -half_y_; y <= half_y_; ++y, out_iy += ni_) {
-          StrideMap::Index y_index(x_index);
-          if (!y_index.AddOffset(y, FD_HEIGHT)) {
-            // This y is outside the image.
-            output->Randomize(t, out_iy, ni_, randomizer_);
-          } else {
-            output->CopyTimeStepGeneral(t, out_iy, ni_, input, y_index.t(), 0);
-          }
+    output->Resize(input, no_);
+    int y_scale = 2 * half_y_ + 1;
+    StrideMap::Index dest_index(output->stride_map());
+    do {
+        // Stack x_scale groups of y_scale * ni_ inputs together.
+        int t = dest_index.t();
+        int out_ix = 0;
+        for (int x = -half_x_; x <= half_x_; ++x, out_ix += y_scale * ni_) {
+            StrideMap::Index x_index(dest_index);
+            if (!x_index.AddOffset(x, FD_WIDTH)) {
+                // This x is outside the image.
+                output->Randomize(t, out_ix, y_scale * ni_, randomizer_);
+            } else {
+                int out_iy = out_ix;
+                for (int y = -half_y_; y <= half_y_; ++y, out_iy += ni_) {
+                    StrideMap::Index y_index(x_index);
+                    if (!y_index.AddOffset(y, FD_HEIGHT)) {
+                        // This y is outside the image.
+                        output->Randomize(t, out_iy, ni_, randomizer_);
+                    } else {
+                        output->CopyTimeStepGeneral(t, out_iy, ni_, input, y_index.t(), 0);
+                    }
+                }
+            }
         }
-      }
-    }
-  } while (dest_index.Increment());
-  if (debug) DisplayForward(*output);
+    } while (dest_index.Increment());
+    if (debug) DisplayForward(*output);
 }
 
 // Runs backward propagation of errors on the deltas line.
@@ -88,32 +88,32 @@ void Convolve::Forward(bool debug, const NetworkIO& input,
 bool Convolve::Backward(bool debug, const NetworkIO& fwd_deltas,
                         NetworkScratch* scratch,
                         NetworkIO* back_deltas) {
-  back_deltas->Resize(fwd_deltas, ni_);
-  NetworkScratch::IO delta_sum;
-  delta_sum.ResizeFloat(fwd_deltas, ni_, scratch);
-  delta_sum->Zero();
-  int y_scale = 2 * half_y_ + 1;
-  StrideMap::Index src_index(fwd_deltas.stride_map());
-  do {
-    // Stack x_scale groups of y_scale * ni_ inputs together.
-    int t = src_index.t();
-    int out_ix = 0;
-    for (int x = -half_x_; x <= half_x_; ++x, out_ix += y_scale * ni_) {
-      StrideMap::Index x_index(src_index);
-      if (x_index.AddOffset(x, FD_WIDTH)) {
-        int out_iy = out_ix;
-        for (int y = -half_y_; y <= half_y_; ++y, out_iy += ni_) {
-          StrideMap::Index y_index(x_index);
-          if (y_index.AddOffset(y, FD_HEIGHT)) {
-            fwd_deltas.AddTimeStepPart(t, out_iy, ni_,
-                                       delta_sum->f(y_index.t()));
-          }
+    back_deltas->Resize(fwd_deltas, ni_);
+    NetworkScratch::IO delta_sum;
+    delta_sum.ResizeFloat(fwd_deltas, ni_, scratch);
+    delta_sum->Zero();
+    int y_scale = 2 * half_y_ + 1;
+    StrideMap::Index src_index(fwd_deltas.stride_map());
+    do {
+        // Stack x_scale groups of y_scale * ni_ inputs together.
+        int t = src_index.t();
+        int out_ix = 0;
+        for (int x = -half_x_; x <= half_x_; ++x, out_ix += y_scale * ni_) {
+            StrideMap::Index x_index(src_index);
+            if (x_index.AddOffset(x, FD_WIDTH)) {
+                int out_iy = out_ix;
+                for (int y = -half_y_; y <= half_y_; ++y, out_iy += ni_) {
+                    StrideMap::Index y_index(x_index);
+                    if (y_index.AddOffset(y, FD_HEIGHT)) {
+                        fwd_deltas.AddTimeStepPart(t, out_iy, ni_,
+                                                   delta_sum->f(y_index.t()));
+                    }
+                }
+            }
         }
-      }
-    }
-  } while (src_index.Increment());
-  back_deltas->CopyAll(*delta_sum);
-  return true;
+    } while (src_index.Increment());
+    back_deltas->CopyAll(*delta_sum);
+    return true;
 }
 
 }  // namespace tesseract.

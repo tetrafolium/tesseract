@@ -40,19 +40,19 @@ extern CLUSTERCONFIG Config;
 //////////////////////////////////////////////////////////////////////////////
 typedef struct
 {
-  char  *Label;
-  int   SampleCount;
-  int   font_sample_count;
-  LIST  List;
+    char  *Label;
+    int   SampleCount;
+    int   font_sample_count;
+    LIST  List;
 }
 LABELEDLISTNODE, *LABELEDLIST;
 
 typedef struct
 {
-  char* Label;
-  int   NumMerged[MAX_NUM_PROTOS];
-  CLASS_TYPE Class;
-}MERGE_CLASS_NODE;
+    char* Label;
+    int   NumMerged[MAX_NUM_PROTOS];
+    CLASS_TYPE Class;
+} MERGE_CLASS_NODE;
 typedef MERGE_CLASS_NODE* MERGE_CLASS;
 
 

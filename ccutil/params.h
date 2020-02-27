@@ -34,210 +34,258 @@ class DoubleParam;
 
 // Enum for constraints on what kind of params should be set by SetParam().
 enum SetParamConstraint {
-  SET_PARAM_CONSTRAINT_NONE,
-  SET_PARAM_CONSTRAINT_DEBUG_ONLY,
-  SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY,
-  SET_PARAM_CONSTRAINT_NON_INIT_ONLY,
+    SET_PARAM_CONSTRAINT_NONE,
+    SET_PARAM_CONSTRAINT_DEBUG_ONLY,
+    SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY,
+    SET_PARAM_CONSTRAINT_NON_INIT_ONLY,
 };
 
 struct ParamsVectors {
-  GenericVector<IntParam *> int_params;
-  GenericVector<BoolParam *> bool_params;
-  GenericVector<StringParam *> string_params;
-  GenericVector<DoubleParam *> double_params;
+    GenericVector<IntParam *> int_params;
+    GenericVector<BoolParam *> bool_params;
+    GenericVector<StringParam *> string_params;
+    GenericVector<DoubleParam *> double_params;
 };
 
 // Utility functions for working with Tesseract parameters.
 class ParamUtils {
- public:
-  // Reads a file of parameter definitions and set/modify the values therein.
-  // If the filename begins with a + or -, the BoolVariables will be
-  // ORed or ANDed with any current values.
-  // Blank lines and lines beginning # are ignored.
-  // Values may have any whitespace after the name and are the rest of line.
-  static bool ReadParamsFile(
-      const char *file,   // filename to read
-      SetParamConstraint constraint,
-      ParamsVectors *member_params);
+public:
+    // Reads a file of parameter definitions and set/modify the values therein.
+    // If the filename begins with a + or -, the BoolVariables will be
+    // ORed or ANDed with any current values.
+    // Blank lines and lines beginning # are ignored.
+    // Values may have any whitespace after the name and are the rest of line.
+    static bool ReadParamsFile(
+        const char *file,   // filename to read
+        SetParamConstraint constraint,
+        ParamsVectors *member_params);
 
-  // Read parameters from the given file pointer.
-  static bool ReadParamsFromFp(SetParamConstraint constraint, TFile *fp,
-                               ParamsVectors *member_params);
+    // Read parameters from the given file pointer.
+    static bool ReadParamsFromFp(SetParamConstraint constraint, TFile *fp,
+                                 ParamsVectors *member_params);
 
-  // Set a parameters to have the given value.
-  static bool SetParam(const char *name, const char* value,
-                       SetParamConstraint constraint,
-                       ParamsVectors *member_params);
+    // Set a parameters to have the given value.
+    static bool SetParam(const char *name, const char* value,
+                         SetParamConstraint constraint,
+                         ParamsVectors *member_params);
 
-  // Returns the pointer to the parameter with the given name (of the
-  // appropriate type) if it was found in the vector obtained from
-  // GlobalParams() or in the given member_params.
-  template<class T>
-  static T *FindParam(const char *name,
-                      const GenericVector<T *> &global_vec,
-                      const GenericVector<T *> &member_vec) {
-    int i;
-    for (i = 0; i < global_vec.size(); ++i) {
-      if (strcmp(global_vec[i]->name_str(), name) == 0) return global_vec[i];
+    // Returns the pointer to the parameter with the given name (of the
+    // appropriate type) if it was found in the vector obtained from
+    // GlobalParams() or in the given member_params.
+    template<class T>
+    static T *FindParam(const char *name,
+                        const GenericVector<T *> &global_vec,
+                        const GenericVector<T *> &member_vec) {
+        int i;
+        for (i = 0; i < global_vec.size(); ++i) {
+            if (strcmp(global_vec[i]->name_str(), name) == 0) return global_vec[i];
+        }
+        for (i = 0; i < member_vec.size(); ++i) {
+            if (strcmp(member_vec[i]->name_str(), name) == 0) return member_vec[i];
+        }
+        return NULL;
     }
-    for (i = 0; i < member_vec.size(); ++i) {
-      if (strcmp(member_vec[i]->name_str(), name) == 0) return member_vec[i];
+    // Removes the given pointer to the param from the given vector.
+    template<class T>
+    static void RemoveParam(T *param_ptr, GenericVector<T *> *vec) {
+        for (int i = 0; i < vec->size(); ++i) {
+            if ((*vec)[i] == param_ptr) {
+                vec->remove(i);
+                return;
+            }
+        }
     }
-    return NULL;
-  }
-  // Removes the given pointer to the param from the given vector.
-  template<class T>
-  static void RemoveParam(T *param_ptr, GenericVector<T *> *vec) {
-    for (int i = 0; i < vec->size(); ++i) {
-      if ((*vec)[i] == param_ptr) {
-        vec->remove(i);
-        return;
-      }
-    }
-  }
-  // Fetches the value of the named param as a STRING. Returns false if not
-  // found.
-  static bool GetParamAsString(const char *name,
-                               const ParamsVectors* member_params,
-                               STRING *value);
+    // Fetches the value of the named param as a STRING. Returns false if not
+    // found.
+    static bool GetParamAsString(const char *name,
+                                 const ParamsVectors* member_params,
+                                 STRING *value);
 
-  // Print parameters to the given file.
-  static void PrintParams(FILE *fp, const ParamsVectors *member_params);
+    // Print parameters to the given file.
+    static void PrintParams(FILE *fp, const ParamsVectors *member_params);
 
-  // Resets all parameters back to default values;
-  static void ResetToDefaults(ParamsVectors* member_params);
+    // Resets all parameters back to default values;
+    static void ResetToDefaults(ParamsVectors* member_params);
 };
 
 // Definition of various parameter types.
 class Param {
- public:
-  ~Param() {}
+public:
+    ~Param() {}
 
-  const char *name_str() const { return name_; }
-  const char *info_str() const { return info_; }
-  bool is_init() const { return init_; }
-  bool is_debug() const { return debug_; }
-  bool constraint_ok(SetParamConstraint constraint) const {
-    return (constraint == SET_PARAM_CONSTRAINT_NONE ||
-            (constraint == SET_PARAM_CONSTRAINT_DEBUG_ONLY &&
-             this->is_debug()) ||
-            (constraint == SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY &&
-             !this->is_debug()) ||
-            (constraint == SET_PARAM_CONSTRAINT_NON_INIT_ONLY &&
-             !this->is_init()));
-  }
+    const char *name_str() const {
+        return name_;
+    }
+    const char *info_str() const {
+        return info_;
+    }
+    bool is_init() const {
+        return init_;
+    }
+    bool is_debug() const {
+        return debug_;
+    }
+    bool constraint_ok(SetParamConstraint constraint) const {
+        return (constraint == SET_PARAM_CONSTRAINT_NONE ||
+                (constraint == SET_PARAM_CONSTRAINT_DEBUG_ONLY &&
+                 this->is_debug()) ||
+                (constraint == SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY &&
+                 !this->is_debug()) ||
+                (constraint == SET_PARAM_CONSTRAINT_NON_INIT_ONLY &&
+                 !this->is_init()));
+    }
 
- protected:
-  Param(const char *name, const char *comment, bool init) :
-    name_(name), info_(comment), init_(init) {
-    debug_ = (strstr(name, "debug") != NULL) || (strstr(name, "display"));
-  }
+protected:
+    Param(const char *name, const char *comment, bool init) :
+        name_(name), info_(comment), init_(init) {
+        debug_ = (strstr(name, "debug") != NULL) || (strstr(name, "display"));
+    }
 
-  const char *name_;      // name of this parameter
-  const char *info_;      // for menus
-  bool init_;             // needs to be set before init
-  bool debug_;
+    const char *name_;      // name of this parameter
+    const char *info_;      // for menus
+    bool init_;             // needs to be set before init
+    bool debug_;
 };
 
 class IntParam : public Param {
-  public:
-   IntParam(inT32 value, const char *name, const char *comment, bool init,
-            ParamsVectors *vec) : Param(name, comment, init) {
-    value_ = value;
-    default_ = value;
-    params_vec_ = &(vec->int_params);
-    vec->int_params.push_back(this);
-  }
-  ~IntParam() { ParamUtils::RemoveParam<IntParam>(this, params_vec_); }
-  operator inT32() const { return value_; }
-  void operator=(inT32 value) { value_ = value; }
-  void set_value(inT32 value) { value_ = value; }
-  void ResetToDefault() {
-    value_ = default_;
-  }
+public:
+    IntParam(inT32 value, const char *name, const char *comment, bool init,
+             ParamsVectors *vec) : Param(name, comment, init) {
+        value_ = value;
+        default_ = value;
+        params_vec_ = &(vec->int_params);
+        vec->int_params.push_back(this);
+    }
+    ~IntParam() {
+        ParamUtils::RemoveParam<IntParam>(this, params_vec_);
+    }
+    operator inT32() const {
+        return value_;
+    }
+    void operator=(inT32 value) {
+        value_ = value;
+    }
+    void set_value(inT32 value) {
+        value_ = value;
+    }
+    void ResetToDefault() {
+        value_ = default_;
+    }
 
- private:
-  inT32 value_;
-  inT32 default_;
-  // Pointer to the vector that contains this param (not owened by this class).
-  GenericVector<IntParam *> *params_vec_;
+private:
+    inT32 value_;
+    inT32 default_;
+    // Pointer to the vector that contains this param (not owened by this class).
+    GenericVector<IntParam *> *params_vec_;
 };
 
 class BoolParam : public Param {
- public:
-  BoolParam(bool value, const char *name, const char *comment, bool init,
-            ParamsVectors *vec) : Param(name, comment, init) {
-    value_ = value;
-    default_ = value;
-    params_vec_ = &(vec->bool_params);
-    vec->bool_params.push_back(this);
-  }
-  ~BoolParam() { ParamUtils::RemoveParam<BoolParam>(this, params_vec_); }
-  operator BOOL8() const { return value_; }
-  void operator=(BOOL8 value) { value_ = value; }
-  void set_value(BOOL8 value) { value_ = value; }
-  void ResetToDefault() {
-    value_ = default_;
-  }
+public:
+    BoolParam(bool value, const char *name, const char *comment, bool init,
+              ParamsVectors *vec) : Param(name, comment, init) {
+        value_ = value;
+        default_ = value;
+        params_vec_ = &(vec->bool_params);
+        vec->bool_params.push_back(this);
+    }
+    ~BoolParam() {
+        ParamUtils::RemoveParam<BoolParam>(this, params_vec_);
+    }
+    operator BOOL8() const {
+        return value_;
+    }
+    void operator=(BOOL8 value) {
+        value_ = value;
+    }
+    void set_value(BOOL8 value) {
+        value_ = value;
+    }
+    void ResetToDefault() {
+        value_ = default_;
+    }
 
- private:
-  BOOL8 value_;
-  BOOL8 default_;
-  // Pointer to the vector that contains this param (not owned by this class).
-  GenericVector<BoolParam *> *params_vec_;
+private:
+    BOOL8 value_;
+    BOOL8 default_;
+    // Pointer to the vector that contains this param (not owned by this class).
+    GenericVector<BoolParam *> *params_vec_;
 };
 
 class StringParam : public Param {
- public:
-  StringParam(const char *value, const char *name,
-              const char *comment, bool init,
-              ParamsVectors *vec) : Param(name, comment, init) {
-    value_ = value;
-    default_ = value;
-    params_vec_ = &(vec->string_params);
-    vec->string_params.push_back(this);
-  }
-  ~StringParam() { ParamUtils::RemoveParam<StringParam>(this, params_vec_); }
-  operator STRING &() { return value_; }
-  const char *string() const { return value_.string(); }
-  const char *c_str() const { return value_.string(); }
-  bool empty() { return value_.length() <= 0; }
-  bool operator==(const STRING& other) { return value_ == other; }
-  void operator=(const STRING& value) { value_ = value; }
-  void set_value(const STRING& value) { value_ = value; }
-  void ResetToDefault() {
-    value_ = default_;
-  }
+public:
+    StringParam(const char *value, const char *name,
+                const char *comment, bool init,
+                ParamsVectors *vec) : Param(name, comment, init) {
+        value_ = value;
+        default_ = value;
+        params_vec_ = &(vec->string_params);
+        vec->string_params.push_back(this);
+    }
+    ~StringParam() {
+        ParamUtils::RemoveParam<StringParam>(this, params_vec_);
+    }
+    operator STRING &() {
+        return value_;
+    }
+    const char *string() const {
+        return value_.string();
+    }
+    const char *c_str() const {
+        return value_.string();
+    }
+    bool empty() {
+        return value_.length() <= 0;
+    }
+    bool operator==(const STRING& other) {
+        return value_ == other;
+    }
+    void operator=(const STRING& value) {
+        value_ = value;
+    }
+    void set_value(const STRING& value) {
+        value_ = value;
+    }
+    void ResetToDefault() {
+        value_ = default_;
+    }
 
- private:
-  STRING value_;
-  STRING default_;
-  // Pointer to the vector that contains this param (not owened by this class).
-  GenericVector<StringParam *> *params_vec_;
+private:
+    STRING value_;
+    STRING default_;
+    // Pointer to the vector that contains this param (not owened by this class).
+    GenericVector<StringParam *> *params_vec_;
 };
 
 class DoubleParam : public Param {
- public:
-  DoubleParam(double value, const char *name, const char *comment,
-              bool init, ParamsVectors *vec) : Param(name, comment, init) {
-    value_ = value;
-    default_ = value;
-    params_vec_ = &(vec->double_params);
-    vec->double_params.push_back(this);
-  }
-  ~DoubleParam() { ParamUtils::RemoveParam<DoubleParam>(this, params_vec_); }
-  operator double() const { return value_; }
-  void operator=(double value) { value_ = value; }
-  void set_value(double value) { value_ = value; }
-  void ResetToDefault() {
-    value_ = default_;
-  }
+public:
+    DoubleParam(double value, const char *name, const char *comment,
+                bool init, ParamsVectors *vec) : Param(name, comment, init) {
+        value_ = value;
+        default_ = value;
+        params_vec_ = &(vec->double_params);
+        vec->double_params.push_back(this);
+    }
+    ~DoubleParam() {
+        ParamUtils::RemoveParam<DoubleParam>(this, params_vec_);
+    }
+    operator double() const {
+        return value_;
+    }
+    void operator=(double value) {
+        value_ = value;
+    }
+    void set_value(double value) {
+        value_ = value;
+    }
+    void ResetToDefault() {
+        value_ = default_;
+    }
 
- private:
-  double value_;
-  double default_;
-  // Pointer to the vector that contains this param (not owned by this class).
-  GenericVector<DoubleParam *> *params_vec_;
+private:
+    double value_;
+    double default_;
+    // Pointer to the vector that contains this param (not owned by this class).
+    GenericVector<DoubleParam *> *params_vec_;
 };
 
 }  // namespace tesseract

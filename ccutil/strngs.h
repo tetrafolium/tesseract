@@ -44,7 +44,7 @@ template <typename T> class GenericVector;
 
 class TESS_API STRING
 {
-  public:
+public:
     STRING();
     STRING(const STRING &string);
     STRING(const char *string);
@@ -66,19 +66,21 @@ class TESS_API STRING
 
     BOOL8 contains(const char c) const;
     inT32 length() const;
-    inT32 size() const { return length(); }
+    inT32 size() const {
+        return length();
+    }
     // Workaround to avoid g++ -Wsign-compare warnings.
     uinT32 unsigned_size() const {
-      const inT32 len = length();
-      assert(0 <= len);
-      return static_cast<uinT32>(len);
+        const inT32 len = length();
+        assert(0 <= len);
+        return static_cast<uinT32>(len);
     }
     const char *string() const;
     const char *c_str() const;
 
     inline char* strdup() const {
-     inT32 len = length() + 1;
-     return strncpy(new char[len], GetCStr(), len);
+        inT32 len = length() + 1;
+        return strncpy(new char[len], GetCStr(), len);
     }
 
 #if STRING_IS_PROTECTED
@@ -118,25 +120,27 @@ class TESS_API STRING
     void add_str_double(const char* str, double number);
 
     // ensure capacity but keep pointer encapsulated
-    inline void ensure(inT32 min_capacity) { ensure_cstr(min_capacity); }
+    inline void ensure(inT32 min_capacity) {
+        ensure_cstr(min_capacity);
+    }
 
-  private:
+private:
     typedef struct STRING_HEADER {
-      // How much space was allocated in the string buffer for char data.
-      int capacity_;
+        // How much space was allocated in the string buffer for char data.
+        int capacity_;
 
-      // used_ is how much of the capacity is currently being used,
-      // including a '\0' terminator.
-      //
-      // If used_ is 0 then string is NULL (not even the '\0')
-      // else if used_ > 0 then it is strlen() + 1 (because it includes '\0')
-      // else strlen is >= 0 (not NULL) but needs to be computed.
-      //      this condition is set when encapsulation is violated because
-      //      an API returned a mutable string.
-      //
-      // capacity_ - used_ = excess capacity that the string can grow
-      //                     without reallocating
-      mutable int used_;
+        // used_ is how much of the capacity is currently being used,
+        // including a '\0' terminator.
+        //
+        // If used_ is 0 then string is NULL (not even the '\0')
+        // else if used_ > 0 then it is strlen() + 1 (because it includes '\0')
+        // else strlen is >= 0 (not NULL) but needs to be computed.
+        //      this condition is set when encapsulation is violated because
+        //      an API returned a mutable string.
+        //
+        // capacity_ - used_ = excess capacity that the string can grow
+        //                     without reallocating
+        mutable int used_;
     } STRING_HEADER;
 
     // To preserve the behavior of the old serialization, we only have space
@@ -147,24 +151,26 @@ class TESS_API STRING
 
     // returns the header part of the storage
     inline STRING_HEADER* GetHeader() {
-      return data_;
+        return data_;
     }
     inline const STRING_HEADER* GetHeader() const {
-      return data_;
+        return data_;
     }
 
     // returns the string data part of storage
-    inline char* GetCStr() { return ((char*)data_) + sizeof(STRING_HEADER); }
+    inline char* GetCStr() {
+        return ((char*)data_) + sizeof(STRING_HEADER);
+    }
 
     inline const char* GetCStr() const {
-      return ((const char *)data_) + sizeof(STRING_HEADER);
+        return ((const char *)data_) + sizeof(STRING_HEADER);
     }
     inline bool InvariantOk() const {
 #if STRING_IS_PROTECTED
-      return (GetHeader()->used_ == 0) ?
-        (string() == NULL) : (GetHeader()->used_ == (strlen(string()) + 1));
+        return (GetHeader()->used_ == 0) ?
+               (string() == NULL) : (GetHeader()->used_ == (strlen(string()) + 1));
 #else
-      return true;
+        return true;
 #endif
     }
 

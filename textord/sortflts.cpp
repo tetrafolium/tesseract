@@ -26,21 +26,21 @@ ELISTIZE (SORTED_FLOAT)
  * Add a new entry to the sorted lsit of floats.
  */
 void SORTED_FLOATS::add(  //add new entry
-                        float value,
-                        inT32 key) {
-  SORTED_FLOAT *new_float = new SORTED_FLOAT (value, key);
+    float value,
+    inT32 key) {
+    SORTED_FLOAT *new_float = new SORTED_FLOAT (value, key);
 
-  if (list.empty ())
-    it.add_after_stay_put (new_float);
-  else {
-    it.move_to_first ();
-    while (!it.at_last () && it.data ()->entry < value)
-      it.forward ();
-    if (it.data ()->entry < value)
-      it.add_after_stay_put (new_float);
-    else
-      it.add_before_stay_put (new_float);
-  }
+    if (list.empty ())
+        it.add_after_stay_put (new_float);
+    else {
+        it.move_to_first ();
+        while (!it.at_last () && it.data ()->entry < value)
+            it.forward ();
+        if (it.data ()->entry < value)
+            it.add_after_stay_put (new_float);
+        else
+            it.add_before_stay_put (new_float);
+    }
 }
 
 
@@ -51,15 +51,15 @@ void SORTED_FLOATS::add(  //add new entry
  */
 
 void SORTED_FLOATS::remove(  //remove the entry
-                           inT32 key) {
-  if (!list.empty ()) {
-    for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ()) {
-      if (it.data ()->address == key) {
-        delete it.extract ();
-        return;
-      }
+    inT32 key) {
+    if (!list.empty ()) {
+        for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ()) {
+            if (it.data ()->address == key) {
+                delete it.extract ();
+                return;
+            }
+        }
     }
-  }
 }
 
 
@@ -71,8 +71,8 @@ void SORTED_FLOATS::remove(  //remove the entry
 
 float
 SORTED_FLOATS::operator[] (      //get an entry
-inT32 index                      //to list
+    inT32 index                      //to list
 ) {
-  it.move_to_first ();
-  return it.data_relative (index)->entry;
+    it.move_to_first ();
+    return it.data_relative (index)->entry;
 }

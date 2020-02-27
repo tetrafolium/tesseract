@@ -36,7 +36,7 @@ void SetupBasicProperties(bool report_errors, bool decompose,
 // Default behavior is to compose, until it is proven that decomposed benefits
 // at least one language.
 inline void SetupBasicProperties(bool report_errors, UNICHARSET* unicharset) {
-  SetupBasicProperties(report_errors, false, unicharset);
+    SetupBasicProperties(report_errors, false, unicharset);
 }
 // Helper sets the properties from universal script unicharsets, if found.
 void SetScriptProperties(const string& script_dir, UNICHARSET* unicharset);

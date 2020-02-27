@@ -66,27 +66,27 @@ using std::string;
 #endif
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-    #if defined(TESS_EXPORTS)
-       #define TESS_API __declspec(dllexport)
-    #elif defined(TESS_IMPORTS)
-       #define TESS_API __declspec(dllimport)
-    #else
-       #define TESS_API
-    #endif
-    #define TESS_LOCAL
+#if defined(TESS_EXPORTS)
+#define TESS_API __declspec(dllexport)
+#elif defined(TESS_IMPORTS)
+#define TESS_API __declspec(dllimport)
 #else
-    #if __GNUC__ >= 4
-      #if defined(TESS_EXPORTS) || defined(TESS_IMPORTS)
-          #define TESS_API  __attribute__ ((visibility ("default")))
-          #define TESS_LOCAL  __attribute__ ((visibility ("hidden")))
-      #else
-          #define TESS_API
-          #define TESS_LOCAL
-      #endif
-    #else
-      #define TESS_API
-      #define TESS_LOCAL
-    #endif
+#define TESS_API
+#endif
+#define TESS_LOCAL
+#else
+#if __GNUC__ >= 4
+#if defined(TESS_EXPORTS) || defined(TESS_IMPORTS)
+#define TESS_API  __attribute__ ((visibility ("default")))
+#define TESS_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define TESS_API
+#define TESS_LOCAL
+#endif
+#else
+#define TESS_API
+#define TESS_LOCAL
+#endif
 #endif
 
 #endif  // TESSERACT_CCUTIL_PLATFORM_H_

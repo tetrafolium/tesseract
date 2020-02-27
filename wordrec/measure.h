@@ -43,9 +43,9 @@
 
 typedef struct
 {
-  long num_samples;
-  float sum_of_samples;
-  float sum_of_squares;
+    long num_samples;
+    float sum_of_samples;
+    float sum_of_squares;
 } MEASUREMENT;
 
 /*

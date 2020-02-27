@@ -34,7 +34,7 @@
  * This routine uses realloc to increase the size of
  * the specified bit vector.
  *
- * Globals: 
+ * Globals:
  * - none
  *
  * @param Vector bit vector to be expanded
@@ -45,30 +45,30 @@
  * @note History: Fri Nov 16 10:11:16 1990, DSJ, Created.
  */
 BIT_VECTOR ExpandBitVector(BIT_VECTOR Vector, int NewNumBits) {
-  return ((BIT_VECTOR) Erealloc(Vector,
-    sizeof(Vector[0]) * WordsInVectorOfSize(NewNumBits)));
+    return ((BIT_VECTOR) Erealloc(Vector,
+                                  sizeof(Vector[0]) * WordsInVectorOfSize(NewNumBits)));
 }                                /* ExpandBitVector */
 
 
 /*---------------------------------------------------------------------------*/
 void FreeBitVector(BIT_VECTOR BitVector) {
-/**
- * This routine frees a bit vector.  It also decrements
- * the global counter that keeps track of the number of
- * bit vectors allocated.  If BitVector is NULL, then
- * the count is printed to stderr.
- *
- * Globals:
- * - BitVectorCount count of number of bit vectors allocated
- *
- * @param BitVector bit vector to be freed
- *
- * @note Exceptions: none
- * @note History: Tue Oct 23 16:46:09 1990, DSJ, Created.
- */
-  if (BitVector) {
-    Efree(BitVector);
-  }
+    /**
+     * This routine frees a bit vector.  It also decrements
+     * the global counter that keeps track of the number of
+     * bit vectors allocated.  If BitVector is NULL, then
+     * the count is printed to stderr.
+     *
+     * Globals:
+     * - BitVectorCount count of number of bit vectors allocated
+     *
+     * @param BitVector bit vector to be freed
+     *
+     * @note Exceptions: none
+     * @note History: Tue Oct 23 16:46:09 1990, DSJ, Created.
+     */
+    if (BitVector) {
+        Efree(BitVector);
+    }
 }                                /* FreeBitVector */
 
 
@@ -87,6 +87,6 @@ void FreeBitVector(BIT_VECTOR BitVector) {
  * @note History: Tue Oct 23 16:51:27 1990, DSJ, Created.
  */
 BIT_VECTOR NewBitVector(int NumBits) {
-  return ((BIT_VECTOR) Emalloc(sizeof(uinT32) *
-    WordsInVectorOfSize(NumBits)));
+    return ((BIT_VECTOR) Emalloc(sizeof(uinT32) *
+                                 WordsInVectorOfSize(NumBits)));
 }                                /* NewBitVector */

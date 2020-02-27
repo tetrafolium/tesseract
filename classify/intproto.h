@@ -74,16 +74,16 @@ class FCOORD;
  * 4th dimension is determined by using CPrunerWordIndexFor(c),
  * where c is the corresponding class id. */
 struct CLASS_PRUNER_STRUCT {
-  uinT32 p[NUM_CP_BUCKETS][NUM_CP_BUCKETS][NUM_CP_BUCKETS][WERDS_PER_CP_VECTOR];
+    uinT32 p[NUM_CP_BUCKETS][NUM_CP_BUCKETS][NUM_CP_BUCKETS][WERDS_PER_CP_VECTOR];
 };
 
 typedef struct
 {
-  inT8 A;
-  uinT8 B;
-  inT8 C;
-  uinT8 Angle;
-  uinT32 Configs[WERDS_PER_CONFIG_VEC];
+    inT8 A;
+    uinT8 B;
+    inT8 C;
+    uinT8 Angle;
+    uinT32 Configs[WERDS_PER_CONFIG_VEC];
 }
 
 
@@ -93,8 +93,8 @@ typedef uinT32 PROTO_PRUNER[NUM_PP_PARAMS][NUM_PP_BUCKETS][WERDS_PER_PP_VECTOR];
 
 typedef struct
 {
-  PROTO_PRUNER ProtoPruner;
-  INT_PROTO_STRUCT Protos[PROTOS_PER_PROTO_SET];
+    PROTO_PRUNER ProtoPruner;
+    INT_PROTO_STRUCT Protos[PROTOS_PER_PROTO_SET];
 }
 
 
@@ -105,13 +105,13 @@ typedef uinT32 CONFIG_PRUNER[NUM_PP_PARAMS][NUM_PP_BUCKETS][4];
 
 typedef struct
 {
-  uinT16 NumProtos;
-  uinT8 NumProtoSets;
-  uinT8 NumConfigs;
-  PROTO_SET ProtoSets[MAX_NUM_PROTO_SETS];
-  uinT8 *ProtoLengths;
-  uinT16 ConfigLengths[MAX_NUM_CONFIGS];
-  int font_set_id;  // FontSet id, see above
+    uinT16 NumProtos;
+    uinT8 NumProtoSets;
+    uinT8 NumConfigs;
+    PROTO_SET ProtoSets[MAX_NUM_PROTO_SETS];
+    uinT8 *ProtoLengths;
+    uinT16 ConfigLengths[MAX_NUM_CONFIGS];
+    int font_set_id;  // FontSet id, see above
 }
 
 
@@ -119,10 +119,10 @@ INT_CLASS_STRUCT, *INT_CLASS;
 
 typedef struct
 {
-  int NumClasses;
-  int NumClassPruners;
-  INT_CLASS Class[MAX_NUM_CLASSES];
-  CLASS_PRUNER_STRUCT* ClassPruners[MAX_NUM_CLASS_PRUNERS];
+    int NumClasses;
+    int NumClassPruners;
+    INT_CLASS Class[MAX_NUM_CLASSES];
+    CLASS_PRUNER_STRUCT* ClassPruners[MAX_NUM_CLASS_PRUNERS];
 }
 
 
@@ -133,21 +133,21 @@ INT_TEMPLATES_STRUCT, *INT_TEMPLATES;
 #define INT_CHAR_NORM_RANGE  256
 
 struct INT_FEATURE_STRUCT {
-  INT_FEATURE_STRUCT() : X(0), Y(0), Theta(0), CP_misses(0) { }
-  // Builds a feature from an FCOORD for position with all the necessary
-  // clipping and rounding.
-  INT_FEATURE_STRUCT(const FCOORD& pos, uinT8 theta);
-  // Builds a feature from ints with all the necessary clipping and casting.
-  INT_FEATURE_STRUCT(int x, int y, int theta);
+    INT_FEATURE_STRUCT() : X(0), Y(0), Theta(0), CP_misses(0) { }
+    // Builds a feature from an FCOORD for position with all the necessary
+    // clipping and rounding.
+    INT_FEATURE_STRUCT(const FCOORD& pos, uinT8 theta);
+    // Builds a feature from ints with all the necessary clipping and casting.
+    INT_FEATURE_STRUCT(int x, int y, int theta);
 
-  uinT8 X;
-  uinT8 Y;
-  uinT8 Theta;
-  inT8 CP_misses;
+    uinT8 X;
+    uinT8 Y;
+    uinT8 Theta;
+    inT8 CP_misses;
 
-  void print() const {
-    tprintf("(%d,%d):%d\n", X, Y, Theta);
-  }
+    void print() const {
+        tprintf("(%d,%d):%d\n", X, Y, Theta);
+    }
 };
 
 typedef INT_FEATURE_STRUCT *INT_FEATURE;
@@ -155,10 +155,10 @@ typedef INT_FEATURE_STRUCT *INT_FEATURE;
 typedef INT_FEATURE_STRUCT INT_FEATURE_ARRAY[MAX_NUM_INT_FEATURES];
 
 enum IntmatcherDebugAction {
-  IDA_ADAPTIVE,
-  IDA_STATIC,
-  IDA_SHAPE_INDEX,
-  IDA_BOTH
+    IDA_ADAPTIVE,
+    IDA_STATIC,
+    IDA_SHAPE_INDEX,
+    IDA_BOTH
 };
 
 /**----------------------------------------------------------------------------

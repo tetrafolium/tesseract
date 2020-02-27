@@ -25,9 +25,9 @@
 #include "blobs.h"
 
 typedef enum {
-  MFXPosition, MFYPosition,
-  MFLength, MFDirection, MFBulge1, MFBulge2,
-  MFCount  // For array sizes.
+    MFXPosition, MFYPosition,
+    MFLength, MFDirection, MFBulge1, MFBulge2,
+    MFCount  // For array sizes.
 } MF_PARAM_NAME;
 
 typedef float MicroFeature[MFCount];

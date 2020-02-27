@@ -26,9 +26,9 @@ extern int tessoptind;
 extern char *tessoptarg;
 
 int tessopt (                     //parse args
-inT32 argc,                      //arg count
-char *argv[],                    //args
-const char *arglist                    //string of arg chars
+    inT32 argc,                      //arg count
+    char *argv[],                    //args
+    const char *arglist                    //string of arg chars
 );
 
 #endif  // TESSERACT_TRAINING_TESSOPT_H_

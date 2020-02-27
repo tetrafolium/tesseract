@@ -24,38 +24,38 @@
 
 class DLLSYM BITS16
 {
-  public:
+public:
     uinT16 val;
 
     BITS16() {
-      val = 0;
+        val = 0;
     }                            // constructor
 
     BITS16(               // constructor
-           uinT16 init);  // initial val
+        uinT16 init);  // initial val
 
     void turn_on_bit(                  // flip specified bit
-                     uinT8 bit_num) {  // bit to flip 0..7
-      val = val | 01 << bit_num;
+        uinT8 bit_num) {  // bit to flip 0..7
+        val = val | 01 << bit_num;
     }
 
     void turn_off_bit(                  // flip specified bit
-                      uinT8 bit_num) {  // bit to flip 0..7
-      val = val & ~(01 << bit_num);
-    }
-
-    void set_bit(                // flip specified bit
-                 uinT8 bit_num,  // bit to flip 0..7
-                 BOOL8 value) {  // value to flip to
-      if (value)
-        val = val | 01 << bit_num;
-      else
+        uinT8 bit_num) {  // bit to flip 0..7
         val = val & ~(01 << bit_num);
     }
 
+    void set_bit(                // flip specified bit
+        uinT8 bit_num,  // bit to flip 0..7
+        BOOL8 value) {  // value to flip to
+        if (value)
+            val = val | 01 << bit_num;
+        else
+            val = val & ~(01 << bit_num);
+    }
+
     BOOL8 bit(                        // access bit
-              uinT8 bit_num) const {  // bit to access
-      return (val >> bit_num) & 01;
+        uinT8 bit_num) const {  // bit to access
+        return (val >> bit_num) & 01;
     }
 };
 #endif

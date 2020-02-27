@@ -34,7 +34,7 @@ Input::Input(const STRING& name, const StaticShape& shape)
     : Network(NT_INPUT, name, shape.height(), shape.depth()),
       shape_(shape),
       cached_x_scale_(1) {
-  if (shape.height() == 1) ni_ = shape.depth();
+    if (shape.height() == 1) ni_ = shape.depth();
 }
 
 Input::~Input() {
@@ -42,27 +42,27 @@ Input::~Input() {
 
 // Writes to the given file. Returns false in case of error.
 bool Input::Serialize(TFile* fp) const {
-  if (!Network::Serialize(fp)) return false;
-  if (fp->FWrite(&shape_, sizeof(shape_), 1) != 1) return false;
-  return true;
+    if (!Network::Serialize(fp)) return false;
+    if (fp->FWrite(&shape_, sizeof(shape_), 1) != 1) return false;
+    return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 bool Input::DeSerialize(TFile* fp) {
-  return fp->FReadEndian(&shape_, sizeof(shape_), 1) == 1;
+    return fp->FReadEndian(&shape_, sizeof(shape_), 1) == 1;
 }
 
 // Returns an integer reduction factor that the network applies to the
 // time sequence. Assumes that any 2-d is already eliminated. Used for
 // scaling bounding boxes of truth data.
 int Input::XScaleFactor() const {
-  return 1;
+    return 1;
 }
 
 // Provides the (minimum) x scale factor to the network (of interest only to
 // input units) so they can determine how to scale bounding boxes.
 void Input::CacheXScaleFactor(int factor) {
-  cached_x_scale_ = factor;
+    cached_x_scale_ = factor;
 }
 
 // Runs forward propagation of activations on the input line.
@@ -70,7 +70,7 @@ void Input::CacheXScaleFactor(int factor) {
 void Input::Forward(bool debug, const NetworkIO& input,
                     const TransposedArray* input_transpose,
                     NetworkScratch* scratch, NetworkIO* output) {
-  *output = input;
+    *output = input;
 }
 
 // Runs backward propagation of errors on the deltas line.
@@ -78,8 +78,8 @@ void Input::Forward(bool debug, const NetworkIO& input,
 bool Input::Backward(bool debug, const NetworkIO& fwd_deltas,
                      NetworkScratch* scratch,
                      NetworkIO* back_deltas) {
-  tprintf("Input::Backward should not be called!!\n");
-  return false;
+    tprintf("Input::Backward should not be called!!\n");
+    return false;
 }
 
 // Creates and returns a Pix of appropriate size for the network from the
@@ -89,22 +89,22 @@ bool Input::Backward(bool debug, const NetworkIO& fwd_deltas,
 Pix* Input::PrepareLSTMInputs(const ImageData& image_data,
                               const Network* network, int min_width,
                               TRand* randomizer, float* image_scale) {
-  // Note that NumInputs() is defined as input image height.
-  int target_height = network->NumInputs();
-  int width, height;
-  Pix* pix = image_data.PreScale(target_height, kMaxInputHeight, image_scale,
-                                 &width, &height, nullptr);
-  if (pix == nullptr) {
-    tprintf("Bad pix from ImageData!\n");
-    return nullptr;
-  }
-  if (width <= min_width || height < min_width) {
-    tprintf("Image too small to scale!! (%dx%d vs min width of %d)\n", width,
-            height, min_width);
-    pixDestroy(&pix);
-    return nullptr;
-  }
-  return pix;
+    // Note that NumInputs() is defined as input image height.
+    int target_height = network->NumInputs();
+    int width, height;
+    Pix* pix = image_data.PreScale(target_height, kMaxInputHeight, image_scale,
+                                   &width, &height, nullptr);
+    if (pix == nullptr) {
+        tprintf("Bad pix from ImageData!\n");
+        return nullptr;
+    }
+    if (width <= min_width || height < min_width) {
+        tprintf("Image too small to scale!! (%dx%d vs min width of %d)\n", width,
+                height, min_width);
+        pixDestroy(&pix);
+        return nullptr;
+    }
+    return pix;
 }
 
 // Converts the given pix to a NetworkIO of height and depth appropriate to the
@@ -116,38 +116,38 @@ Pix* Input::PrepareLSTMInputs(const ImageData& image_data,
 /* static */
 void Input::PreparePixInput(const StaticShape& shape, const Pix* pix,
                             TRand* randomizer, NetworkIO* input) {
-  bool color = shape.depth() == 3;
-  Pix* var_pix = const_cast<Pix*>(pix);
-  int depth = pixGetDepth(var_pix);
-  Pix* normed_pix = nullptr;
-  // On input to BaseAPI, an image is forced to be 1, 8 or 24 bit, without
-  // colormap, so we just have to deal with depth conversion here.
-  if (color) {
-    // Force RGB.
-    if (depth == 32)
-      normed_pix = pixClone(var_pix);
-    else
-      normed_pix = pixConvertTo32(var_pix);
-  } else {
-    // Convert non-8-bit images to 8 bit.
-    if (depth == 8)
-      normed_pix = pixClone(var_pix);
-    else
-      normed_pix = pixConvertTo8(var_pix, false);
-  }
-  int height = pixGetHeight(normed_pix);
-  int target_height = shape.height();
-  if (target_height == 1) target_height = shape.depth();
-  if (target_height == 0) target_height = height;
-  float im_factor = static_cast<float>(target_height) / height;
-  if (im_factor != 1.0f) {
-    // Get the scaled image.
-    Pix* scaled_pix = pixScale(normed_pix, im_factor, im_factor);
+    bool color = shape.depth() == 3;
+    Pix* var_pix = const_cast<Pix*>(pix);
+    int depth = pixGetDepth(var_pix);
+    Pix* normed_pix = nullptr;
+    // On input to BaseAPI, an image is forced to be 1, 8 or 24 bit, without
+    // colormap, so we just have to deal with depth conversion here.
+    if (color) {
+        // Force RGB.
+        if (depth == 32)
+            normed_pix = pixClone(var_pix);
+        else
+            normed_pix = pixConvertTo32(var_pix);
+    } else {
+        // Convert non-8-bit images to 8 bit.
+        if (depth == 8)
+            normed_pix = pixClone(var_pix);
+        else
+            normed_pix = pixConvertTo8(var_pix, false);
+    }
+    int height = pixGetHeight(normed_pix);
+    int target_height = shape.height();
+    if (target_height == 1) target_height = shape.depth();
+    if (target_height == 0) target_height = height;
+    float im_factor = static_cast<float>(target_height) / height;
+    if (im_factor != 1.0f) {
+        // Get the scaled image.
+        Pix* scaled_pix = pixScale(normed_pix, im_factor, im_factor);
+        pixDestroy(&normed_pix);
+        normed_pix = scaled_pix;
+    }
+    input->FromPix(shape, normed_pix, randomizer);
     pixDestroy(&normed_pix);
-    normed_pix = scaled_pix;
-  }
-  input->FromPix(shape, normed_pix, randomizer);
-  pixDestroy(&normed_pix);
 }
 
 }  // namespace tesseract.

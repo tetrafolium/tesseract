@@ -41,15 +41,15 @@
  * @note History: 5/21/89, DSJ, Created.
  */
 FILE *Efopen(const char *Name, const char *Mode) {
-  FILE *File;
-  char ErrorMessage[MAXERRORMESSAGE];
+    FILE *File;
+    char ErrorMessage[MAXERRORMESSAGE];
 
-  File = fopen (Name, Mode);
-  if (File == NULL) {
-    sprintf (ErrorMessage, "Unable to open %s", Name);
-    DoError(FOPENERROR, ErrorMessage); 
-    return (NULL);
-  }
-  else
-    return (File);
+    File = fopen (Name, Mode);
+    if (File == NULL) {
+        sprintf (ErrorMessage, "Unable to open %s", Name);
+        DoError(FOPENERROR, ErrorMessage);
+        return (NULL);
+    }
+    else
+        return (File);
 }                                /* Efopen */

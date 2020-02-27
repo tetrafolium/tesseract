@@ -43,7 +43,7 @@ class TessBaseAPI;
  * in addition to the heuristics for producing it.
  */
 class TESS_API TessResultRenderer {
-  public:
+public:
     virtual ~TessResultRenderer();
 
     // Takes ownership of pointer so must be new'd instance.
@@ -52,7 +52,9 @@ class TESS_API TessResultRenderer {
     void insert(TessResultRenderer* next);
 
     // Returns the next renderer or NULL.
-    TessResultRenderer* next() { return next_; }
+    TessResultRenderer* next() {
+        return next_;
+    }
 
     /**
      * Starts a new document with the given title.
@@ -77,8 +79,12 @@ class TESS_API TessResultRenderer {
      */
     bool EndDocument();
 
-    const char* file_extension() const { return file_extension_; }
-    const char* title() const { return title_.c_str(); }
+    const char* file_extension() const {
+        return file_extension_;
+    }
+    const char* title() const {
+        return title_.c_str();
+    }
 
     /**
      * Returns the index of the last image given to AddImage
@@ -89,9 +95,11 @@ class TESS_API TessResultRenderer {
      * depending on when in the document lifecycle you are looking at it.
      * Will return -1 if a document was never started.
      */
-    int imagenum() const { return imagenum_; }
+    int imagenum() const {
+        return imagenum_;
+    }
 
-  protected:
+protected:
     /**
      * Called by concrete classes.
      *
@@ -125,7 +133,7 @@ class TESS_API TessResultRenderer {
     // This method will grow the output buffer if needed.
     void AppendData(const char* s, int len);
 
-  private:
+private:
     const char* file_extension_;  // standard extension for generated output
     STRING title_;                // title of document being renderered
     int imagenum_;                // index of last image added
@@ -139,81 +147,81 @@ class TESS_API TessResultRenderer {
  * Renders tesseract output into a plain UTF-8 text string
  */
 class TESS_API TessTextRenderer : public TessResultRenderer {
- public:
-  explicit TessTextRenderer(const char *outputbase);
+public:
+    explicit TessTextRenderer(const char *outputbase);
 
- protected:
-  virtual bool AddImageHandler(TessBaseAPI* api);
+protected:
+    virtual bool AddImageHandler(TessBaseAPI* api);
 };
 
 /**
  * Renders tesseract output into an hocr text string
  */
 class TESS_API TessHOcrRenderer : public TessResultRenderer {
- public:
-  explicit TessHOcrRenderer(const char *outputbase, bool font_info);
-  explicit TessHOcrRenderer(const char *outputbase);
+public:
+    explicit TessHOcrRenderer(const char *outputbase, bool font_info);
+    explicit TessHOcrRenderer(const char *outputbase);
 
- protected:
-  virtual bool BeginDocumentHandler();
-  virtual bool AddImageHandler(TessBaseAPI* api);
-  virtual bool EndDocumentHandler();
+protected:
+    virtual bool BeginDocumentHandler();
+    virtual bool AddImageHandler(TessBaseAPI* api);
+    virtual bool EndDocumentHandler();
 
- private:
-  bool font_info_;  // whether to print font information
+private:
+    bool font_info_;  // whether to print font information
 };
 
 /**
  * Renders Tesseract output into a TSV string
  */
 class TESS_API TessTsvRenderer : public TessResultRenderer {
- public:
-  explicit TessTsvRenderer(const char* outputbase, bool font_info);
-  explicit TessTsvRenderer(const char* outputbase);
+public:
+    explicit TessTsvRenderer(const char* outputbase, bool font_info);
+    explicit TessTsvRenderer(const char* outputbase);
 
- protected:
-  virtual bool BeginDocumentHandler();
-  virtual bool AddImageHandler(TessBaseAPI* api);
-  virtual bool EndDocumentHandler();
+protected:
+    virtual bool BeginDocumentHandler();
+    virtual bool AddImageHandler(TessBaseAPI* api);
+    virtual bool EndDocumentHandler();
 
- private:
-  bool font_info_;              // whether to print font information
+private:
+    bool font_info_;              // whether to print font information
 };
 
 /**
  * Renders tesseract output into searchable PDF
  */
 class TESS_API TessPDFRenderer : public TessResultRenderer {
- public:
-  // datadir is the location of the TESSDATA. We need it because
-  // we load a custom PDF font from this location.
-  TessPDFRenderer(const char* outputbase, const char* datadir, bool textonly);
+public:
+    // datadir is the location of the TESSDATA. We need it because
+    // we load a custom PDF font from this location.
+    TessPDFRenderer(const char* outputbase, const char* datadir, bool textonly);
 
- protected:
-  virtual bool BeginDocumentHandler();
-  virtual bool AddImageHandler(TessBaseAPI* api);
-  virtual bool EndDocumentHandler();
+protected:
+    virtual bool BeginDocumentHandler();
+    virtual bool AddImageHandler(TessBaseAPI* api);
+    virtual bool EndDocumentHandler();
 
- private:
-  // We don't want to have every image in memory at once,
-  // so we store some metadata as we go along producing
-  // PDFs one page at a time. At the end, that metadata is
-  // used to make everything that isn't easily handled in a
-  // streaming fashion.
-  long int obj_;                     // counter for PDF objects
-  GenericVector<long int> offsets_;  // offset of every PDF object in bytes
-  GenericVector<long int> pages_;    // object number for every /Page object
-  const char *datadir_;              // where to find the custom font
-  bool textonly_;                    // skip images if set
-  // Bookkeeping only. DIY = Do It Yourself.
-  void AppendPDFObjectDIY(size_t objectsize);
-  // Bookkeeping + emit data.
-  void AppendPDFObject(const char *data);
-  // Create the /Contents object for an entire page.
-  char* GetPDFTextObjects(TessBaseAPI* api, double width, double height);
-  // Turn an image into a PDF object. Only transcode if we have to.
-  static bool imageToPDFObj(Pix *pix, char *filename, long int objnum,
-                          char **pdf_object, long int *pdf_object_size);
+private:
+    // We don't want to have every image in memory at once,
+    // so we store some metadata as we go along producing
+    // PDFs one page at a time. At the end, that metadata is
+    // used to make everything that isn't easily handled in a
+    // streaming fashion.
+    long int obj_;                     // counter for PDF objects
+    GenericVector<long int> offsets_;  // offset of every PDF object in bytes
+    GenericVector<long int> pages_;    // object number for every /Page object
+    const char *datadir_;              // where to find the custom font
+    bool textonly_;                    // skip images if set
+    // Bookkeeping only. DIY = Do It Yourself.
+    void AppendPDFObjectDIY(size_t objectsize);
+    // Bookkeeping + emit data.
+    void AppendPDFObject(const char *data);
+    // Create the /Contents object for an entire page.
+    char* GetPDFTextObjects(TessBaseAPI* api, double width, double height);
+    // Turn an image into a PDF object. Only transcode if we have to.
+    static bool imageToPDFObj(Pix *pix, char *filename, long int objnum,
+                              char **pdf_object, long int *pdf_object_size);
 };
 
 
@@ -221,33 +229,33 @@ class TESS_API TessPDFRenderer : public TessResultRenderer {
  * Renders tesseract output into a plain UTF-8 text string
  */
 class TESS_API TessUnlvRenderer : public TessResultRenderer {
- public:
-  explicit TessUnlvRenderer(const char *outputbase);
+public:
+    explicit TessUnlvRenderer(const char *outputbase);
 
- protected:
-  virtual bool AddImageHandler(TessBaseAPI* api);
+protected:
+    virtual bool AddImageHandler(TessBaseAPI* api);
 };
 
 /**
  * Renders tesseract output into a plain UTF-8 text string
  */
 class TESS_API TessBoxTextRenderer : public TessResultRenderer {
- public:
-  explicit TessBoxTextRenderer(const char *outputbase);
+public:
+    explicit TessBoxTextRenderer(const char *outputbase);
 
- protected:
-  virtual bool AddImageHandler(TessBaseAPI* api);
+protected:
+    virtual bool AddImageHandler(TessBaseAPI* api);
 };
 
 /**
  * Renders tesseract output into an osd text string
  */
 class TESS_API TessOsdRenderer : public TessResultRenderer {
- public:
-  explicit TessOsdRenderer(const char* outputbase);
+public:
+    explicit TessOsdRenderer(const char* outputbase);
 
- protected:
-  virtual bool AddImageHandler(TessBaseAPI* api);
+protected:
+    virtual bool AddImageHandler(TessBaseAPI* api);
 };
 
 }  // namespace tesseract.

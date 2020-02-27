@@ -34,9 +34,9 @@ STRING_PARAM_FLAG(tessdata_dir, "", "Directory of traineddata files");
 DECLARE_INT_PARAM_FLAG(debug_level);
 
 enum ClassifierName {
-  CN_PRUNER,
-  CN_FULL,
-  CN_COUNT
+    CN_PRUNER,
+    CN_FULL,
+    CN_COUNT
 };
 
 const char* names[] = {"pruner", "full", nullptr};
@@ -45,50 +45,50 @@ static tesseract::ShapeClassifier* InitializeClassifier(
     const char* classifer_name, const UNICHARSET& unicharset,
     int argc, char **argv,
     tesseract::TessBaseAPI** api) {
-  // Decode the classifier string.
-  ClassifierName classifier = CN_COUNT;
-  for (int c = 0; c < CN_COUNT; ++c) {
-    if (strcmp(classifer_name, names[c]) == 0) {
-      classifier = static_cast<ClassifierName>(c);
-      break;
+    // Decode the classifier string.
+    ClassifierName classifier = CN_COUNT;
+    for (int c = 0; c < CN_COUNT; ++c) {
+        if (strcmp(classifer_name, names[c]) == 0) {
+            classifier = static_cast<ClassifierName>(c);
+            break;
+        }
     }
-  }
-  if (classifier == CN_COUNT) {
-    fprintf(stderr, "Invalid classifier name:%s\n", FLAGS_classifier.c_str());
-    return nullptr;
-  }
+    if (classifier == CN_COUNT) {
+        fprintf(stderr, "Invalid classifier name:%s\n", FLAGS_classifier.c_str());
+        return nullptr;
+    }
 
-  // We need to initialize tesseract to test.
-  *api = new tesseract::TessBaseAPI;
-  tesseract::OcrEngineMode engine_mode = tesseract::OEM_TESSERACT_ONLY;
-  tesseract::Tesseract* tesseract = nullptr;
-  tesseract::Classify* classify = nullptr;
-  if (
-      classifier == CN_PRUNER || classifier == CN_FULL) {
-    if ((*api)->Init(FLAGS_tessdata_dir.c_str(), FLAGS_lang.c_str(),
-                 engine_mode) < 0) {
-      fprintf(stderr, "Tesseract initialization failed!\n");
-      return nullptr;
+    // We need to initialize tesseract to test.
+    *api = new tesseract::TessBaseAPI;
+    tesseract::OcrEngineMode engine_mode = tesseract::OEM_TESSERACT_ONLY;
+    tesseract::Tesseract* tesseract = nullptr;
+    tesseract::Classify* classify = nullptr;
+    if (
+        classifier == CN_PRUNER || classifier == CN_FULL) {
+        if ((*api)->Init(FLAGS_tessdata_dir.c_str(), FLAGS_lang.c_str(),
+                         engine_mode) < 0) {
+            fprintf(stderr, "Tesseract initialization failed!\n");
+            return nullptr;
+        }
+        tesseract = const_cast<tesseract::Tesseract*>((*api)->tesseract());
+        classify = static_cast<tesseract::Classify*>(tesseract);
+        if (classify->shape_table() == nullptr) {
+            fprintf(stderr, "Tesseract must contain a ShapeTable!\n");
+            return nullptr;
+        }
     }
-    tesseract = const_cast<tesseract::Tesseract*>((*api)->tesseract());
-    classify = static_cast<tesseract::Classify*>(tesseract);
-    if (classify->shape_table() == nullptr) {
-      fprintf(stderr, "Tesseract must contain a ShapeTable!\n");
-      return nullptr;
-    }
-  }
-  tesseract::ShapeClassifier* shape_classifier = nullptr;
+    tesseract::ShapeClassifier* shape_classifier = nullptr;
 
-  if (classifier == CN_PRUNER) {
-    shape_classifier = new tesseract::TessClassifier(true, classify);
-  } else if (classifier == CN_FULL) {
-    shape_classifier = new tesseract::TessClassifier(false, classify);
-  } else {
-    fprintf(stderr, "%s tester not yet implemented\n", classifer_name);
-    return nullptr;
-  }
-  tprintf("Testing classifier %s:\n", classifer_name);
-  return shape_classifier;
+    if (classifier == CN_PRUNER) {
+        shape_classifier = new tesseract::TessClassifier(true, classify);
+    } else if (classifier == CN_FULL) {
+        shape_classifier = new tesseract::TessClassifier(false, classify);
+    } else {
+        fprintf(stderr, "%s tester not yet implemented\n", classifer_name);
+        return nullptr;
+    }
+    tprintf("Testing classifier %s:\n", classifer_name);
+    return shape_classifier;
 }
 
 // This program has complex setup requirements, so here is some help:
@@ -111,32 +111,32 @@ static tesseract::ShapeClassifier* InitializeClassifier(
 // full     : Tesseract full classifier.
 //            with an input trainer.)
 int main(int argc, char **argv) {
-  ParseArguments(&argc, &argv);
-  STRING file_prefix;
-  tesseract::MasterTrainer* trainer =
-      tesseract::LoadTrainingData(argc, argv, false, nullptr, &file_prefix);
-  tesseract::TessBaseAPI* api;
-  // Decode the classifier string.
-  tesseract::ShapeClassifier* shape_classifier = InitializeClassifier(
-      FLAGS_classifier.c_str(), trainer->unicharset(), argc, argv, &api);
-  if (shape_classifier == nullptr) {
-    fprintf(stderr, "Classifier init failed!:%s\n", FLAGS_classifier.c_str());
-    return 1;
-  }
+    ParseArguments(&argc, &argv);
+    STRING file_prefix;
+    tesseract::MasterTrainer* trainer =
+        tesseract::LoadTrainingData(argc, argv, false, nullptr, &file_prefix);
+    tesseract::TessBaseAPI* api;
+    // Decode the classifier string.
+    tesseract::ShapeClassifier* shape_classifier = InitializeClassifier(
+                FLAGS_classifier.c_str(), trainer->unicharset(), argc, argv, &api);
+    if (shape_classifier == nullptr) {
+        fprintf(stderr, "Classifier init failed!:%s\n", FLAGS_classifier.c_str());
+        return 1;
+    }
 
-  // We want to test junk as well if it is available.
-  // trainer->IncludeJunk();
-  // We want to test with replicated samples too.
-  trainer->ReplicateAndRandomizeSamplesIfRequired();
+    // We want to test junk as well if it is available.
+    // trainer->IncludeJunk();
+    // We want to test with replicated samples too.
+    trainer->ReplicateAndRandomizeSamplesIfRequired();
 
-  trainer->TestClassifierOnSamples(tesseract::CT_UNICHAR_TOP1_ERR,
-                                   MAX(3, FLAGS_debug_level), false,
-                                   shape_classifier, nullptr);
-  delete shape_classifier;
-  delete api;
-  delete trainer;
+    trainer->TestClassifierOnSamples(tesseract::CT_UNICHAR_TOP1_ERR,
+                                     MAX(3, FLAGS_debug_level), false,
+                                     shape_classifier, nullptr);
+    delete shape_classifier;
+    delete api;
+    delete trainer;
 
-  return 0;
+    return 0;
 } /* main */
 
 

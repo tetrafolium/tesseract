@@ -30,20 +30,20 @@
 
 
 extern INT_VAR_H (edges_children_per_grandchild, 10,
-"Importance ratio for chucking outlines");
+                  "Importance ratio for chucking outlines");
 extern INT_VAR_H (edges_children_count_limit, 45,
-"Max holes allowed in blob");
+                  "Max holes allowed in blob");
 extern double_VAR_H (edges_childarea, 0.5,
-"Max area fraction of child outline");
+                     "Max area fraction of child outline");
 extern double_VAR_H (edges_boxarea, 0.8,
-"Min area fraction of grandchild for box");
+                     "Min area fraction of grandchild for box");
 void complete_edge(CRACKEDGE *start,  //start of loop
                    C_OUTLINE_IT* outline_it);
 ScrollView::Color check_path_legal(                  //certify outline
-                        CRACKEDGE *start  //start of loop
-                       );
+    CRACKEDGE *start  //start of loop
+);
 inT16 loop_bounding_box(                    //get bounding box
-                        CRACKEDGE *&start,  //edge loop
-                        ICOORD &botleft,    //bounding box
-                        ICOORD &topright);
+    CRACKEDGE *&start,  //edge loop
+    ICOORD &botleft,    //bounding box
+    ICOORD &topright);
 #endif

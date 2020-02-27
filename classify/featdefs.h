@@ -40,15 +40,15 @@ extern const char* kGeoFeatureType;
   feature set contain the same number of parameters.*/
 
 struct CHAR_DESC_STRUCT {
-  uinT32 NumFeatureSets;
-  FEATURE_SET FeatureSets[NUM_FEATURE_TYPES];
+    uinT32 NumFeatureSets;
+    FEATURE_SET FeatureSets[NUM_FEATURE_TYPES];
 };
 typedef CHAR_DESC_STRUCT *CHAR_DESC;
 
 struct FEATURE_DEFS_STRUCT {
-  inT32 NumFeatureTypes;
-  const FEATURE_DESC_STRUCT* FeatureDesc[NUM_FEATURE_TYPES];
-  int FeatureEnabled[NUM_FEATURE_TYPES];
+    inT32 NumFeatureTypes;
+    const FEATURE_DESC_STRUCT* FeatureDesc[NUM_FEATURE_TYPES];
+    int FeatureEnabled[NUM_FEATURE_TYPES];
 };
 typedef FEATURE_DEFS_STRUCT *FEATURE_DEFS;
 

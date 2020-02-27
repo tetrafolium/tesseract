@@ -47,7 +47,7 @@ CLASS REGION_OCC
 
 class REGION_OCC:public ELIST_LINK
 {
-  public:
+public:
     float min_x;                 //Lowest x in region
     float max_x;                 //Highest x in region
     inT16 region_type;           //Type of crossing
@@ -55,12 +55,12 @@ class REGION_OCC:public ELIST_LINK
     REGION_OCC() {}  // constructor used
     // only in COPIER etc
     REGION_OCC(  //constructor
-               float min,
-               float max,
-               inT16 region) {
-      min_x = min;
-      max_x = max;
-      region_type = region;
+        float min,
+        float max,
+        inT16 region) {
+        min_x = min;
+        max_x = max;
+        region_type = region;
     }
 };
 
@@ -125,7 +125,7 @@ have significantly changed bands until it has moved out of the error margin.
 *************************************************************************/
 class BAND
 {
-  public:
+public:
     inT16 max_max;               //upper max
     inT16 max;                   //nominal max
     inT16 min_max;               //lower max
@@ -137,96 +137,96 @@ class BAND
     }                            // constructor
 
     void set(                      // initialise a band
-             inT16 new_max_max,    // upper max
-             inT16 new_max,        // new nominal max
-             inT16 new_min_max,    // new lower max
-             inT16 new_max_min,    // new upper min
-             inT16 new_min,        // new nominal min
-             inT16 new_min_min) {  // new lower min
-      max_max = new_max_max;
-      max = new_max;
-      min_max = new_min_max;
-      max_min = new_max_min;
-      min = new_min;
-      min_min = new_min_min;
+        inT16 new_max_max,    // upper max
+        inT16 new_max,        // new nominal max
+        inT16 new_min_max,    // new lower max
+        inT16 new_max_min,    // new upper min
+        inT16 new_min,        // new nominal min
+        inT16 new_min_min) {  // new lower min
+        max_max = new_max_max;
+        max = new_max;
+        min_max = new_min_max;
+        max_min = new_max_min;
+        min = new_min;
+        min_min = new_min_min;
     }
 
     BOOL8 in_minimal(            //in minimal limits?
-                     float y) {  //y value
-      if ((y >= max_min) && (y < min_max))
-        return TRUE;
-      else
-        return FALSE;
+        float y) {  //y value
+        if ((y >= max_min) && (y < min_max))
+            return TRUE;
+        else
+            return FALSE;
     }
 
     BOOL8 in_nominal(            //in nominal limits?
-                     float y) {  //y value
-      if ((y >= min) && (y < max))
-        return TRUE;
-      else
-        return FALSE;
+        float y) {  //y value
+        if ((y >= min) && (y < max))
+            return TRUE;
+        else
+            return FALSE;
     }
 
     BOOL8 in_maximal(            //in maximal limits?
-                     float y) {  //y value
-      if ((y >= min_min) && (y < max_max))
-        return TRUE;
-      else
-        return FALSE;
+        float y) {  //y value
+        if ((y >= min_min) && (y < max_max))
+            return TRUE;
+        else
+            return FALSE;
     }
 
-                                 //overlaps min limits?
+    //overlaps min limits?
     BOOL8 range_overlaps_minimal(float y1,    //one range limit
                                  float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_OVERLAPS_BAND (min_max, max_min, y1, y2);
-      else
-        return RANGE_OVERLAPS_BAND (min_max, max_min, y2, y1);
+        if (y1 > y2)
+            return RANGE_OVERLAPS_BAND (min_max, max_min, y1, y2);
+        else
+            return RANGE_OVERLAPS_BAND (min_max, max_min, y2, y1);
     }
 
-                                 //overlaps nom limits?
+    //overlaps nom limits?
     BOOL8 range_overlaps_nominal(float y1,    //one range limit
                                  float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_OVERLAPS_BAND (max, min, y1, y2);
-      else
-        return RANGE_OVERLAPS_BAND (max, min, y2, y1);
+        if (y1 > y2)
+            return RANGE_OVERLAPS_BAND (max, min, y1, y2);
+        else
+            return RANGE_OVERLAPS_BAND (max, min, y2, y1);
     }
 
-                                 //overlaps max limits?
+    //overlaps max limits?
     BOOL8 range_overlaps_maximal(float y1,    //one range limit
                                  float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_OVERLAPS_BAND (max_max, min_min, y1, y2);
-      else
-        return RANGE_OVERLAPS_BAND (max_max, min_min, y2, y1);
+        if (y1 > y2)
+            return RANGE_OVERLAPS_BAND (max_max, min_min, y1, y2);
+        else
+            return RANGE_OVERLAPS_BAND (max_max, min_min, y2, y1);
     }
 
     BOOL8 range_in_minimal(             //within min limits?
-                           float y1,    //one range limit
-                           float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_IN_BAND (min_max, max_min, y1, y2);
-      else
-        return RANGE_IN_BAND (min_max, max_min, y2, y1);
+        float y1,    //one range limit
+        float y2) {  //other range limit
+        if (y1 > y2)
+            return RANGE_IN_BAND (min_max, max_min, y1, y2);
+        else
+            return RANGE_IN_BAND (min_max, max_min, y2, y1);
     }
 
     BOOL8 range_in_nominal(             //within nom limits?
-                           float y1,    //one range limit
-                           float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_IN_BAND (max, min, y1, y2);
-      else
-        return RANGE_IN_BAND (max, min, y2, y1);
+        float y1,    //one range limit
+        float y2) {  //other range limit
+        if (y1 > y2)
+            return RANGE_IN_BAND (max, min, y1, y2);
+        else
+            return RANGE_IN_BAND (max, min, y2, y1);
     }
 
     BOOL8 range_in_maximal(             //within max limits?
-                           float y1,    //one range limit
-                           float y2) {  //other range limit
-      if (y1 > y2)
-        return RANGE_IN_BAND (max_max, min_min, y1, y2);
-      else
-        return RANGE_IN_BAND (max_max, min_min, y2, y1);
+        float y1,    //one range limit
+        float y2) {  //other range limit
+        if (y1 > y2)
+            return RANGE_IN_BAND (max_max, min_min, y1, y2);
+        else
+            return RANGE_IN_BAND (max_max, min_min, y2, y1);
     }
 };
 
@@ -245,18 +245,18 @@ class BAND
 
 extern BOOL_VAR_H (blockocc_show_result, FALSE, "Show intermediate results");
 extern INT_VAR_H (blockocc_desc_height, 0,
-"Descender height after normalisation");
+                  "Descender height after normalisation");
 extern INT_VAR_H (blockocc_asc_height, 255,
-"Ascender height after normalisation");
+                  "Ascender height after normalisation");
 extern INT_VAR_H (blockocc_band_count, 4, "Number of bands used");
 extern double_VAR_H (textord_underline_threshold, 0.9,
-"Fraction of width occupied");
+                     "Fraction of width occupied");
 
 BOOL8 test_underline(                   //look for underlines
-                     BOOL8 testing_on,  //drawing blob
-                     C_BLOB *blob,      //blob to test
-                     inT16 baseline,    //coords of baseline
-                     inT16 xheight      //height of line
-                    );
+    BOOL8 testing_on,  //drawing blob
+    C_BLOB *blob,      //blob to test
+    inT16 baseline,    //coords of baseline
+    inT16 xheight      //height of line
+);
 
 #endif

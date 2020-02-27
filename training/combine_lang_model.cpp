@@ -38,50 +38,50 @@ BOOL_PARAM_FLAG(pass_through_recoder, false,
                 " unicharset. Otherwise, potentially a compression of it");
 
 int main(int argc, char** argv) {
-  tesseract::ParseCommandLineFlags(argv[0], &argc, &argv, true);
+    tesseract::ParseCommandLineFlags(argv[0], &argc, &argv, true);
 
-  // Check validity of input flags.
-  if (FLAGS_input_unicharset.empty() || FLAGS_script_dir.empty() ||
-      FLAGS_output_dir.empty() || FLAGS_lang.empty()) {
-    tprintf("Usage: %s --input_unicharset filename --script_dir dirname\n",
-            argv[0]);
-    tprintf("  --output_dir rootdir --lang lang [--lang_is_rtl]\n");
-    tprintf("  [--words file --puncs file --numbers file]\n");
-    tprintf("Sets properties on the input unicharset file, and writes:\n");
-    tprintf("rootdir/lang/lang.charset_size=ddd.txt\n");
-    tprintf("rootdir/lang/lang.traineddata\n");
-    tprintf("rootdir/lang/lang.unicharset\n");
-    tprintf("If the 3 word lists are provided, the dawgs are also added to");
-    tprintf(" the traineddata file.\n");
-    tprintf("The output unicharset and charset_size files are just for human");
-    tprintf(" readability.\n");
-    exit(1);
-  }
-  GenericVector<STRING> words, puncs, numbers;
-  // If these reads fail, we get a warning message and an empty list of words.
-  tesseract::ReadFile(FLAGS_words.c_str(), nullptr).split('\n', &words);
-  tesseract::ReadFile(FLAGS_puncs.c_str(), nullptr).split('\n', &puncs);
-  tesseract::ReadFile(FLAGS_numbers.c_str(), nullptr).split('\n', &numbers);
-  // Load the input unicharset
-  UNICHARSET unicharset;
-  if (!unicharset.load_from_file(FLAGS_input_unicharset.c_str(), false)) {
-    tprintf("Failed to load unicharset from %s\n",
+    // Check validity of input flags.
+    if (FLAGS_input_unicharset.empty() || FLAGS_script_dir.empty() ||
+            FLAGS_output_dir.empty() || FLAGS_lang.empty()) {
+        tprintf("Usage: %s --input_unicharset filename --script_dir dirname\n",
+                argv[0]);
+        tprintf("  --output_dir rootdir --lang lang [--lang_is_rtl]\n");
+        tprintf("  [--words file --puncs file --numbers file]\n");
+        tprintf("Sets properties on the input unicharset file, and writes:\n");
+        tprintf("rootdir/lang/lang.charset_size=ddd.txt\n");
+        tprintf("rootdir/lang/lang.traineddata\n");
+        tprintf("rootdir/lang/lang.unicharset\n");
+        tprintf("If the 3 word lists are provided, the dawgs are also added to");
+        tprintf(" the traineddata file.\n");
+        tprintf("The output unicharset and charset_size files are just for human");
+        tprintf(" readability.\n");
+        exit(1);
+    }
+    GenericVector<STRING> words, puncs, numbers;
+    // If these reads fail, we get a warning message and an empty list of words.
+    tesseract::ReadFile(FLAGS_words.c_str(), nullptr).split('\n', &words);
+    tesseract::ReadFile(FLAGS_puncs.c_str(), nullptr).split('\n', &puncs);
+    tesseract::ReadFile(FLAGS_numbers.c_str(), nullptr).split('\n', &numbers);
+    // Load the input unicharset
+    UNICHARSET unicharset;
+    if (!unicharset.load_from_file(FLAGS_input_unicharset.c_str(), false)) {
+        tprintf("Failed to load unicharset from %s\n",
+                FLAGS_input_unicharset.c_str());
+        return 1;
+    }
+    tprintf("Loaded unicharset of size %d from file %s\n", unicharset.size(),
             FLAGS_input_unicharset.c_str());
-    return 1;
-  }
-  tprintf("Loaded unicharset of size %d from file %s\n", unicharset.size(),
-          FLAGS_input_unicharset.c_str());
 
-  // Set unichar properties
-  tprintf("Setting unichar properties\n");
-  tesseract::SetupBasicProperties(/*report_errors*/ true,
-                                  /*decompose (NFD)*/ false, &unicharset);
-  tprintf("Setting script properties\n");
-  tesseract::SetScriptProperties(FLAGS_script_dir.c_str(), &unicharset);
-  // Combine everything into a traineddata file.
-  return tesseract::CombineLangModel(
-      unicharset, FLAGS_script_dir.c_str(), FLAGS_version_str.c_str(),
-      FLAGS_output_dir.c_str(), FLAGS_lang.c_str(), FLAGS_pass_through_recoder,
-      words, puncs, numbers, FLAGS_lang_is_rtl, /*reader*/ nullptr,
-      /*writer*/ nullptr);
+    // Set unichar properties
+    tprintf("Setting unichar properties\n");
+    tesseract::SetupBasicProperties(/*report_errors*/ true,
+            /*decompose (NFD)*/ false, &unicharset);
+    tprintf("Setting script properties\n");
+    tesseract::SetScriptProperties(FLAGS_script_dir.c_str(), &unicharset);
+    // Combine everything into a traineddata file.
+    return tesseract::CombineLangModel(
+               unicharset, FLAGS_script_dir.c_str(), FLAGS_version_str.c_str(),
+               FLAGS_output_dir.c_str(), FLAGS_lang.c_str(), FLAGS_pass_through_recoder,
+               words, puncs, numbers, FLAGS_lang_is_rtl, /*reader*/ nullptr,
+               /*writer*/ nullptr);
 }

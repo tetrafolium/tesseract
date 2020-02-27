@@ -28,18 +28,18 @@
 // constructors.
 
 char *alloc_string(inT32 count) {
-  // Round up the amount allocated to a multiple of 4
-  return static_cast<char*>(malloc((count + 3) & ~3));
+    // Round up the amount allocated to a multiple of 4
+    return static_cast<char*>(malloc((count + 3) & ~3));
 }
 
 void free_string(char *string) {
-  free(string);
+    free(string);
 }
 
 void *alloc_mem(inT32 count) {
-  return malloc(static_cast<size_t>(count));
+    return malloc(static_cast<size_t>(count));
 }
 
 void free_mem(void *oldchunk) {
-  free(oldchunk);
+    free(oldchunk);
 }

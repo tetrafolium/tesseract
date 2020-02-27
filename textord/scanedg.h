@@ -28,9 +28,9 @@
 class C_OUTLINE_IT;
 
 struct CrackPos {
-  CRACKEDGE** free_cracks;   // Freelist for fast allocation.
-  int x;                     // Position of new edge.
-  int y;
+    CRACKEDGE** free_cracks;   // Freelist for fast allocation.
+    int x;                     // Position of new edge.
+    int y;
 };
 
 struct Pix;

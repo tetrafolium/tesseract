@@ -28,7 +28,7 @@
 /* define data structure to hold 2D points or vectors using floating point */
 typedef struct
 {
-  FLOAT32 x, y;
+    FLOAT32 x, y;
 } FPOINT;
 typedef FPOINT FVECTOR;
 
