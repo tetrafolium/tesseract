@@ -107,7 +107,7 @@ protected:
   // Hook for specialized handling in BeginDocument()
   virtual bool BeginDocumentHandler();
 
-  // This must be overriden to render the OCR'd results
+  // This must be overridden to render the OCR'd results
   virtual bool AddImageHandler(TessBaseAPI *api) = 0;
 
   // Hook for specialized handling in EndDocument()
@@ -126,7 +126,7 @@ protected:
 
 private:
   const char *file_extension_; // standard extension for generated output
-  STRING title_;               // title of document being renderered
+  STRING title_;               // title of document being rendered
   int imagenum_;               // index of last image added
 
   FILE *fout_;               // output file pointer

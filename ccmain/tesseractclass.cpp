@@ -335,7 +335,7 @@ Tesseract::Tesseract()
                     this->params()),
       BOOL_MEMBER(tessedit_prefer_joined_punct, false,
                   "Reward punctation joins", this->params()),
-      INT_MEMBER(fixsp_done_mode, 1, "What constitues done for spacing",
+      INT_MEMBER(fixsp_done_mode, 1, "What constitutes done for spacing",
                  this->params()),
       INT_MEMBER(debug_fix_space_level, 0, "Contextual fixspace debug",
                  this->params()),

@@ -285,7 +285,7 @@ public:
   // merged with others any more.
   void FinalizeLargeChars();
 
-  // Ouput pitch estimation results to attributes of TD_ROW.
+  // Output pitch estimation results to attributes of TD_ROW.
   void OutputEstimations();
 
   void DebugOutputResult(int row_index);

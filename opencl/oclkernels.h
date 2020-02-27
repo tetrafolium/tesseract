@@ -177,7 +177,7 @@ KERNEL(
     unsigned int parbitsxp, parbitsxn, nwords;
     unsigned int destword, tempword, lastword, currword;
     unsigned int lnextword, lprevword, rnextword, rprevword, firstword, secondword;
-    int i, j, siter, eiter;
+    int i, j, siter, either;
 
     //Ignore the execss
     if (pos >= (wpl*h) || (xn < 1 && xp < 1))
@@ -196,7 +196,7 @@ KERNEL(
         parbitsxp = 31;
 
     siter = (col - nwords);
-    eiter = (col + nwords);
+    either = (col + nwords);
 
     //Get prev word
     if (col==0)
@@ -244,10 +244,10 @@ KERNEL(
     else
         firstword = *(sword + row*wpl + siter);
 
-    if (eiter >= wpl)
+    if (either >= wpl)
         lastword = 0x0;
     else
-        lastword = *(sword + row*wpl + eiter);
+        lastword = *(sword + row*wpl + either);
 
     for ( i = 1; i < nwords; i++)
     {
@@ -269,18 +269,18 @@ KERNEL(
         lnextword = firstword << (32 - parbitsxn) | secondword >> parbitsxn;
 
         //Gets RHS words
-        if ((eiter - i) >= wpl)
+        if ((either - i) >= wpl)
             firstword = 0x0;
         else
-            firstword = *(sword + row*wpl + eiter - i);
+            firstword = *(sword + row*wpl + either - i);
 
         rnextword = firstword << parbitsxp | lastword >> (32 - parbitsxp);
 
         lastword = firstword;
-        if ((eiter - i - 1) >= wpl)
+        if ((either - i - 1) >= wpl)
             firstword = 0x0;
         else
-            firstword = *(sword + row*wpl + eiter - i - 1);
+            firstword = *(sword + row*wpl + either - i - 1);
 
         rprevword = firstword << parbitsxp | lastword >> (32 - parbitsxp);
 
@@ -374,7 +374,7 @@ KERNEL(
     const unsigned int pos = row * wpl + col;
     unsigned int tempword;
     unsigned int destword;
-    int i, siter, eiter;
+    int i, siter, either;
 
     //Ignore the execss
     if (row >= h || col >= wpl)
@@ -384,9 +384,9 @@ KERNEL(
 
     //Set start position and end position considering the boundary conditions
     siter = (row - yn) < 0 ? 0 : (row - yn);
-    eiter = (row >= (h - yp)) ? (h - 1) : (row + yp);
+    either = (row >= (h - yp)) ? (h - 1) : (row + yp);
 
-    for (i = siter; i <= eiter; i++)
+    for (i = siter; i <= either; i++)
     {
         tempword = *(sword + i*wpl + col);
 
@@ -521,7 +521,7 @@ KERNEL(
     unsigned int parbitsxp, parbitsxn, nwords;
     unsigned int destword, tempword, lastword, currword;
     unsigned int lnextword, lprevword, rnextword, rprevword, firstword, secondword;
-    int i, j, siter, eiter;
+    int i, j, siter, either;
 
     //Ignore the execss
     if (pos >= (wpl*h) || (xn < 1 && xp < 1))
@@ -540,7 +540,7 @@ KERNEL(
         parbitsxp = 31;
 
     siter = (col - nwords);
-    eiter = (col + nwords);
+    either = (col + nwords);
 
     //Get prev word
     if (col==0)
@@ -598,10 +598,10 @@ KERNEL(
     else
         firstword = *(sword + row*wpl + siter);
 
-    if (eiter >= wpl)
+    if (either >= wpl)
         lastword = 0xffffffff;
     else
-        lastword = *(sword + row*wpl + eiter);
+        lastword = *(sword + row*wpl + either);
 
 
     for ( i = 1; i < nwords; i++)
@@ -624,18 +624,18 @@ KERNEL(
         lnextword = firstword << (32 - parbitsxp) | secondword >> (parbitsxp);
 
         //Gets RHS words
-        if ((eiter - i) >= wpl)
+        if ((either - i) >= wpl)
             firstword = 0xffffffff;
         else
-            firstword = *(sword + row*wpl + eiter - i);
+            firstword = *(sword + row*wpl + either - i);
 
         rnextword = firstword << parbitsxn | lastword >> (32 - parbitsxn);
 
         lastword = firstword;
-        if ((eiter - i - 1) >= wpl)
+        if ((either - i - 1) >= wpl)
             firstword = 0xffffffff;
         else
-            firstword = *(sword + row*wpl + eiter - i - 1);
+            firstword = *(sword + row*wpl + either - i - 1);
 
         rprevword = firstword << parbitsxn | lastword >> (32 - parbitsxn);
 
@@ -753,7 +753,7 @@ KERNEL(
     const int row = get_global_id(1);
     const unsigned int pos = row * wpl + col;
     unsigned int tempword, destword;
-    int i, siter, eiter;
+    int i, siter, either;
 
     //Ignore the execss
     if (row >= h || col >= wpl)
@@ -763,9 +763,9 @@ KERNEL(
 
     //Set start position and end position considering the boundary conditions
     siter = (row - yp) < 0 ? 0 : (row - yp);
-    eiter = (row >= (h - yn)) ? (h - 1) : (row + yn);
+    either = (row >= (h - yn)) ? (h - 1) : (row + yn);
 
-    for (i = siter; i <= eiter; i++)
+    for (i = siter; i <= either; i++)
     {
         tempword = *(sword + i*wpl + col);
 
