@@ -32,7 +32,7 @@
 #endif
 #ifdef __GNUC__
 #define ultoa _ultoa
-#endif  /* __GNUC__ */
+#endif /* __GNUC__ */
 #define SIGNED
 #if defined(_MSC_VER)
 #if (_MSC_VER < 1900)
@@ -77,8 +77,8 @@ using std::string;
 #else
 #if __GNUC__ >= 4
 #if defined(TESS_EXPORTS) || defined(TESS_IMPORTS)
-#define TESS_API  __attribute__ ((visibility ("default")))
-#define TESS_LOCAL  __attribute__ ((visibility ("hidden")))
+#define TESS_API __attribute__((visibility("default")))
+#define TESS_LOCAL __attribute__((visibility("hidden")))
 #else
 #define TESS_API
 #define TESS_LOCAL
@@ -89,4 +89,4 @@ using std::string;
 #endif
 #endif
 
-#endif  // TESSERACT_CCUTIL_PLATFORM_H_
+#endif // TESSERACT_CCUTIL_PLATFORM_H_

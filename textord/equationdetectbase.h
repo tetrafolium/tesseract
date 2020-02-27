@@ -31,29 +31,29 @@ class ColPartitionSet;
 
 class EquationDetectBase {
 public:
-    EquationDetectBase();
-    virtual ~EquationDetectBase();
+  EquationDetectBase();
+  virtual ~EquationDetectBase();
 
-    // Iterate over the blobs inside to_block, and set the blobs that we want to
-    // process to BSTT_NONE. (By default, they should be BSTT_SKIP). The function
-    // returns 0 upon success.
-    virtual int LabelSpecialText(TO_BLOCK* to_block) = 0;
+  // Iterate over the blobs inside to_block, and set the blobs that we want to
+  // process to BSTT_NONE. (By default, they should be BSTT_SKIP). The function
+  // returns 0 upon success.
+  virtual int LabelSpecialText(TO_BLOCK *to_block) = 0;
 
-    // Interface to find possible equation partition grid from part_grid. This
-    // should be called after IdentifySpecialText function.
-    virtual int FindEquationParts(ColPartitionGrid* part_grid,
-                                  ColPartitionSet** best_columns) = 0;
+  // Interface to find possible equation partition grid from part_grid. This
+  // should be called after IdentifySpecialText function.
+  virtual int FindEquationParts(ColPartitionGrid *part_grid,
+                                ColPartitionSet **best_columns) = 0;
 
-    // Debug function: Render a bounding box on pix based on the value of its
-    // special_text_type, specifically:
-    // BSTT_MATH: red box
-    // BSTT_DIGIT: cyan box
-    // BSTT_ITALIC: green box
-    // BSTT_UNCLEAR: blue box
-    // All others: yellow box
-    static void RenderSpecialText(Pix* pix, BLOBNBOX* blob);
+  // Debug function: Render a bounding box on pix based on the value of its
+  // special_text_type, specifically:
+  // BSTT_MATH: red box
+  // BSTT_DIGIT: cyan box
+  // BSTT_ITALIC: green box
+  // BSTT_UNCLEAR: blue box
+  // All others: yellow box
+  static void RenderSpecialText(Pix *pix, BLOBNBOX *blob);
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_TEXTORD_EQUATIONDETECTBASE_H_
+#endif // TESSERACT_TEXTORD_EQUATIONDETECTBASE_H_

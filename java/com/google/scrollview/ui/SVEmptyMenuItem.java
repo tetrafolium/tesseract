@@ -22,7 +22,6 @@ package com.google.scrollview.ui;
 import com.google.scrollview.ScrollView;
 import com.google.scrollview.events.SVEvent;
 import com.google.scrollview.events.SVEventType;
-
 import javax.swing.JMenuItem;
 
 /**
@@ -31,18 +30,13 @@ import javax.swing.JMenuItem;
  * description if it gets called.
  */
 class SVEmptyMenuItem extends SVAbstractMenuItem {
-    SVEmptyMenuItem(int id, String name) {
-        super(id, name, new JMenuItem(name));
-    }
-    /** What to do when user clicks on this item. */
-    @Override
-    public void performAction(SVWindow window, SVEventType eventType) {
-        // Send an event indicating that someone clicked on an entry.
-        // Value will be null here.
-        SVEvent svme =
-            new SVEvent(eventType, window, id, getValue());
-        ScrollView.addMessage(svme);
-    }
+  SVEmptyMenuItem(int id, String name) { super(id, name, new JMenuItem(name)); }
+  /** What to do when user clicks on this item. */
+  @Override
+  public void performAction(SVWindow window, SVEventType eventType) {
+    // Send an event indicating that someone clicked on an entry.
+    // Value will be null here.
+    SVEvent svme = new SVEvent(eventType, window, id, getValue());
+    ScrollView.addMessage(svme);
+  }
 }
-
-

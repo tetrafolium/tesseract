@@ -19,6 +19,6 @@
 
 #include <stdio.h>
 
-#include  "tessvars.h"
+#include "tessvars.h"
 
-FILE *debug_fp = stderr;  // write debug stuff here
+FILE *debug_fp = stderr; // write debug stuff here

@@ -13,44 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////
-#include "gtest/gtest.h"
 #include "baseapi.h"
 #include "leptonica/allheaders.h"
-#include <iostream>
-#include <string>
+#include "gtest/gtest.h"
 #include <fstream>
+#include <iostream>
 #include <locale>
+#include <string>
 
-TEST(TesseractTest, ApiExample)
-{
-    char *outText;
-    std::locale loc("C"); // You can also use "" for the default system locale
-    std::ifstream file("../testing/phototest.txt");
-    file.imbue(loc); // Use it for file input
-    std::string gtText((std::istreambuf_iterator<char>(file)),
-                       std::istreambuf_iterator<char>());
+TEST(TesseractTest, ApiExample) {
+  char *outText;
+  std::locale loc("C"); // You can also use "" for the default system locale
+  std::ifstream file("../testing/phototest.txt");
+  file.imbue(loc); // Use it for file input
+  std::string gtText((std::istreambuf_iterator<char>(file)),
+                     std::istreambuf_iterator<char>());
 
-    tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    ASSERT_FALSE(api->Init(nullptr, "eng")) << "Could not initialize tesseract.";
+  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+  // Initialize tesseract-ocr with English, without specifying tessdata path
+  ASSERT_FALSE(api->Init(nullptr, "eng")) << "Could not initialize tesseract.";
 
-    // Open input image with leptonica library
-    Pix *image = pixRead("../testing/phototest.tif");
-    ASSERT_TRUE(image != nullptr) << "Failed to read test image.";
-    api->SetImage(image);
-    // Get OCR result
-    outText = api->GetUTF8Text();
+  // Open input image with leptonica library
+  Pix *image = pixRead("../testing/phototest.tif");
+  ASSERT_TRUE(image != nullptr) << "Failed to read test image.";
+  api->SetImage(image);
+  // Get OCR result
+  outText = api->GetUTF8Text();
 
-    ASSERT_EQ(gtText,outText) << "Phototest.tif with default values OCR does not match ground truth";
+  ASSERT_EQ(gtText, outText)
+      << "Phototest.tif with default values OCR does not match ground truth";
 
-    // Destroy used object and release memory
-    api->End();
-    delete [] outText;
-    pixDestroy(&image);
-
+  // Destroy used object and release memory
+  api->End();
+  delete[] outText;
+  pixDestroy(&image);
 }
 
 int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

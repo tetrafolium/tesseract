@@ -32,7 +32,7 @@
 
 #define REALLY_QUOTE_IT(x) QUOTE_IT(x)
 
-#define MAX_CUTOFF      1000
+#define MAX_CUTOFF 1000
 
 namespace tesseract {
 /**
@@ -49,32 +49,32 @@ namespace tesseract {
  * @note Exceptions: none
  * @note History: Wed Feb 20 09:38:26 1991, DSJ, Created.
  */
-void Classify::ReadNewCutoffs(TFile* fp, CLASS_CUTOFF_ARRAY Cutoffs) {
-    char Class[UNICHAR_LEN + 1];
-    CLASS_ID ClassId;
-    int Cutoff;
-    int i;
+void Classify::ReadNewCutoffs(TFile *fp, CLASS_CUTOFF_ARRAY Cutoffs) {
+  char Class[UNICHAR_LEN + 1];
+  CLASS_ID ClassId;
+  int Cutoff;
+  int i;
 
-    if (shape_table_ != NULL) {
-        if (!shapetable_cutoffs_.DeSerialize(fp)) {
-            tprintf("Error during read of shapetable pffmtable!\n");
-        }
+  if (shape_table_ != NULL) {
+    if (!shapetable_cutoffs_.DeSerialize(fp)) {
+      tprintf("Error during read of shapetable pffmtable!\n");
     }
-    for (i = 0; i < MAX_NUM_CLASSES; i++)
-        Cutoffs[i] = MAX_CUTOFF;
+  }
+  for (i = 0; i < MAX_NUM_CLASSES; i++)
+    Cutoffs[i] = MAX_CUTOFF;
 
-    const int kMaxLineSize = 100;
-    char line[kMaxLineSize];
-    while (fp->FGets(line, kMaxLineSize) != nullptr &&
-            sscanf(line, "%" REALLY_QUOTE_IT(UNICHAR_LEN) "s %d", Class,
-                   &Cutoff) == 2) {
-        if (strcmp(Class, "NULL") == 0) {
-            ClassId = unicharset.unichar_to_id(" ");
-        } else {
-            ClassId = unicharset.unichar_to_id(Class);
-        }
-        Cutoffs[ClassId] = Cutoff;
+  const int kMaxLineSize = 100;
+  char line[kMaxLineSize];
+  while (fp->FGets(line, kMaxLineSize) != nullptr &&
+         sscanf(line, "%" REALLY_QUOTE_IT(UNICHAR_LEN) "s %d", Class,
+                &Cutoff) == 2) {
+    if (strcmp(Class, "NULL") == 0) {
+      ClassId = unicharset.unichar_to_id(" ");
+    } else {
+      ClassId = unicharset.unichar_to_id(Class);
     }
+    Cutoffs[ClassId] = Cutoff;
+  }
 }
 
-}  // namespace tesseract
+} // namespace tesseract

@@ -45,31 +45,30 @@ STRING_PARAM_FLAG(canonical_class2, "", "Class to show ambigs for");
 // Otherwise, if FLAGS_canonical_class1 is set, prints a table of font-wise
 // cluster distances between FLAGS_canonical_class1 and FLAGS_canonical_class2.
 int main(int argc, char **argv) {
-    ParseArguments(&argc, &argv);
+  ParseArguments(&argc, &argv);
 
-    STRING file_prefix;
-    tesseract::MasterTrainer* trainer =
-        tesseract::LoadTrainingData(argc, argv, false, nullptr, &file_prefix);
+  STRING file_prefix;
+  tesseract::MasterTrainer *trainer =
+      tesseract::LoadTrainingData(argc, argv, false, nullptr, &file_prefix);
 
-    if (!trainer)
-        return 1;
+  if (!trainer)
+    return 1;
 
-    if (FLAGS_display_cloud_font >= 0) {
+  if (FLAGS_display_cloud_font >= 0) {
 #ifndef GRAPHICS_DISABLED
-        trainer->DisplaySamples(FLAGS_canonical_class1.c_str(),
-                                FLAGS_display_cloud_font,
-                                FLAGS_canonical_class2.c_str(),
-                                FLAGS_display_canonical_font);
-#endif  // GRAPHICS_DISABLED
-        return 0;
-    } else if (!FLAGS_canonical_class1.empty()) {
-        trainer->DebugCanonical(FLAGS_canonical_class1.c_str(),
-                                FLAGS_canonical_class2.c_str());
-        return 0;
-    }
-    trainer->SetupMasterShapes();
-    WriteShapeTable(file_prefix, trainer->master_shapes());
-    delete trainer;
-
+    trainer->DisplaySamples(
+        FLAGS_canonical_class1.c_str(), FLAGS_display_cloud_font,
+        FLAGS_canonical_class2.c_str(), FLAGS_display_canonical_font);
+#endif // GRAPHICS_DISABLED
     return 0;
+  } else if (!FLAGS_canonical_class1.empty()) {
+    trainer->DebugCanonical(FLAGS_canonical_class1.c_str(),
+                            FLAGS_canonical_class2.c_str());
+    return 0;
+  }
+  trainer->SetupMasterShapes();
+  WriteShapeTable(file_prefix, trainer->master_shapes());
+  delete trainer;
+
+  return 0;
 } /* main */

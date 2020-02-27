@@ -22,50 +22,49 @@
 #include "config_auto.h"
 #endif
 
-#include          <stdio.h>
-#include          <stdarg.h>
-#include          "ccutil.h"
-#include          "params.h"
-#include          "strngs.h"
-#include          "tprintf.h"
+#include "ccutil.h"
+#include "params.h"
+#include "strngs.h"
+#include "tprintf.h"
+#include <stdarg.h>
+#include <stdio.h>
 
-#define MAX_MSG_LEN     65536
+#define MAX_MSG_LEN 65536
 
 #define EXTERN
 // Since tprintf is protected by a mutex, these parameters can remain global.
 DLLSYM STRING_VAR(debug_file, "", "File to send tprintf output to");
 
-DLLSYM void
-tprintf_internal(                       // Trace printf
-    const char *format, ...             // Message
+DLLSYM void tprintf_internal( // Trace printf
+    const char *format, ...   // Message
 ) {
-    tesseract::tprintfMutex.Lock();
-    va_list args;                  // variable args
-    static FILE *debugfp = NULL;   // debug file
-    // debug window
-    inT32 offset = 0;              // into message
-    static char msg[MAX_MSG_LEN + 1];
+  tesseract::tprintfMutex.Lock();
+  va_list args;                // variable args
+  static FILE *debugfp = NULL; // debug file
+  // debug window
+  inT32 offset = 0; // into message
+  static char msg[MAX_MSG_LEN + 1];
 
-    va_start(args, format);  // variable list
-    // Format into msg
+  va_start(args, format); // variable list
+                          // Format into msg
 #ifdef _WIN32
-    offset += _vsnprintf(msg + offset, MAX_MSG_LEN - offset, format, args);
-    if (strcmp(debug_file.string(), "/dev/null") == 0)
-        debug_file.set_value("nul");
+  offset += _vsnprintf(msg + offset, MAX_MSG_LEN - offset, format, args);
+  if (strcmp(debug_file.string(), "/dev/null") == 0)
+    debug_file.set_value("nul");
 #else
-    offset += vsnprintf(msg + offset, MAX_MSG_LEN - offset, format, args);
+  offset += vsnprintf(msg + offset, MAX_MSG_LEN - offset, format, args);
 #endif
-    va_end(args);
+  va_end(args);
 
-    if (debugfp == NULL && strlen(debug_file.string()) > 0) {
-        debugfp = fopen(debug_file.string(), "wb");
-    } else if (debugfp != NULL && strlen(debug_file.string()) == 0) {
-        fclose(debugfp);
-        debugfp = NULL;
-    }
-    if (debugfp != NULL)
-        fprintf(debugfp, "%s", msg);
-    else
-        fprintf(stderr, "%s", msg);
-    tesseract::tprintfMutex.Unlock();
+  if (debugfp == NULL && strlen(debug_file.string()) > 0) {
+    debugfp = fopen(debug_file.string(), "wb");
+  } else if (debugfp != NULL && strlen(debug_file.string()) == 0) {
+    fclose(debugfp);
+    debugfp = NULL;
+  }
+  if (debugfp != NULL)
+    fprintf(debugfp, "%s", msg);
+  else
+    fprintf(stderr, "%s", msg);
+  tesseract::tprintfMutex.Unlock();
 }

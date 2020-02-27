@@ -19018,4 +19018,4 @@ extern const char kUniversalAmbigsFile[] = {
 
 extern const int ksizeofUniversalAmbigsFile = sizeof(kUniversalAmbigsFile);
 
-}  // namespace tesseract
+} // namespace tesseract

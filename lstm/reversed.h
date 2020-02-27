@@ -27,63 +27,63 @@ namespace tesseract {
 // C++ Implementation of the Reversed class from lstm.py.
 class Reversed : public Plumbing {
 public:
-    explicit Reversed(const STRING& name, NetworkType type);
-    virtual ~Reversed();
+  explicit Reversed(const STRING &name, NetworkType type);
+  virtual ~Reversed();
 
-    // Returns the shape output from the network given an input shape (which may
-    // be partially unknown ie zero).
-    virtual StaticShape OutputShape(const StaticShape& input_shape) const;
+  // Returns the shape output from the network given an input shape (which may
+  // be partially unknown ie zero).
+  virtual StaticShape OutputShape(const StaticShape &input_shape) const;
 
-    virtual STRING spec() const {
-        STRING spec(type_ == NT_XREVERSED ? "Rx"
-                    : (type_ == NT_YREVERSED ? "Ry" : "Txy"));
-        // For most simple cases, we will output Rx<net> or Ry<net> where <net> is
-        // the network in stack_[0], but in the special case that <net> is an
-        // LSTM, we will just output the LSTM's spec modified to take the reversal
-        // into account. This is because when the user specified Lfy64, we actually
-        // generated TxyLfx64, and if the user specified Lrx64 we actually
-        // generated RxLfx64, and we want to display what the user asked for.
-        STRING net_spec = stack_[0]->spec();
-        if (net_spec[0] == 'L') {
-            // Setup a from and to character according to the type of the reversal
-            // such that the LSTM spec gets modified to the spec that the user
-            // asked for
-            char from = 'f';
-            char to = 'r';
-            if (type_ == NT_XYTRANSPOSE) {
-                from = 'x';
-                to = 'y';
-            }
-            // Change the from char to the to char.
-            for (int i = 0; i < net_spec.length(); ++i) {
-                if (net_spec[i] == from) net_spec[i] = to;
-            }
-            return net_spec;
-        }
-        spec += net_spec;
-        return spec;
+  virtual STRING spec() const {
+    STRING spec(type_ == NT_XREVERSED ? "Rx"
+                                      : (type_ == NT_YREVERSED ? "Ry" : "Txy"));
+    // For most simple cases, we will output Rx<net> or Ry<net> where <net> is
+    // the network in stack_[0], but in the special case that <net> is an
+    // LSTM, we will just output the LSTM's spec modified to take the reversal
+    // into account. This is because when the user specified Lfy64, we actually
+    // generated TxyLfx64, and if the user specified Lrx64 we actually
+    // generated RxLfx64, and we want to display what the user asked for.
+    STRING net_spec = stack_[0]->spec();
+    if (net_spec[0] == 'L') {
+      // Setup a from and to character according to the type of the reversal
+      // such that the LSTM spec gets modified to the spec that the user
+      // asked for
+      char from = 'f';
+      char to = 'r';
+      if (type_ == NT_XYTRANSPOSE) {
+        from = 'x';
+        to = 'y';
+      }
+      // Change the from char to the to char.
+      for (int i = 0; i < net_spec.length(); ++i) {
+        if (net_spec[i] == from)
+          net_spec[i] = to;
+      }
+      return net_spec;
     }
+    spec += net_spec;
+    return spec;
+  }
 
-    // Takes ownership of the given network to make it the reversed one.
-    void SetNetwork(Network* network);
+  // Takes ownership of the given network to make it the reversed one.
+  void SetNetwork(Network *network);
 
-    // Runs forward propagation of activations on the input line.
-    // See Network for a detailed discussion of the arguments.
-    virtual void Forward(bool debug, const NetworkIO& input,
-                         const TransposedArray* input_transpose,
-                         NetworkScratch* scratch, NetworkIO* output);
+  // Runs forward propagation of activations on the input line.
+  // See Network for a detailed discussion of the arguments.
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
-    // Runs backward propagation of errors on the deltas line.
-    // See Network for a detailed discussion of the arguments.
-    virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                          NetworkScratch* scratch,
-                          NetworkIO* back_deltas);
+  // Runs backward propagation of errors on the deltas line.
+  // See Network for a detailed discussion of the arguments.
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
 private:
-    // Copies src to *dest with the reversal according to type_.
-    void ReverseData(const NetworkIO& src, NetworkIO* dest) const;
+  // Copies src to *dest with the reversal according to type_.
+  void ReverseData(const NetworkIO &src, NetworkIO *dest) const;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_LSTM_REVERSED_H_
+#endif // TESSERACT_LSTM_REVERSED_H_

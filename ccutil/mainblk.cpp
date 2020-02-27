@@ -17,17 +17,17 @@
  *
  **********************************************************************/
 
-#include          "fileerr.h"
+#include "fileerr.h"
 #ifdef __UNIX__
-#include          <unistd.h>
-#include          <signal.h>
+#include <signal.h>
+#include <unistd.h>
 #else
-#include          <io.h>
+#include <io.h>
 #endif
-#include          <stdlib.h>
-#include          "ccutil.h"
+#include "ccutil.h"
+#include <stdlib.h>
 
-#define VARDIR        "configs/" /**< variables files */
+#define VARDIR "configs/" /**< variables files */
 #define EXTERN
 
 const ERRCODE NO_PATH =
@@ -51,56 +51,56 @@ namespace tesseract {
  * @param basename - name of image
  */
 void CCUtil::main_setup(const char *argv0, const char *basename) {
-    imagebasename = basename;      /**< name of image */
+  imagebasename = basename; /**< name of image */
 
-    char *tessdata_prefix = getenv("TESSDATA_PREFIX");
+  char *tessdata_prefix = getenv("TESSDATA_PREFIX");
 
-    if (argv0 != NULL && *argv0 != '\0') {
-        /* Use tessdata prefix from the command line. */
-        datadir = argv0;
-    } else if (tessdata_prefix) {
-        /* Use tessdata prefix from the environment. */
-        datadir = tessdata_prefix;
+  if (argv0 != NULL && *argv0 != '\0') {
+    /* Use tessdata prefix from the command line. */
+    datadir = argv0;
+  } else if (tessdata_prefix) {
+    /* Use tessdata prefix from the environment. */
+    datadir = tessdata_prefix;
 #if defined(_WIN32)
-    } else if (datadir == NULL || access(datadir.string(), 0) != 0) {
-        /* Look for tessdata in directory of executable. */
-        static char dir[128];
-        static char exe[128];
-        DWORD length = GetModuleFileName(NULL, exe, sizeof(exe));
-        if (length > 0 && length < sizeof(exe)) {
-            _splitpath(exe, NULL, dir, NULL, NULL);
-            datadir = dir;
-        }
+  } else if (datadir == NULL || access(datadir.string(), 0) != 0) {
+    /* Look for tessdata in directory of executable. */
+    static char dir[128];
+    static char exe[128];
+    DWORD length = GetModuleFileName(NULL, exe, sizeof(exe));
+    if (length > 0 && length < sizeof(exe)) {
+      _splitpath(exe, NULL, dir, NULL, NULL);
+      datadir = dir;
+    }
 #endif /* _WIN32 */
 #if defined(TESSDATA_PREFIX)
-    } else {
-        /* Use tessdata prefix which was compiled in. */
+  } else {
+    /* Use tessdata prefix which was compiled in. */
 #define _STR(a) #a
 #define _XSTR(a) _STR(a)
-        datadir = _XSTR(TESSDATA_PREFIX);
+    datadir = _XSTR(TESSDATA_PREFIX);
 #undef _XSTR
 #undef _STR
 #endif
-    }
+  }
 
-    // datadir may still be empty:
-    if (datadir.length() == 0) {
-        datadir = "./";
-    } else {
-        // Remove tessdata from the end if present, as we will add it back!
-        int length = datadir.length();
-        if (length >= 8 && strcmp(&datadir[length - 8], "tessdata") == 0)
-            datadir.truncate_at(length - 8);
-        else if (length >= 9 && strcmp(&datadir[length - 9], "tessdata/") == 0)
-            datadir.truncate_at(length - 9);
-    }
+  // datadir may still be empty:
+  if (datadir.length() == 0) {
+    datadir = "./";
+  } else {
+    // Remove tessdata from the end if present, as we will add it back!
+    int length = datadir.length();
+    if (length >= 8 && strcmp(&datadir[length - 8], "tessdata") == 0)
+      datadir.truncate_at(length - 8);
+    else if (length >= 9 && strcmp(&datadir[length - 9], "tessdata/") == 0)
+      datadir.truncate_at(length - 9);
+  }
 
-    // check for missing directory separator
-    const char *lastchar = datadir.string();
-    lastchar += datadir.length() - 1;
-    if ((strcmp(lastchar, "/") != 0) && (strcmp(lastchar, "\\") != 0))
-        datadir += "/";
+  // check for missing directory separator
+  const char *lastchar = datadir.string();
+  lastchar += datadir.length() - 1;
+  if ((strcmp(lastchar, "/") != 0) && (strcmp(lastchar, "\\") != 0))
+    datadir += "/";
 
-    datadir += m_data_sub_dir;     /**< data directory */
+  datadir += m_data_sub_dir; /**< data directory */
 }
-}  // namespace tesseract
+} // namespace tesseract

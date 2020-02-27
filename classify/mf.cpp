@@ -42,42 +42,42 @@
  * @note Exceptions: none
  * @note History: Wed May 23 18:06:38 1990, DSJ, Created.
  */
-FEATURE_SET ExtractMicros(TBLOB* Blob, const DENORM& cn_denorm) {
-    int NumFeatures;
-    MICROFEATURES Features, OldFeatures;
-    FEATURE_SET FeatureSet;
-    FEATURE Feature;
-    MICROFEATURE OldFeature;
+FEATURE_SET ExtractMicros(TBLOB *Blob, const DENORM &cn_denorm) {
+  int NumFeatures;
+  MICROFEATURES Features, OldFeatures;
+  FEATURE_SET FeatureSet;
+  FEATURE Feature;
+  MICROFEATURE OldFeature;
 
-    OldFeatures = BlobMicroFeatures(Blob, cn_denorm);
-    if (OldFeatures == NULL)
-        return NULL;
-    NumFeatures = count (OldFeatures);
-    FeatureSet = NewFeatureSet (NumFeatures);
+  OldFeatures = BlobMicroFeatures(Blob, cn_denorm);
+  if (OldFeatures == NULL)
+    return NULL;
+  NumFeatures = count(OldFeatures);
+  FeatureSet = NewFeatureSet(NumFeatures);
 
-    Features = OldFeatures;
-    iterate(Features) {
-        OldFeature = (MICROFEATURE) first_node (Features);
-        Feature = NewFeature (&MicroFeatureDesc);
-        Feature->Params[MFDirection] = OldFeature[ORIENTATION];
-        Feature->Params[MFXPosition] = OldFeature[XPOSITION];
-        Feature->Params[MFYPosition] = OldFeature[YPOSITION];
-        Feature->Params[MFLength] = OldFeature[MFLENGTH];
+  Features = OldFeatures;
+  iterate(Features) {
+    OldFeature = (MICROFEATURE)first_node(Features);
+    Feature = NewFeature(&MicroFeatureDesc);
+    Feature->Params[MFDirection] = OldFeature[ORIENTATION];
+    Feature->Params[MFXPosition] = OldFeature[XPOSITION];
+    Feature->Params[MFYPosition] = OldFeature[YPOSITION];
+    Feature->Params[MFLength] = OldFeature[MFLENGTH];
 
-        // Bulge features are deprecated and should not be used.  Set to 0.
-        Feature->Params[MFBulge1] = 0.0f;
-        Feature->Params[MFBulge2] = 0.0f;
+    // Bulge features are deprecated and should not be used.  Set to 0.
+    Feature->Params[MFBulge1] = 0.0f;
+    Feature->Params[MFBulge2] = 0.0f;
 
 #ifndef _WIN32
-        // Assert that feature parameters are well defined.
-        int i;
-        for (i = 0; i < Feature->Type->NumParams; i++) {
-            ASSERT_HOST(!isnan(Feature->Params[i]));
-        }
+    // Assert that feature parameters are well defined.
+    int i;
+    for (i = 0; i < Feature->Type->NumParams; i++) {
+      ASSERT_HOST(!isnan(Feature->Params[i]));
+    }
 #endif
 
-        AddFeature(FeatureSet, Feature);
-    }
-    FreeMicroFeatures(OldFeatures);
-    return FeatureSet;
-}                                /* ExtractMicros */
+    AddFeature(FeatureSet, Feature);
+  }
+  FreeMicroFeatures(OldFeatures);
+  return FeatureSet;
+} /* ExtractMicros */

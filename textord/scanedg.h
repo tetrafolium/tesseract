@@ -17,52 +17,50 @@
  *
  **********************************************************************/
 
-#ifndef           SCANEDG_H
-#define           SCANEDG_H
+#ifndef SCANEDG_H
+#define SCANEDG_H
 
-#include          "params.h"
-#include          "scrollview.h"
-#include          "pdblock.h"
-#include          "crakedge.h"
+#include "crakedge.h"
+#include "params.h"
+#include "pdblock.h"
+#include "scrollview.h"
 
 class C_OUTLINE_IT;
 
 struct CrackPos {
-    CRACKEDGE** free_cracks;   // Freelist for fast allocation.
-    int x;                     // Position of new edge.
-    int y;
+  CRACKEDGE **free_cracks; // Freelist for fast allocation.
+  int x;                   // Position of new edge.
+  int y;
 };
 
 struct Pix;
 
-void block_edges(Pix *t_image,         // thresholded image
-                 PDBLK *block,         // block in image
-                 C_OUTLINE_IT* outline_it);
-void make_margins(PDBLK *block,            // block in image
-                  BLOCK_LINE_IT *line_it,  // for old style
-                  uinT8 *pixels,           // pixels to strip
-                  uinT8 margin,            // white-out pixel
-                  inT16 left,              // block edges
+void block_edges(Pix *t_image, // thresholded image
+                 PDBLK *block, // block in image
+                 C_OUTLINE_IT *outline_it);
+void make_margins(PDBLK *block,           // block in image
+                  BLOCK_LINE_IT *line_it, // for old style
+                  uinT8 *pixels,          // pixels to strip
+                  uinT8 margin,           // white-out pixel
+                  inT16 left,             // block edges
                   inT16 right,
-                  inT16 y);                // line coord                 );
-void line_edges(inT16 x,                     // coord of line start
-                inT16 y,                     // coord of line
-                inT16 xext,                  // width of line
-                uinT8 uppercolour,           // start of prev line
-                uinT8 * bwpos,               // thresholded line
-                CRACKEDGE ** prevline,       // edges in progress
-                CRACKEDGE **free_cracks,
-                C_OUTLINE_IT* outline_it);
-CRACKEDGE *h_edge(int sign,                  // sign of edge
-                  CRACKEDGE * join,          // edge to join to
-                  CrackPos* pos);
-CRACKEDGE *v_edge(int sign,                  // sign of edge
-                  CRACKEDGE * join,          // edge to join to
-                  CrackPos* pos);
-void join_edges(CRACKEDGE *edge1,            // edges to join
-                CRACKEDGE *edge2,            // no specific order
-                CRACKEDGE **free_cracks,
-                C_OUTLINE_IT* outline_it);
+                  inT16 y);           // line coord                 );
+void line_edges(inT16 x,              // coord of line start
+                inT16 y,              // coord of line
+                inT16 xext,           // width of line
+                uinT8 uppercolour,    // start of prev line
+                uinT8 *bwpos,         // thresholded line
+                CRACKEDGE **prevline, // edges in progress
+                CRACKEDGE **free_cracks, C_OUTLINE_IT *outline_it);
+CRACKEDGE *h_edge(int sign,        // sign of edge
+                  CRACKEDGE *join, // edge to join to
+                  CrackPos *pos);
+CRACKEDGE *v_edge(int sign,        // sign of edge
+                  CRACKEDGE *join, // edge to join to
+                  CrackPos *pos);
+void join_edges(CRACKEDGE *edge1, // edges to join
+                CRACKEDGE *edge2, // no specific order
+                CRACKEDGE **free_cracks, C_OUTLINE_IT *outline_it);
 void free_crackedges(CRACKEDGE *start);
 
 #endif

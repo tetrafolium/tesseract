@@ -15,12 +15,12 @@
 #ifndef TESSERACT_TRAINING_LANG_MODEL_HELPERS_H_
 #define TESSERACT_TRAINING_LANG_MODEL_HELPERS_H_
 
-#include <string>
 #include "genericvector.h"
 #include "serialis.h"
 #include "strngs.h"
 #include "tessdatamanager.h"
 #include "unicharset.h"
+#include <string>
 
 namespace tesseract {
 
@@ -29,17 +29,17 @@ namespace tesseract {
 // Default writer will overwrite any existing file, but a supplied writer
 // can do its own thing. If lang is empty, returns true but does nothing.
 // NOTE that suffix should contain any required . for the filename.
-bool WriteFile(const string& output_dir, const string& lang,
-               const string& suffix, const GenericVector<char>& data,
+bool WriteFile(const string &output_dir, const string &lang,
+               const string &suffix, const GenericVector<char> &data,
                FileWriter writer);
 // Helper reads a file with optional reader and returns a STRING.
 // On failure emits a warning message and returns and empty STRING.
-STRING ReadFile(const string& filename, FileReader reader);
+STRING ReadFile(const string &filename, FileReader reader);
 
 // Helper writes the unicharset to file and to the traineddata.
-bool WriteUnicharset(const UNICHARSET& unicharset, const string& output_dir,
-                     const string& lang, FileWriter writer,
-                     TessdataManager* traineddata);
+bool WriteUnicharset(const UNICHARSET &unicharset, const string &output_dir,
+                     const string &lang, FileWriter writer,
+                     TessdataManager *traineddata);
 // Helper creates the recoder from the unicharset and writes it to the
 // traineddata, with a human-readable form to file at:
 // <output_dir>/<lang>/<lang>.charset_size=<num> for some num being the size
@@ -52,10 +52,10 @@ bool WriteUnicharset(const UNICHARSET& unicharset, const string& output_dir,
 // symbols into sequences of unicodes, and encoding Han using the data in the
 // radical_table_data, which must be the content of the file:
 // langdata/radical-stroke.txt.
-bool WriteRecoder(const UNICHARSET& unicharset, bool pass_through,
-                  const string& output_dir, const string& lang,
-                  FileWriter writer, STRING* radical_table_data,
-                  TessdataManager* traineddata);
+bool WriteRecoder(const UNICHARSET &unicharset, bool pass_through,
+                  const string &output_dir, const string &lang,
+                  FileWriter writer, STRING *radical_table_data,
+                  TessdataManager *traineddata);
 
 // The main function for combine_lang_model.cpp.
 // Returns EXIT_SUCCESS or EXIT_FAILURE for error.
@@ -71,14 +71,14 @@ bool WriteRecoder(const UNICHARSET& unicharset, bool pass_through,
 // puncs must be non-empty.
 // lang_is_rtl indicates that the language is generally written from right
 // to left (eg Arabic/Hebrew).
-int CombineLangModel(const UNICHARSET& unicharset, const string& script_dir,
-                     const string& version_str, const string& output_dir,
-                     const string& lang, bool pass_through_recoder,
-                     const GenericVector<STRING>& words,
-                     const GenericVector<STRING>& puncs,
-                     const GenericVector<STRING>& numbers, bool lang_is_rtl,
+int CombineLangModel(const UNICHARSET &unicharset, const string &script_dir,
+                     const string &version_str, const string &output_dir,
+                     const string &lang, bool pass_through_recoder,
+                     const GenericVector<STRING> &words,
+                     const GenericVector<STRING> &puncs,
+                     const GenericVector<STRING> &numbers, bool lang_is_rtl,
                      FileReader reader, FileWriter writer);
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_TRAINING_LANG_MODEL_HELPERS_H_
+#endif // TESSERACT_TRAINING_LANG_MODEL_HELPERS_H_

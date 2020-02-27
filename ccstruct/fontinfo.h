@@ -17,7 +17,6 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-
 #ifndef TESSERACT_CCSTRUCT_FONTINFO_H_
 #define TESSERACT_CCSTRUCT_FONTINFO_H_
 
@@ -36,23 +35,23 @@ class BitVector;
 // fontinfo_table.
 // These get copied around a lot, so best to keep them small.
 struct ScoredFont {
-    ScoredFont() : fontinfo_id(-1), score(0) {}
-    ScoredFont(int font_id, uinT16 classifier_score)
-        : fontinfo_id(font_id), score(classifier_score) {}
+  ScoredFont() : fontinfo_id(-1), score(0) {}
+  ScoredFont(int font_id, uinT16 classifier_score)
+      : fontinfo_id(font_id), score(classifier_score) {}
 
-    // Index into fontinfo table, but inside the classifier, may be a shapetable
-    // index.
-    inT32 fontinfo_id;
-    // Raw score from the low-level classifier.
-    uinT16 score;
+  // Index into fontinfo table, but inside the classifier, may be a shapetable
+  // index.
+  inT32 fontinfo_id;
+  // Raw score from the low-level classifier.
+  uinT16 score;
 };
 
 // Struct for information about spacing between characters in a particular font.
 struct FontSpacingInfo {
-    inT16 x_gap_before;
-    inT16 x_gap_after;
-    GenericVector<UNICHAR_ID> kerned_unichar_ids;
-    GenericVector<inT16> kerned_x_gaps;
+  inT16 x_gap_before;
+  inT16 x_gap_after;
+  GenericVector<UNICHAR_ID> kerned_unichar_ids;
+  GenericVector<inT16> kerned_x_gaps;
 };
 
 /*
@@ -60,79 +59,71 @@ struct FontSpacingInfo {
  * serif, fraktur
  */
 struct FontInfo {
-    FontInfo() : name(NULL), properties(0), universal_id(0), spacing_vec(NULL) {}
-    ~FontInfo() {}
+  FontInfo() : name(NULL), properties(0), universal_id(0), spacing_vec(NULL) {}
+  ~FontInfo() {}
 
-    // Writes to the given file. Returns false in case of error.
-    bool Serialize(FILE* fp) const;
-    // Reads from the given file. Returns false in case of error.
-    // If swap is true, assumes a big/little-endian swap is needed.
-    bool DeSerialize(TFile* fp);
+  // Writes to the given file. Returns false in case of error.
+  bool Serialize(FILE *fp) const;
+  // Reads from the given file. Returns false in case of error.
+  // If swap is true, assumes a big/little-endian swap is needed.
+  bool DeSerialize(TFile *fp);
 
-    // Reserves unicharset_size spots in spacing_vec.
-    void init_spacing(int unicharset_size) {
-        spacing_vec = new GenericVector<FontSpacingInfo *>();
-        spacing_vec->init_to_size(unicharset_size, NULL);
-    }
-    // Adds the given pointer to FontSpacingInfo to spacing_vec member
-    // (FontInfo class takes ownership of the pointer).
-    // Note: init_spacing should be called before calling this function.
-    void add_spacing(UNICHAR_ID uch_id, FontSpacingInfo *spacing_info) {
-        ASSERT_HOST(spacing_vec != NULL && spacing_vec->size() > uch_id);
-        (*spacing_vec)[uch_id] = spacing_info;
-    }
+  // Reserves unicharset_size spots in spacing_vec.
+  void init_spacing(int unicharset_size) {
+    spacing_vec = new GenericVector<FontSpacingInfo *>();
+    spacing_vec->init_to_size(unicharset_size, NULL);
+  }
+  // Adds the given pointer to FontSpacingInfo to spacing_vec member
+  // (FontInfo class takes ownership of the pointer).
+  // Note: init_spacing should be called before calling this function.
+  void add_spacing(UNICHAR_ID uch_id, FontSpacingInfo *spacing_info) {
+    ASSERT_HOST(spacing_vec != NULL && spacing_vec->size() > uch_id);
+    (*spacing_vec)[uch_id] = spacing_info;
+  }
 
-    // Returns the pointer to FontSpacingInfo for the given UNICHAR_ID.
-    const FontSpacingInfo *get_spacing(UNICHAR_ID uch_id) const {
-        return (spacing_vec == NULL || spacing_vec->size() <= uch_id) ?
-               NULL : (*spacing_vec)[uch_id];
-    }
+  // Returns the pointer to FontSpacingInfo for the given UNICHAR_ID.
+  const FontSpacingInfo *get_spacing(UNICHAR_ID uch_id) const {
+    return (spacing_vec == NULL || spacing_vec->size() <= uch_id)
+               ? NULL
+               : (*spacing_vec)[uch_id];
+  }
 
-    // Fills spacing with the value of the x gap expected between the two given
-    // UNICHAR_IDs. Returns true on success.
-    bool get_spacing(UNICHAR_ID prev_uch_id,
-                     UNICHAR_ID uch_id,
-                     int *spacing) const {
-        const FontSpacingInfo *prev_fsi = this->get_spacing(prev_uch_id);
-        const FontSpacingInfo *fsi = this->get_spacing(uch_id);
-        if (prev_fsi == NULL || fsi == NULL) return false;
-        int i = 0;
-        for (; i < prev_fsi->kerned_unichar_ids.size(); ++i) {
-            if (prev_fsi->kerned_unichar_ids[i] == uch_id) break;
-        }
-        if (i < prev_fsi->kerned_unichar_ids.size()) {
-            *spacing = prev_fsi->kerned_x_gaps[i];
-        } else {
-            *spacing = prev_fsi->x_gap_after + fsi->x_gap_before;
-        }
-        return true;
+  // Fills spacing with the value of the x gap expected between the two given
+  // UNICHAR_IDs. Returns true on success.
+  bool get_spacing(UNICHAR_ID prev_uch_id, UNICHAR_ID uch_id,
+                   int *spacing) const {
+    const FontSpacingInfo *prev_fsi = this->get_spacing(prev_uch_id);
+    const FontSpacingInfo *fsi = this->get_spacing(uch_id);
+    if (prev_fsi == NULL || fsi == NULL)
+      return false;
+    int i = 0;
+    for (; i < prev_fsi->kerned_unichar_ids.size(); ++i) {
+      if (prev_fsi->kerned_unichar_ids[i] == uch_id)
+        break;
     }
+    if (i < prev_fsi->kerned_unichar_ids.size()) {
+      *spacing = prev_fsi->kerned_x_gaps[i];
+    } else {
+      *spacing = prev_fsi->x_gap_after + fsi->x_gap_before;
+    }
+    return true;
+  }
 
-    bool is_italic() const {
-        return properties & 1;
-    }
-    bool is_bold() const {
-        return (properties & 2) != 0;
-    }
-    bool is_fixed_pitch() const {
-        return (properties & 4) != 0;
-    }
-    bool is_serif() const {
-        return (properties & 8) != 0;
-    }
-    bool is_fraktur() const {
-        return (properties & 16) != 0;
-    }
+  bool is_italic() const { return properties & 1; }
+  bool is_bold() const { return (properties & 2) != 0; }
+  bool is_fixed_pitch() const { return (properties & 4) != 0; }
+  bool is_serif() const { return (properties & 8) != 0; }
+  bool is_fraktur() const { return (properties & 16) != 0; }
 
-    char* name;
-    uinT32 properties;
-    // The universal_id is a field reserved for the initialization process
-    // to assign a unique id number to all fonts loaded for the current
-    // combination of languages. This id will then be returned by
-    // ResultIterator::WordFontAttributes.
-    inT32 universal_id;
-    // Horizontal spacing between characters (indexed by UNICHAR_ID).
-    GenericVector<FontSpacingInfo *> *spacing_vec;
+  char *name;
+  uinT32 properties;
+  // The universal_id is a field reserved for the initialization process
+  // to assign a unique id number to all fonts loaded for the current
+  // combination of languages. This id will then be returned by
+  // ResultIterator::WordFontAttributes.
+  inT32 universal_id;
+  // Horizontal spacing between characters (indexed by UNICHAR_ID).
+  GenericVector<FontSpacingInfo *> *spacing_vec;
 };
 
 // Every class (character) owns a FontSet that represents all the fonts that can
@@ -145,8 +136,8 @@ struct FontInfo {
 // the FontInfo in the FontSet structure, it's better to share FontInfos among
 // FontSets (Classify::fontinfo_table_).
 struct FontSet {
-    int           size;
-    int*          configs;  // FontInfo ids
+  int size;
+  int *configs; // FontInfo ids
 };
 
 // Class that adds a bit of functionality on top of GenericVector to
@@ -155,45 +146,46 @@ struct FontSet {
 // are replaced.
 class FontInfoTable : public GenericVector<FontInfo> {
 public:
-    FontInfoTable();
-    ~FontInfoTable();
+  FontInfoTable();
+  ~FontInfoTable();
 
-    // Writes to the given file. Returns false in case of error.
-    bool Serialize(FILE* fp) const;
-    // Reads from the given file. Returns false in case of error.
-    // If swap is true, assumes a big/little-endian swap is needed.
-    bool DeSerialize(TFile* fp);
+  // Writes to the given file. Returns false in case of error.
+  bool Serialize(FILE *fp) const;
+  // Reads from the given file. Returns false in case of error.
+  // If swap is true, assumes a big/little-endian swap is needed.
+  bool DeSerialize(TFile *fp);
 
-    // Returns true if the given set of fonts includes one with the same
-    // properties as font_id.
-    bool SetContainsFontProperties(
-        int font_id, const GenericVector<ScoredFont>& font_set) const;
-    // Returns true if the given set of fonts includes multiple properties.
-    bool SetContainsMultipleFontProperties(
-        const GenericVector<ScoredFont>& font_set) const;
+  // Returns true if the given set of fonts includes one with the same
+  // properties as font_id.
+  bool
+  SetContainsFontProperties(int font_id,
+                            const GenericVector<ScoredFont> &font_set) const;
+  // Returns true if the given set of fonts includes multiple properties.
+  bool SetContainsMultipleFontProperties(
+      const GenericVector<ScoredFont> &font_set) const;
 
-    // Moves any non-empty FontSpacingInfo entries from other to this.
-    void MoveSpacingInfoFrom(FontInfoTable* other);
-    // Moves this to the target unicity table.
-    void MoveTo(UnicityTable<FontInfo>* target);
+  // Moves any non-empty FontSpacingInfo entries from other to this.
+  void MoveSpacingInfoFrom(FontInfoTable *other);
+  // Moves this to the target unicity table.
+  void MoveTo(UnicityTable<FontInfo> *target);
 };
 
 // Compare FontInfo structures.
-bool CompareFontInfo(const FontInfo& fi1, const FontInfo& fi2);
+bool CompareFontInfo(const FontInfo &fi1, const FontInfo &fi2);
 // Compare FontSet structures.
-bool CompareFontSet(const FontSet& fs1, const FontSet& fs2);
+bool CompareFontSet(const FontSet &fs1, const FontSet &fs2);
 // Deletion callbacks for GenericVector.
 void FontInfoDeleteCallback(FontInfo f);
 void FontSetDeleteCallback(FontSet fs);
 
 // Callbacks used by UnicityTable to read/write FontInfo/FontSet structures.
-bool read_info(TFile* f, FontInfo* fi);
-bool write_info(FILE* f, const FontInfo& fi);
-bool read_spacing_info(TFile* f, FontInfo* fi);
-bool write_spacing_info(FILE* f, const FontInfo& fi);
-bool read_set(TFile* f, FontSet* fs);
-bool write_set(FILE* f, const FontSet& fs);
+bool read_info(TFile *f, FontInfo *fi);
+bool write_info(FILE *f, const FontInfo &fi);
+bool read_spacing_info(TFile *f, FontInfo *fi);
+bool write_spacing_info(FILE *f, const FontInfo &fi);
+bool read_set(TFile *f, FontSet *fs);
+bool write_set(FILE *f, const FontSet &fs);
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
 #endif /* THIRD_PARTY_TESSERACT_CCSTRUCT_FONTINFO_H_ */

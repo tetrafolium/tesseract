@@ -17,57 +17,52 @@
  *
  **********************************************************************/
 
-#ifndef           SORTFLTS_H
-#define           SORTFLTS_H
+#ifndef SORTFLTS_H
+#define SORTFLTS_H
 
-#include          "elst.h"
+#include "elst.h"
 
-class SORTED_FLOAT:public ELIST_LINK
-{
-    friend class SORTED_FLOATS;
+class SORTED_FLOAT : public ELIST_LINK {
+  friend class SORTED_FLOATS;
 
 public:
-    SORTED_FLOAT() {
-    }                            //empty constructor
-    SORTED_FLOAT(              //create one
-        float value,  //value of entry
-        inT32 key) {  //reference
-        entry = value;
-        address = key;
-    }
+  SORTED_FLOAT() {} // empty constructor
+  SORTED_FLOAT(     // create one
+      float value,  // value of entry
+      inT32 key) {  // reference
+    entry = value;
+    address = key;
+  }
+
 private:
-    float entry;                 //value of float
-    inT32 address;               //key
+  float entry;   // value of float
+  inT32 address; // key
 };
 
-ELISTIZEH (SORTED_FLOAT)
-class SORTED_FLOATS
-{
+ELISTIZEH(SORTED_FLOAT)
+class SORTED_FLOATS {
 public:
-    /** empty constructor */
-    SORTED_FLOATS() {
-        it.set_to_list (&list);
-    }
-    /**
-     * add sample
-     * @param value sample float
-     * @param key retrieval key
-     */
-    void add(float value,
-             inT32 key);
-    /**
-     * delete sample
-     * @param key key to delete
-     */
-    void remove(inT32 key);
-    /**
-     * index to list
-     * @param index item to get
-     */
-    float operator[] (inT32 index);
+  /** empty constructor */
+  SORTED_FLOATS() { it.set_to_list(&list); }
+  /**
+   * add sample
+   * @param value sample float
+   * @param key retrieval key
+   */
+  void add(float value, inT32 key);
+  /**
+   * delete sample
+   * @param key key to delete
+   */
+  void remove(inT32 key);
+  /**
+   * index to list
+   * @param index item to get
+   */
+  float operator[](inT32 index);
 
 private:
-    SORTED_FLOAT_LIST list;      //list of floats
-    SORTED_FLOAT_IT it;          //iterator built-in
+  SORTED_FLOAT_LIST list; // list of floats
+  SORTED_FLOAT_IT it;     // iterator built-in
 };
 #endif

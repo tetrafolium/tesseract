@@ -30,41 +30,41 @@ namespace tesseract {
 
 // The standard unicode normalizations.
 enum class UnicodeNormMode {
-    kNFD,
-    kNFC,
-    kNFKD,
-    kNFKC,
+  kNFD,
+  kNFC,
+  kNFKD,
+  kNFKC,
 };
 
 // To normalize away differences in punctuation that are ambiguous, like
 // curly quotes and different widths of dash.
 enum class OCRNorm {
-    kNone,
-    kNormalize,
+  kNone,
+  kNormalize,
 };
 
 // To validate and normalize away some subtle differences that can occur in
 // Indic scripts, eg ensuring that an explicit virama is always followed by
 // a zero-width non-joiner.
 enum class GraphemeNorm {
-    kNone,
-    kNormalize,
+  kNone,
+  kNormalize,
 };
 
 // Normalizes a UTF8 string according to the given modes. Returns true on
 // success. If false is returned, some failure or invalidity was present, and
 // the result string is produced on a "best effort" basis.
 bool NormalizeUTF8String(UnicodeNormMode u_mode, OCRNorm ocr_normalize,
-                         GraphemeNorm grapheme_normalize, const char* str8,
-                         string* normalized);
+                         GraphemeNorm grapheme_normalize, const char *str8,
+                         string *normalized);
 // Normalizes a UTF8 string according to the given modes and splits into
 // graphemes according to g_mode. Returns true on success. If false is returned,
 // some failure or invalidity was present, and the result string is produced on
 // a "best effort" basis.
 bool NormalizeCleanAndSegmentUTF8(UnicodeNormMode u_mode, OCRNorm ocr_normalize,
                                   GraphemeNormMode g_mode, bool report_errors,
-                                  const char* str8,
-                                  std::vector<string>* graphemes);
+                                  const char *str8,
+                                  std::vector<string> *graphemes);
 
 // Applies just the OCR-specific normalizations and return the normalized char.
 char32 OCRNormalize(char32 ch);
@@ -79,15 +79,15 @@ bool IsValidCodepoint(const char32 ch);
 bool IsWhitespace(const char32 ch);
 // Returns true if every char in the given (null-terminated) string has the
 // White_Space Unicode property.
-bool IsUTF8Whitespace(const char* text);
+bool IsUTF8Whitespace(const char *text);
 
 // Returns the length of bytes of the prefix of 'text' that have the White_Space
 // unicode property.
-unsigned int SpanUTF8Whitespace(const char* text);
+unsigned int SpanUTF8Whitespace(const char *text);
 
 // Returns the length of bytes of the prefix of 'text' that DO NOT have the
 // White_Space unicode property.
-unsigned int SpanUTF8NotWhitespace(const char* text);
+unsigned int SpanUTF8NotWhitespace(const char *text);
 
 // Returns true if the char is interchange valid i.e. no C0 or C1 control codes
 // (other than CR LF HT FF) and no non-characters.
@@ -98,6 +98,6 @@ bool IsInterchangeValid7BitAscii(const char32 ch);
 // Convert a full-width UTF-8 string to half-width.
 char32 FullwidthToHalfwidth(const char32 ch);
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_CCUTIL_NORMSTRNGS_H_
+#endif // TESSERACT_CCUTIL_NORMSTRNGS_H_

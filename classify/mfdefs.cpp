@@ -33,9 +33,8 @@
  * @note History: 7/27/89, DSJ, Created.
  */
 MICROFEATURE NewMicroFeature() {
-    return ((MICROFEATURE) Emalloc (sizeof (MFBLOCK)));
-}                                /* NewMicroFeature */
-
+  return ((MICROFEATURE)Emalloc(sizeof(MFBLOCK)));
+} /* NewMicroFeature */
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -46,5 +45,5 @@ MICROFEATURE NewMicroFeature() {
  * @note History: 7/27/89, DSJ, Created.
  */
 void FreeMicroFeatures(MICROFEATURES MicroFeatures) {
-    destroy_nodes(MicroFeatures, Efree);
-}                                /* FreeMicroFeatures */
+  destroy_nodes(MicroFeatures, Efree);
+} /* FreeMicroFeatures */

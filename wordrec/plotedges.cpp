@@ -51,23 +51,21 @@ ScrollView *edge_window = NULL;
  * Macro to display edge points in a window.
  **********************************************************************/
 void display_edgepts(LIST outlines) {
-    void *window;
-    /* Set up window */
-    if (edge_window == NULL) {
-        edge_window = c_create_window ("Edges", 750, 150,
-                                       400, 128, -400.0, 400.0, 0.0, 256.0);
-    }
-    else {
-        c_clear_window(edge_window);
-    }
-    /* Render the outlines */
-    window = edge_window;
-    /* Reclaim old memory */
-    iterate(outlines) {
-        render_edgepts (window, (EDGEPT *) first_node (outlines), White);
-    }
+  void *window;
+  /* Set up window */
+  if (edge_window == NULL) {
+    edge_window =
+        c_create_window("Edges", 750, 150, 400, 128, -400.0, 400.0, 0.0, 256.0);
+  } else {
+    c_clear_window(edge_window);
+  }
+  /* Render the outlines */
+  window = edge_window;
+  /* Reclaim old memory */
+  iterate(outlines) {
+    render_edgepts(window, (EDGEPT *)first_node(outlines), White);
+  }
 }
-
 
 /**********************************************************************
  * draw_blob_edges
@@ -75,48 +73,47 @@ void display_edgepts(LIST outlines) {
  * Display the edges of this blob in the edges window.
  **********************************************************************/
 void draw_blob_edges(TBLOB *blob) {
-    TESSLINE *ol;
-    LIST edge_list = NIL_LIST;
+  TESSLINE *ol;
+  LIST edge_list = NIL_LIST;
 
-    if (wordrec_display_splits) {
-        for (ol = blob->outlines; ol != NULL; ol = ol->next)
-            push_on (edge_list, ol->loop);
-        display_edgepts(edge_list);
-        destroy(edge_list);
-    }
+  if (wordrec_display_splits) {
+    for (ol = blob->outlines; ol != NULL; ol = ol->next)
+      push_on(edge_list, ol->loop);
+    display_edgepts(edge_list);
+    destroy(edge_list);
+  }
 }
-
 
 /**********************************************************************
  * mark_outline
  *
  * Make a mark on the edges window at a particular location.
  **********************************************************************/
-void mark_outline(EDGEPT *edgept) {  /* Start of point list */
-    void *window = edge_window;
-    float x = edgept->pos.x;
-    float y = edgept->pos.y;
+void mark_outline(EDGEPT *edgept) { /* Start of point list */
+  void *window = edge_window;
+  float x = edgept->pos.x;
+  float y = edgept->pos.y;
 
-    c_line_color_index(window, Red);
-    c_move(window, x, y);
+  c_line_color_index(window, Red);
+  c_move(window, x, y);
 
-    x -= 4;
-    y -= 12;
-    c_draw(window, x, y);
+  x -= 4;
+  y -= 12;
+  c_draw(window, x, y);
 
-    x -= 2;
-    y += 4;
-    c_draw(window, x, y);
+  x -= 2;
+  y += 4;
+  c_draw(window, x, y);
 
-    x -= 4;
-    y += 2;
-    c_draw(window, x, y);
+  x -= 4;
+  y += 2;
+  c_draw(window, x, y);
 
-    x += 10;
-    y += 6;
-    c_draw(window, x, y);
+  x += 10;
+  y += 6;
+  c_draw(window, x, y);
 
-    c_make_current(window);
+  c_make_current(window);
 }
 
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED

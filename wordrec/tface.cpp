@@ -21,18 +21,17 @@
 #include "chop.h"
 #include "chopper.h"
 #include "danerror.h"
+#include "featdefs.h"
 #include "globals.h"
 #include "gradechop.h"
 #include "pageres.h"
-#include "wordrec.h"
-#include "featdefs.h"
 #include "params_model.h"
+#include "wordrec.h"
 
 #include <math.h>
 #ifdef __UNIX__
 #include <unistd.h>
 #endif
-
 
 namespace tesseract {
 
@@ -46,15 +45,16 @@ namespace tesseract {
 void Wordrec::program_editup(const char *textbase,
                              TessdataManager *init_classifier,
                              TessdataManager *init_dict) {
-    if (textbase != NULL) imagefile = textbase;
-    InitFeatureDefs(&feature_defs_);
-    InitAdaptiveClassifier(init_classifier);
-    if (init_dict) {
-        getDict().SetupForLoad(Dict::GlobalDawgCache());
-        getDict().Load(lang, init_dict);
-        getDict().FinishLoad();
-    }
-    pass2_ok_split = chop_ok_split;
+  if (textbase != NULL)
+    imagefile = textbase;
+  InitFeatureDefs(&feature_defs_);
+  InitAdaptiveClassifier(init_classifier);
+  if (init_dict) {
+    getDict().SetupForLoad(Dict::GlobalDawgCache());
+    getDict().Load(lang, init_dict);
+    getDict().FinishLoad();
+  }
+  pass2_ok_split = chop_ok_split;
 }
 
 /**
@@ -63,11 +63,10 @@ void Wordrec::program_editup(const char *textbase,
  * Cleanup and exit the recog program.
  */
 int Wordrec::end_recog() {
-    program_editdown (0);
+  program_editdown(0);
 
-    return (0);
+  return (0);
 }
-
 
 /**
  * @name program_editdown
@@ -76,10 +75,9 @@ int Wordrec::end_recog() {
  * program.
  */
 void Wordrec::program_editdown(inT32 elasped_time) {
-    EndAdaptiveClassifier();
-    getDict().End();
+  EndAdaptiveClassifier();
+  getDict().End();
 }
-
 
 /**
  * @name set_pass1
@@ -87,11 +85,10 @@ void Wordrec::program_editdown(inT32 elasped_time) {
  * Get ready to do some pass 1 stuff.
  */
 void Wordrec::set_pass1() {
-    chop_ok_split.set_value(70.0);
-    language_model_->getParamsModel().SetPass(ParamsModel::PTRAIN_PASS1);
-    SettupPass1();
+  chop_ok_split.set_value(70.0);
+  language_model_->getParamsModel().SetPass(ParamsModel::PTRAIN_PASS1);
+  SettupPass1();
 }
-
 
 /**
  * @name set_pass2
@@ -99,11 +96,10 @@ void Wordrec::set_pass1() {
  * Get ready to do some pass 2 stuff.
  */
 void Wordrec::set_pass2() {
-    chop_ok_split.set_value(pass2_ok_split);
-    language_model_->getParamsModel().SetPass(ParamsModel::PTRAIN_PASS2);
-    SettupPass2();
+  chop_ok_split.set_value(pass2_ok_split);
+  language_model_->getParamsModel().SetPass(ParamsModel::PTRAIN_PASS2);
+  SettupPass2();
 }
-
 
 /**
  * @name cc_recog
@@ -111,13 +107,12 @@ void Wordrec::set_pass2() {
  * Recognize a word.
  */
 void Wordrec::cc_recog(WERD_RES *word) {
-    getDict().reset_hyphen_vars(word->word->flag(W_EOL));
-    chop_word_main(word);
-    word->DebugWordChoices(getDict().stopper_debug_level >= 1,
-                           getDict().word_to_debug.string());
-    ASSERT_HOST(word->StatesAllValid());
+  getDict().reset_hyphen_vars(word->word->flag(W_EOL));
+  chop_word_main(word);
+  word->DebugWordChoices(getDict().stopper_debug_level >= 1,
+                         getDict().word_to_debug.string());
+  ASSERT_HOST(word->StatesAllValid());
 }
-
 
 /**
  * @name dict_word()
@@ -126,7 +121,7 @@ void Wordrec::cc_recog(WERD_RES *word) {
  * of the PermuterType values if found, according to the dictionary.
  */
 int Wordrec::dict_word(const WERD_CHOICE &word) {
-    return getDict().valid_word(word);
+  return getDict().valid_word(word);
 }
 
 /**
@@ -136,18 +131,17 @@ int Wordrec::dict_word(const WERD_CHOICE &word) {
  * The blob may need rotating to the correct orientation for classification.
  */
 BLOB_CHOICE_LIST *Wordrec::call_matcher(TBLOB *tessblob) {
-    // Rotate the blob for classification if necessary.
-    TBLOB* rotated_blob = tessblob->ClassifyNormalizeIfNeeded();
-    if (rotated_blob == NULL) {
-        rotated_blob = tessblob;
-    }
-    BLOB_CHOICE_LIST *ratings = new BLOB_CHOICE_LIST();  // matcher result
-    AdaptiveClassifier(rotated_blob, ratings);
-    if (rotated_blob != tessblob) {
-        delete rotated_blob;
-    }
-    return ratings;
+  // Rotate the blob for classification if necessary.
+  TBLOB *rotated_blob = tessblob->ClassifyNormalizeIfNeeded();
+  if (rotated_blob == NULL) {
+    rotated_blob = tessblob;
+  }
+  BLOB_CHOICE_LIST *ratings = new BLOB_CHOICE_LIST(); // matcher result
+  AdaptiveClassifier(rotated_blob, ratings);
+  if (rotated_blob != tessblob) {
+    delete rotated_blob;
+  }
+  return ratings;
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

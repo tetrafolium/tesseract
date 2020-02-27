@@ -29,25 +29,21 @@ namespace tesseract {
 
 class DawgCache {
 public:
-    Dawg *GetSquishedDawg(const STRING &lang, TessdataType tessdata_dawg_type,
-                          int debug_level, TessdataManager *data_file);
+  Dawg *GetSquishedDawg(const STRING &lang, TessdataType tessdata_dawg_type,
+                        int debug_level, TessdataManager *data_file);
 
-    // If we manage the given dawg, decrement its count,
-    // and possibly delete it if the count reaches zero.
-    // If dawg is unknown to us, return false.
-    bool FreeDawg(Dawg *dawg) {
-        return dawgs_.Free(dawg);
-    }
+  // If we manage the given dawg, decrement its count,
+  // and possibly delete it if the count reaches zero.
+  // If dawg is unknown to us, return false.
+  bool FreeDawg(Dawg *dawg) { return dawgs_.Free(dawg); }
 
-    // Free up any currently unused dawgs.
-    void DeleteUnusedDawgs() {
-        dawgs_.DeleteUnusedObjects();
-    }
+  // Free up any currently unused dawgs.
+  void DeleteUnusedDawgs() { dawgs_.DeleteUnusedObjects(); }
 
 private:
-    ObjectCache<Dawg> dawgs_;
+  ObjectCache<Dawg> dawgs_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_DICT_DAWG_CACHE_H_
+#endif // TESSERACT_DICT_DAWG_CACHE_H_

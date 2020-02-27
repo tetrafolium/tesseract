@@ -45,30 +45,30 @@ namespace tesseract {
  * - 05/24/91, DSJ, Updated for either char or baseline normalize.
  */
 FEATURE_SET Classify::ExtractOutlineFeatures(TBLOB *Blob) {
-    LIST Outlines;
-    LIST RemainingOutlines;
-    MFOUTLINE Outline;
-    FEATURE_SET FeatureSet;
-    FLOAT32 XScale, YScale;
+  LIST Outlines;
+  LIST RemainingOutlines;
+  MFOUTLINE Outline;
+  FEATURE_SET FeatureSet;
+  FLOAT32 XScale, YScale;
 
-    FeatureSet = NewFeatureSet (MAX_OUTLINE_FEATURES);
-    if (Blob == NULL)
-        return (FeatureSet);
-
-    Outlines = ConvertBlob (Blob);
-
-    NormalizeOutlines(Outlines, &XScale, &YScale);
-    RemainingOutlines = Outlines;
-    iterate(RemainingOutlines) {
-        Outline = (MFOUTLINE) first_node (RemainingOutlines);
-        ConvertToOutlineFeatures(Outline, FeatureSet);
-    }
-    if (classify_norm_method == baseline)
-        NormalizeOutlineX(FeatureSet);
-    FreeOutlines(Outlines);
+  FeatureSet = NewFeatureSet(MAX_OUTLINE_FEATURES);
+  if (Blob == NULL)
     return (FeatureSet);
-}                                /* ExtractOutlineFeatures */
-}  // namespace tesseract
+
+  Outlines = ConvertBlob(Blob);
+
+  NormalizeOutlines(Outlines, &XScale, &YScale);
+  RemainingOutlines = Outlines;
+  iterate(RemainingOutlines) {
+    Outline = (MFOUTLINE)first_node(RemainingOutlines);
+    ConvertToOutlineFeatures(Outline, FeatureSet);
+  }
+  if (classify_norm_method == baseline)
+    NormalizeOutlineX(FeatureSet);
+  FreeOutlines(Outlines);
+  return (FeatureSet);
+} /* ExtractOutlineFeatures */
+} // namespace tesseract
 
 /*----------------------------------------------------------------------------
               Private Code
@@ -90,20 +90,18 @@ FEATURE_SET Classify::ExtractOutlineFeatures(TBLOB *Blob) {
  * @note Exceptions: none
  * @note History: 11/13/90, DSJ, Created.
  */
-void AddOutlineFeatureToSet(FPOINT *Start,
-                            FPOINT *End,
+void AddOutlineFeatureToSet(FPOINT *Start, FPOINT *End,
                             FEATURE_SET FeatureSet) {
-    FEATURE Feature;
+  FEATURE Feature;
 
-    Feature = NewFeature(&OutlineFeatDesc);
-    Feature->Params[OutlineFeatDir] = NormalizedAngleFrom(Start, End, 1.0);
-    Feature->Params[OutlineFeatX] = AverageOf(Start->x, End->x);
-    Feature->Params[OutlineFeatY] = AverageOf(Start->y, End->y);
-    Feature->Params[OutlineFeatLength] = DistanceBetween(*Start, *End);
-    AddFeature(FeatureSet, Feature);
+  Feature = NewFeature(&OutlineFeatDesc);
+  Feature->Params[OutlineFeatDir] = NormalizedAngleFrom(Start, End, 1.0);
+  Feature->Params[OutlineFeatX] = AverageOf(Start->x, End->x);
+  Feature->Params[OutlineFeatY] = AverageOf(Start->y, End->y);
+  Feature->Params[OutlineFeatLength] = DistanceBetween(*Start, *End);
+  AddFeature(FeatureSet, Feature);
 
-}                                /* AddOutlineFeatureToSet */
-
+} /* AddOutlineFeatureToSet */
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -120,33 +118,31 @@ void AddOutlineFeatureToSet(FPOINT *Start,
  * - 5/24/91, DSJ, Added hidden edge capability.
  */
 void ConvertToOutlineFeatures(MFOUTLINE Outline, FEATURE_SET FeatureSet) {
-    MFOUTLINE Next;
-    MFOUTLINE First;
-    FPOINT FeatureStart;
-    FPOINT FeatureEnd;
+  MFOUTLINE Next;
+  MFOUTLINE First;
+  FPOINT FeatureStart;
+  FPOINT FeatureEnd;
 
-    if (DegenerateOutline (Outline))
-        return;
+  if (DegenerateOutline(Outline))
+    return;
 
-    First = Outline;
-    Next = First;
-    do {
-        FeatureStart = PointAt(Next)->Point;
-        Next = NextPointAfter(Next);
+  First = Outline;
+  Next = First;
+  do {
+    FeatureStart = PointAt(Next)->Point;
+    Next = NextPointAfter(Next);
 
-        /* note that an edge is hidden if the ending point of the edge is
-           marked as hidden.  This situation happens because the order of
-           the outlines is reversed when they are converted from the old
-           format.  In the old format, a hidden edge is marked by the
-           starting point for that edge. */
-        if (!PointAt(Next)->Hidden) {
-            FeatureEnd = PointAt(Next)->Point;
-            AddOutlineFeatureToSet(&FeatureStart, &FeatureEnd, FeatureSet);
-        }
+    /* note that an edge is hidden if the ending point of the edge is
+       marked as hidden.  This situation happens because the order of
+       the outlines is reversed when they are converted from the old
+       format.  In the old format, a hidden edge is marked by the
+       starting point for that edge. */
+    if (!PointAt(Next)->Hidden) {
+      FeatureEnd = PointAt(Next)->Point;
+      AddOutlineFeatureToSet(&FeatureStart, &FeatureEnd, FeatureSet);
     }
-    while (Next != First);
-}                                /* ConvertToOutlineFeatures */
-
+  } while (Next != First);
+} /* ConvertToOutlineFeatures */
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -161,26 +157,26 @@ void ConvertToOutlineFeatures(MFOUTLINE Outline, FEATURE_SET FeatureSet) {
  * @note History: 11/13/90, DSJ, Created.
  */
 void NormalizeOutlineX(FEATURE_SET FeatureSet) {
-    int i;
-    FEATURE Feature;
-    FLOAT32 Length;
-    FLOAT32 TotalX = 0.0;
-    FLOAT32 TotalWeight = 0.0;
-    FLOAT32 Origin;
+  int i;
+  FEATURE Feature;
+  FLOAT32 Length;
+  FLOAT32 TotalX = 0.0;
+  FLOAT32 TotalWeight = 0.0;
+  FLOAT32 Origin;
 
-    if (FeatureSet->NumFeatures <= 0)
-        return;
+  if (FeatureSet->NumFeatures <= 0)
+    return;
 
-    for (i = 0; i < FeatureSet->NumFeatures; i++) {
-        Feature = FeatureSet->Features[i];
-        Length = Feature->Params[OutlineFeatLength];
-        TotalX += Feature->Params[OutlineFeatX] * Length;
-        TotalWeight += Length;
-    }
-    Origin = TotalX / TotalWeight;
+  for (i = 0; i < FeatureSet->NumFeatures; i++) {
+    Feature = FeatureSet->Features[i];
+    Length = Feature->Params[OutlineFeatLength];
+    TotalX += Feature->Params[OutlineFeatX] * Length;
+    TotalWeight += Length;
+  }
+  Origin = TotalX / TotalWeight;
 
-    for (i = 0; i < FeatureSet->NumFeatures; i++) {
-        Feature = FeatureSet->Features[i];
-        Feature->Params[OutlineFeatX] -= Origin;
-    }
-}                                /* NormalizeOutlineX */
+  for (i = 0; i < FeatureSet->NumFeatures; i++) {
+    Feature = FeatureSet->Features[i];
+    Feature->Params[OutlineFeatX] -= Origin;
+  }
+} /* NormalizeOutlineX */

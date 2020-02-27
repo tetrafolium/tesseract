@@ -17,15 +17,15 @@
  *
  **********************************************************************/
 
-#ifndef           GLOBALOC_H
-#define           GLOBALOC_H
+#ifndef GLOBALOC_H
+#define GLOBALOC_H
 
-#include          "host.h"
+#include "host.h"
 
 // Saves a clone of the given pix, and notes its resolution in thread-specific
 // data, so that the image can be written prior to a crash.
 struct Pix;
-void SavePixForCrash(int resolution, Pix* pix);
+void SavePixForCrash(int resolution, Pix *pix);
 
 void signal_exit(int signal_code);
 

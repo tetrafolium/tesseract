@@ -17,78 +17,70 @@
  *
  **********************************************************************/
 
-#include          <signal.h>
+#include <signal.h>
 #ifdef __linux__
-#include          <sys/syscall.h>   // For SYS_gettid.
-#include          <unistd.h>        // For syscall itself.
+#include <sys/syscall.h> // For SYS_gettid.
+#include <unistd.h>      // For syscall itself.
 #endif
-#include          "allheaders.h"
-#include          "errcode.h"
-#include          "tprintf.h"
+#include "allheaders.h"
+#include "errcode.h"
+#include "tprintf.h"
 
 // Size of thread-id array of pixes to keep in case of crash.
 const int kMaxNumThreadPixes = 32768;
 
-Pix* global_crash_pixes[kMaxNumThreadPixes];
+Pix *global_crash_pixes[kMaxNumThreadPixes];
 
-void SavePixForCrash(int resolution, Pix* pix) {
+void SavePixForCrash(int resolution, Pix *pix) {
 #ifdef __linux__
 #ifndef ANDROID
-    int thread_id = syscall(SYS_gettid) % kMaxNumThreadPixes;
+  int thread_id = syscall(SYS_gettid) % kMaxNumThreadPixes;
 #else
-    int thread_id = gettid() % kMaxNumThreadPixes;
+  int thread_id = gettid() % kMaxNumThreadPixes;
 #endif
-    pixDestroy(&global_crash_pixes[thread_id]);
-    if (pix != NULL) {
-        Pix* clone = pixClone(pix);
-        pixSetXRes(clone, resolution);
-        pixSetYRes(clone, resolution);
-        global_crash_pixes[thread_id] = clone;
-    }
+  pixDestroy(&global_crash_pixes[thread_id]);
+  if (pix != NULL) {
+    Pix *clone = pixClone(pix);
+    pixSetXRes(clone, resolution);
+    pixSetYRes(clone, resolution);
+    global_crash_pixes[thread_id] = clone;
+  }
 #endif
 }
 
 // CALL ONLY from a signal handler! Writes a crash image to stderr.
 void signal_exit(int signal_code) {
-    tprintf("Received signal %d!\n", signal_code);
+  tprintf("Received signal %d!\n", signal_code);
 #ifdef __linux__
 #ifndef ANDROID
-    int thread_id = syscall(SYS_gettid) % kMaxNumThreadPixes;
+  int thread_id = syscall(SYS_gettid) % kMaxNumThreadPixes;
 #else
-    int thread_id = gettid() % kMaxNumThreadPixes;
+  int thread_id = gettid() % kMaxNumThreadPixes;
 #endif
-    if (global_crash_pixes[thread_id] != NULL) {
-        fprintf(stderr, "Crash caused by image with resolution %d\n",
-                pixGetYRes(global_crash_pixes[thread_id]));
-        fprintf(stderr, "<Cut here>\n");
-        pixWriteStreamPng(stderr, global_crash_pixes[thread_id], 0.0);
-        fprintf(stderr, "\n<End cut>\n");
-    }
-    // Raise an uncaught signal, so as to get a useful stack trace.
-    raise(SIGILL);
+  if (global_crash_pixes[thread_id] != NULL) {
+    fprintf(stderr, "Crash caused by image with resolution %d\n",
+            pixGetYRes(global_crash_pixes[thread_id]));
+    fprintf(stderr, "<Cut here>\n");
+    pixWriteStreamPng(stderr, global_crash_pixes[thread_id], 0.0);
+    fprintf(stderr, "\n<End cut>\n");
+  }
+  // Raise an uncaught signal, so as to get a useful stack trace.
+  raise(SIGILL);
 #else
-    abort();
+  abort();
 #endif
 }
 
-void err_exit() {
-    ASSERT_HOST("Fatal error encountered!" == NULL);
-}
-
+void err_exit() { ASSERT_HOST("Fatal error encountered!" == NULL); }
 
 void set_global_loc_code(int loc_code) {
-    // global_loc_code = loc_code;
-
+  // global_loc_code = loc_code;
 }
-
 
 void set_global_subloc_code(int loc_code) {
-    // global_subloc_code = loc_code;
-
+  // global_subloc_code = loc_code;
 }
 
-
 void set_global_subsubloc_code(int loc_code) {
-    // global_subsubloc_code = loc_code;
-
+  // global_subsubloc_code = loc_code;
 }
