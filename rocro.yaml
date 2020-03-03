@@ -7,10 +7,12 @@ inspecode:
   clang-format:     ### for C++
     auto-fix: true
     thresholds: { num-issues: 560 }
+      # 560 issues on prod    (clang 7.0.1)
+      # 573 issues on staging (clang 9.0.0)
 
   cpd:              ### for C++
     options: [ --skip-lexical-errors ]
-    thresholds: { num-issues: 346 }
+    thresholds: { num-issues: 179 }
 
   cppcheck:         ### for C++
     thresholds: { num-issues: 22 }
@@ -26,7 +28,7 @@ inspecode:
     thresholds: { num-issues: 918 }
 
   fossology:
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 8 }
 
   grep:             ### for any-languages
     thresholds: { num-issues: 3 }
