@@ -20,10 +20,10 @@
 #define TESSERACT_CLASSIFY_CLUSTTOOL_H_
 
 //--------------------------Include Files---------------------------------------
-#include <stdio.h>
 #include "cluster.h"
 #include "host.h"
 #include "serialis.h"
+#include <stdio.h>
 
 /*-------------------------------------------------------------------------
         Public Function Prototype
@@ -42,7 +42,7 @@ void WriteParamDesc(FILE *File, uinT16 N, const PARAM_DESC ParamDesc[]);
 
 void WritePrototype(FILE *File, uinT16 N, PROTOTYPE *Proto);
 
-void WriteNFloats (FILE * File, uinT16 N, FLOAT32 Array[]);
+void WriteNFloats(FILE *File, uinT16 N, FLOAT32 Array[]);
 
 void WriteProtoStyle(FILE *File, PROTOSTYLE ProtoStyle);
 
@@ -56,11 +56,11 @@ void WriteProtoList(FILE *File, uinT16 N, PARAM_DESC ParamDesc[],
 #define ILLEGALCIRCULARSPEC 5001
 #define ILLEGALMINMAXSPEC 5002
 #define ILLEGALSIGNIFICANCESPEC 5003
-#define ILLEGALSTYLESPEC  5004
-#define ILLEGALSAMPLECOUNT  5005
+#define ILLEGALSTYLESPEC 5004
+#define ILLEGALSAMPLECOUNT 5005
 #define ILLEGALMEANSPEC 5006
 #define ILLEGALVARIANCESPEC 5007
 #define ILLEGALDISTRIBUTION 5008
-#define ILLEGALFLOAT  5009
-#define ILLEGALESSENTIALSPEC  5013
-#endif  // TESSERACT_CLASSIFY_CLUSTTOOL_H_
+#define ILLEGALFLOAT 5009
+#define ILLEGALESSENTIALSPEC 5013
+#endif // TESSERACT_CLASSIFY_CLUSTTOOL_H_

@@ -26,15 +26,15 @@
 
 #ifdef _WIN32
 #ifndef __GNUC__
-#include <windows.h>
 #include "platform.h"
+#include <windows.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
 #if (_MSC_VER <= 1400)
 #define vsnprintf _vsnprintf
 #endif
-#pragma warning(disable:4786)
+#pragma warning(disable : 4786)
 #else
 #include "platform.h"
 #include <windows.h>
@@ -47,35 +47,36 @@
 #include <string>
 
 #ifndef MAX
-#define MAX(a, b)  ((a > b) ? a : b)
+#define MAX(a, b) ((a > b) ? a : b)
 #endif
 
 #ifndef MIN
-#define MIN(a, b)  ((a < b) ? a : b)
+#define MIN(a, b) ((a < b) ? a : b)
 #endif
 
 /// The SVSync class provides functionality for Thread & Process Creation
 class SVSync {
- public:
+public:
   /// Create new thread.
-  static void StartThread(void *(*func)(void*), void* arg);
+  static void StartThread(void *(*func)(void *), void *arg);
   /// Signals a thread to exit.
   static void ExitThread();
   /// Starts a new process.
-  static void StartProcess(const char* executable, const char* args);
+  static void StartProcess(const char *executable, const char *args);
 };
 
 /// A semaphore class which encapsulates the main signalling
 /// and wait abilities of semaphores for windows and unix.
 class SVSemaphore {
- public:
+public:
   /// Sets up a semaphore.
   SVSemaphore();
   /// Signal a semaphore.
   void Signal();
   /// Wait on a semaphore.
   void Wait();
- private:
+
+private:
 #ifdef _WIN32
   HANDLE semaphore_;
 #elif defined(__APPLE__)
@@ -88,14 +89,15 @@ class SVSemaphore {
 /// A mutex which encapsulates the main locking and unlocking
 /// abilites of mutexes for windows and unix.
 class SVMutex {
- public:
+public:
   /// Sets up a new mutex.
   SVMutex();
   /// Locks on a mutex.
   void Lock();
   /// Unlocks on a mutex.
   void Unlock();
- private:
+
+private:
 #ifdef _WIN32
   HANDLE mutex_;
 #else
@@ -106,12 +108,12 @@ class SVMutex {
 // Auto-unlocking object that locks a mutex on construction and unlocks it
 // on destruction.
 class SVAutoLock {
- public:
-  explicit SVAutoLock(SVMutex* mutex) : mutex_(mutex) { mutex->Lock(); }
+public:
+  explicit SVAutoLock(SVMutex *mutex) : mutex_(mutex) { mutex->Lock(); }
   ~SVAutoLock() { mutex_->Unlock(); }
 
- private:
-  SVMutex* mutex_;
+private:
+  SVMutex *mutex_;
 };
 
 /// The SVNetwork class takes care of the remote connection for ScrollView
@@ -119,19 +121,19 @@ class SVAutoLock {
 /// receiving messages and closing the connection.
 /// It is designed to work on both Linux and Windows.
 class SVNetwork {
- public:
+public:
   /// Set up a connection to hostname on port.
-  SVNetwork(const char* hostname, int port);
+  SVNetwork(const char *hostname, int port);
 
   /// Destructor.
   ~SVNetwork();
 
   /// Put a message in the messagebuffer to the server and try to send it.
-  void Send(const char* msg);
+  void Send(const char *msg);
 
   /// Receive a message from the server.
   /// This will always return one line of char* (denoted by \n).
-  char* Receive();
+  char *Receive();
 
   /// Close the connection to the server.
   void Close();
@@ -139,20 +141,20 @@ class SVNetwork {
   /// Flush the buffer.
   void Flush();
 
- private:
+private:
   /// The mutex for access to Send() and Flush().
   SVMutex mutex_send_;
   /// The actual stream_ to the server.
   int stream_;
   /// Stores the last received message-chunk from the server.
-  char* msg_buffer_in_;
+  char *msg_buffer_in_;
 
   /// Stores the messages which are supposed to go out.
   std::string msg_buffer_out_;
 
-  bool has_content;  // Win32 (strtok)
+  bool has_content; // Win32 (strtok)
   /// Where we are at in our msg_buffer_in_
-  char* buffer_ptr_;  // Unix (strtok_r)
+  char *buffer_ptr_; // Unix (strtok_r)
 };
 
-#endif  // TESSERACT_VIEWER_SVUTIL_H_
+#endif // TESSERACT_VIEWER_SVUTIL_H_

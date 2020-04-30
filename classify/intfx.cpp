@@ -47,7 +47,6 @@ static float sin_table[INT_CHAR_NORM_RANGE];
 // Guards write access to AtanTable so we don't create it more than once.
 tesseract::CCUtilMutex atan_table_mutex;
 
-
 /**----------------------------------------------------------------------------
             Public Code
 ----------------------------------------------------------------------------**/
@@ -78,15 +77,16 @@ namespace tesseract {
 // TODO(rays) Make BlobToTrainingSample a member of Classify now that
 // the FlexFx and FeatureDescription code have been removed and LearnBlob
 // is now a member of Classify.
-TrainingSample* BlobToTrainingSample(
-    const TBLOB& blob, bool nonlinear_norm, INT_FX_RESULT_STRUCT* fx_info,
-    GenericVector<INT_FEATURE_STRUCT>* bl_features) {
+TrainingSample *
+BlobToTrainingSample(const TBLOB &blob, bool nonlinear_norm,
+                     INT_FX_RESULT_STRUCT *fx_info,
+                     GenericVector<INT_FEATURE_STRUCT> *bl_features) {
   GenericVector<INT_FEATURE_STRUCT> cn_features;
-  Classify::ExtractFeatures(blob, nonlinear_norm, bl_features,
-                            &cn_features, fx_info, NULL);
+  Classify::ExtractFeatures(blob, nonlinear_norm, bl_features, &cn_features,
+                            fx_info, NULL);
   // TODO(rays) Use blob->PreciseBoundingBox() instead.
   TBOX box = blob.bounding_box();
-  TrainingSample* sample = NULL;
+  TrainingSample *sample = NULL;
   int num_features = fx_info->NumCN;
   if (num_features > 0) {
     sample = TrainingSample::CopyFromFeatures(*fx_info, box, &cn_features[0],
@@ -130,9 +130,9 @@ TrainingSample* BlobToTrainingSample(
 // Ry:     rounded x second moment.
 // Xmean:  Rounded x center of mass of the blob.
 // Ymean:  Rounded y center of mass of the blob.
-void Classify::SetupBLCNDenorms(const TBLOB& blob, bool nonlinear_norm,
-                                DENORM* bl_denorm, DENORM* cn_denorm,
-                                INT_FX_RESULT_STRUCT* fx_info) {
+void Classify::SetupBLCNDenorms(const TBLOB &blob, bool nonlinear_norm,
+                                DENORM *bl_denorm, DENORM *cn_denorm,
+                                INT_FX_RESULT_STRUCT *fx_info) {
   // Compute 1st and 2nd moments of the original outline.
   FCOORD center, second_moments;
   int length = blob.ComputeMoments(&center, &second_moments);
@@ -149,27 +149,25 @@ void Classify::SetupBLCNDenorms(const TBLOB& blob, bool nonlinear_norm,
                                 1.0f, 1.0f, 128.0f, 128.0f);
   // Setup the denorm for character normalization.
   if (nonlinear_norm) {
-    GenericVector<GenericVector<int> > x_coords;
-    GenericVector<GenericVector<int> > y_coords;
+    GenericVector<GenericVector<int>> x_coords;
+    GenericVector<GenericVector<int>> y_coords;
     TBOX box;
     blob.GetPreciseBoundingBox(&box);
     box.pad(1, 1);
     blob.GetEdgeCoords(box, &x_coords, &y_coords);
-    cn_denorm->SetupNonLinear(&blob.denorm(), box, MAX_UINT8, MAX_UINT8,
-                              0.0f, 0.0f, x_coords, y_coords);
+    cn_denorm->SetupNonLinear(&blob.denorm(), box, MAX_UINT8, MAX_UINT8, 0.0f,
+                              0.0f, x_coords, y_coords);
   } else {
-    cn_denorm->SetupNormalization(NULL, NULL, &blob.denorm(),
-                                  center.x(), center.y(),
-                                  51.2f / second_moments.x(),
-                                  51.2f / second_moments.y(),
-                                  128.0f, 128.0f);
+    cn_denorm->SetupNormalization(NULL, NULL, &blob.denorm(), center.x(),
+                                  center.y(), 51.2f / second_moments.x(),
+                                  51.2f / second_moments.y(), 128.0f, 128.0f);
   }
 }
 
 // Helper normalizes the direction, assuming that it is at the given
 // unnormed_pos, using the given denorm, starting at the root_denorm.
-uinT8 NormalizeDirection(uinT8 dir, const FCOORD& unnormed_pos,
-                         const DENORM& denorm, const DENORM* root_denorm) {
+uinT8 NormalizeDirection(uinT8 dir, const FCOORD &unnormed_pos,
+                         const DENORM &denorm, const DENORM *root_denorm) {
   // Convert direction to a vector.
   FCOORD unnormed_end;
   unnormed_end.from_direction(dir);
@@ -184,9 +182,9 @@ uinT8 NormalizeDirection(uinT8 dir, const FCOORD& unnormed_pos,
 // Helper returns the mean direction vector from the given stats. Use the
 // mean direction from dirs if there is information available, otherwise, use
 // the fit_vector from point_diffs.
-static FCOORD MeanDirectionVector(const LLSQ& point_diffs, const LLSQ& dirs,
-                                  const FCOORD& start_pt,
-                                  const FCOORD& end_pt) {
+static FCOORD MeanDirectionVector(const LLSQ &point_diffs, const LLSQ &dirs,
+                                  const FCOORD &start_pt,
+                                  const FCOORD &end_pt) {
   FCOORD fit_vector;
   if (dirs.count() > 0) {
     // There were directions, so use them. To avoid wrap-around problems, we
@@ -233,17 +231,19 @@ static FCOORD MeanDirectionVector(const LLSQ& point_diffs, const LLSQ& dirs,
 // Emitted features are on the line defined by:
 // start_pt + lambda * (end_pt - start_pt) for scalar lambda.
 // Features are spaced at feature_length intervals.
-static int ComputeFeatures(const FCOORD& start_pt, const FCOORD& end_pt,
+static int ComputeFeatures(const FCOORD &start_pt, const FCOORD &end_pt,
                            double feature_length,
-                           GenericVector<INT_FEATURE_STRUCT>* features) {
+                           GenericVector<INT_FEATURE_STRUCT> *features) {
   FCOORD feature_vector(end_pt - start_pt);
-  if (feature_vector.x() == 0.0f && feature_vector.y() == 0.0f) return 0;
+  if (feature_vector.x() == 0.0f && feature_vector.y() == 0.0f)
+    return 0;
   // Compute theta for the feature based on its direction.
   uinT8 theta = feature_vector.to_direction();
   // Compute the number of features and lambda_step.
   double target_length = feature_vector.length();
   int num_features = IntCastRounded(target_length / feature_length);
-  if (num_features == 0) return 0;
+  if (num_features == 0)
+    return 0;
   // Divide the length evenly into num_features pieces.
   double lambda_step = 1.0 / num_features;
   double lambda = lambda_step / 2.0;
@@ -270,11 +270,10 @@ static int ComputeFeatures(const FCOORD& start_pt, const FCOORD& end_pt,
 // LLSQ conveniently stores the mean of 2 variables, we use it to store
 // dir and dir+128 (128 is 180 degrees) and then use the resulting mean
 // with the least variance.
-static int GatherPoints(const C_OUTLINE* outline, double feature_length,
-                        const DENORM& denorm, const DENORM* root_denorm,
-                        int start_index, int end_index,
-                        ICOORD* pos, FCOORD* pos_normed,
-                        LLSQ* points, LLSQ* dirs) {
+static int GatherPoints(const C_OUTLINE *outline, double feature_length,
+                        const DENORM &denorm, const DENORM *root_denorm,
+                        int start_index, int end_index, ICOORD *pos,
+                        FCOORD *pos_normed, LLSQ *points, LLSQ *dirs) {
   int step_length = outline->pathlength();
   ICOORD step = outline->step(start_index % step_length);
   // Prev_normed is the start point of this collection and will be set on the
@@ -326,16 +325,17 @@ static int GatherPoints(const C_OUTLINE* outline, double feature_length,
 // the feature extraction. Hidden edges should be excluded by the caller.
 // If force_poly is true, the features will be extracted from the polygonal
 // approximation even if more accurate data is available.
-static void ExtractFeaturesFromRun(
-    const EDGEPT* startpt, const EDGEPT* lastpt,
-    const DENORM& denorm, double feature_length, bool force_poly,
-    GenericVector<INT_FEATURE_STRUCT>* features) {
-  const EDGEPT* endpt = lastpt->next;
-  const C_OUTLINE* outline = startpt->src_outline;
+static void
+ExtractFeaturesFromRun(const EDGEPT *startpt, const EDGEPT *lastpt,
+                       const DENORM &denorm, double feature_length,
+                       bool force_poly,
+                       GenericVector<INT_FEATURE_STRUCT> *features) {
+  const EDGEPT *endpt = lastpt->next;
+  const C_OUTLINE *outline = startpt->src_outline;
   if (outline != NULL && !force_poly) {
     // Detailed information is available. We have to normalize only from
     // the root_denorm to denorm.
-    const DENORM* root_denorm = denorm.RootDenorm();
+    const DENORM *root_denorm = denorm.RootDenorm();
     int total_features = 0;
     // Get the features from the outline.
     int step_length = outline->pathlength();
@@ -355,9 +355,9 @@ static void ExtractFeaturesFromRun(
     LLSQ points;
     LLSQ dirs;
     FCOORD normed_pos;
-    int index = GatherPoints(outline, feature_length, denorm, root_denorm,
-                             start_index, end_index, &pos, &normed_pos,
-                             &points, &dirs);
+    int index =
+        GatherPoints(outline, feature_length, denorm, root_denorm, start_index,
+                     end_index, &pos, &normed_pos, &points, &dirs);
     while (index <= end_index) {
       // At each iteration we nominally have 3 accumulated sets of points and
       // dirs: prev_points/dirs, points/dirs, next_points/dirs and sum them
@@ -367,9 +367,9 @@ static void ExtractFeaturesFromRun(
       LLSQ next_points;
       LLSQ next_dirs;
       FCOORD next_normed_pos;
-      index = GatherPoints(outline, feature_length, denorm, root_denorm,
-                           index, end_index, &pos, &next_normed_pos,
-                           &next_points, &next_dirs);
+      index = GatherPoints(outline, feature_length, denorm, root_denorm, index,
+                           end_index, &pos, &next_normed_pos, &next_points,
+                           &next_dirs);
       LLSQ sum_points(prev_points);
       // TODO(rays) find out why it is better to use just dirs and next_dirs
       // in sum_dirs, instead of using prev_dirs as well.
@@ -387,8 +387,8 @@ static void ExtractFeaturesFromRun(
         // The segment to which we fit features is the line passing through
         // fit_pt in direction of fit_vector that starts nearest to
         // prev_normed_pos and ends nearest to normed_pos.
-        FCOORD start_pos = prev_normed_pos.nearest_pt_on_line(fit_pt,
-                                                              fit_vector);
+        FCOORD start_pos =
+            prev_normed_pos.nearest_pt_on_line(fit_pt, fit_vector);
         FCOORD end_pos = normed_pos.nearest_pt_on_line(fit_pt, fit_vector);
         // Possible correction to match the adjacent polygon segment.
         if (total_features == 0 && startpt != endpt) {
@@ -399,8 +399,8 @@ static void ExtractFeaturesFromRun(
           FCOORD poly_pos(endpt->pos.x, endpt->pos.y);
           denorm.LocalNormTransform(poly_pos, &end_pos);
         }
-        int num_features = ComputeFeatures(start_pos, end_pos, feature_length,
-                                           features);
+        int num_features =
+            ComputeFeatures(start_pos, end_pos, feature_length, features);
         if (num_features > 0) {
           // We made some features so shuffle the accumulators.
           prev_points = points;
@@ -423,7 +423,7 @@ static void ExtractFeaturesFromRun(
     }
   } else {
     // There is no outline, so we are forced to use the polygonal approximation.
-    const EDGEPT* pt = startpt;
+    const EDGEPT *pt = startpt;
     do {
       FCOORD start_pos(pt->pos.x, pt->pos.y);
       FCOORD end_pos(pt->next->pos.x, pt->next->pos.y);
@@ -442,27 +442,28 @@ static void ExtractFeaturesFromRun(
 // number of cn features generated for each outline in the blob (in order).
 // Thus after the first outline, there were (*outline_cn_counts)[0] features,
 // after the second outline, there were (*outline_cn_counts)[1] features etc.
-void Classify::ExtractFeatures(const TBLOB& blob,
-                               bool nonlinear_norm,
-                               GenericVector<INT_FEATURE_STRUCT>* bl_features,
-                               GenericVector<INT_FEATURE_STRUCT>* cn_features,
-                               INT_FX_RESULT_STRUCT* results,
-                               GenericVector<int>* outline_cn_counts) {
+void Classify::ExtractFeatures(const TBLOB &blob, bool nonlinear_norm,
+                               GenericVector<INT_FEATURE_STRUCT> *bl_features,
+                               GenericVector<INT_FEATURE_STRUCT> *cn_features,
+                               INT_FX_RESULT_STRUCT *results,
+                               GenericVector<int> *outline_cn_counts) {
   DENORM bl_denorm, cn_denorm;
-  tesseract::Classify::SetupBLCNDenorms(blob, nonlinear_norm,
-                                        &bl_denorm, &cn_denorm, results);
+  tesseract::Classify::SetupBLCNDenorms(blob, nonlinear_norm, &bl_denorm,
+                                        &cn_denorm, results);
   if (outline_cn_counts != NULL)
     outline_cn_counts->truncate(0);
   // Iterate the outlines.
-  for (TESSLINE* ol = blob.outlines; ol != NULL; ol = ol->next) {
+  for (TESSLINE *ol = blob.outlines; ol != NULL; ol = ol->next) {
     // Iterate the polygon.
-    EDGEPT* loop_pt = ol->FindBestStartPt();
-    EDGEPT* pt = loop_pt;
-    if (pt == NULL) continue;
+    EDGEPT *loop_pt = ol->FindBestStartPt();
+    EDGEPT *pt = loop_pt;
+    if (pt == NULL)
+      continue;
     do {
-      if (pt->IsHidden()) continue;
+      if (pt->IsHidden())
+        continue;
       // Find a run of equal src_outline.
-      EDGEPT* last_pt = pt;
+      EDGEPT *last_pt = pt;
       do {
         last_pt = last_pt->next;
       } while (last_pt != loop_pt && !last_pt->IsHidden() &&
@@ -486,8 +487,7 @@ void Classify::ExtractFeatures(const TBLOB& blob,
   results->Width = blob.bounding_box().width();
 }
 
-}  // namespace tesseract
-
+} // namespace tesseract
 
 /*--------------------------------------------------------------------------*/
 // Extract a set of standard-sized features from Blobs and write them out in
@@ -510,20 +510,18 @@ void Classify::ExtractFeatures(const TBLOB& blob,
 //   in x and y so that the result is vaguely square.
 //
 // Deprecated! Prefer tesseract::Classify::ExtractFeatures instead.
-bool ExtractIntFeat(const TBLOB& blob,
-                    bool nonlinear_norm,
+bool ExtractIntFeat(const TBLOB &blob, bool nonlinear_norm,
                     INT_FEATURE_ARRAY baseline_features,
                     INT_FEATURE_ARRAY charnorm_features,
-                    INT_FX_RESULT_STRUCT* results) {
+                    INT_FX_RESULT_STRUCT *results) {
   GenericVector<INT_FEATURE_STRUCT> bl_features;
   GenericVector<INT_FEATURE_STRUCT> cn_features;
-  tesseract::Classify::ExtractFeatures(blob, nonlinear_norm,
-                                       &bl_features, &cn_features, results,
-                                       NULL);
+  tesseract::Classify::ExtractFeatures(blob, nonlinear_norm, &bl_features,
+                                       &cn_features, results, NULL);
   if (bl_features.empty() || cn_features.empty() ||
       bl_features.size() > MAX_NUM_INT_FEATURES ||
       cn_features.size() > MAX_NUM_INT_FEATURES) {
-    return false;  // Feature extraction failed.
+    return false; // Feature extraction failed.
   }
   memcpy(baseline_features, &bl_features[0],
          bl_features.size() * sizeof(bl_features[0]));

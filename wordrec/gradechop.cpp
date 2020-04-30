@@ -26,9 +26,9 @@
               I n c l u d e s
 ----------------------------------------------------------------------*/
 #include "gradechop.h"
-#include "wordrec.h"
 #include "chop.h"
 #include "ndminx.h"
+#include "wordrec.h"
 #include <math.h>
 
 /*----------------------------------------------------------------------
@@ -58,11 +58,10 @@ PRIORITY Wordrec::grade_split_length(register SPLIT *split) {
   if (split_length <= 0)
     grade = 0;
   else
-    grade = sqrt (split_length) * chop_split_dist_knob;
+    grade = sqrt(split_length) * chop_split_dist_knob;
 
-  return (MAX (0.0, grade));
+  return (MAX(0.0, grade));
 }
-
 
 /**********************************************************************
  * grade_sharpness
@@ -74,17 +73,16 @@ PRIORITY Wordrec::grade_split_length(register SPLIT *split) {
 PRIORITY Wordrec::grade_sharpness(register SPLIT *split) {
   PRIORITY grade;
 
-  grade = point_priority (split->point1) + point_priority (split->point2);
+  grade = point_priority(split->point1) + point_priority(split->point2);
 
   if (grade < -360.0)
     grade = 0;
   else
     grade += 360.0;
 
-  grade *= chop_sharpness_knob;       /* Values 0 to -360 */
+  grade *= chop_sharpness_knob; /* Values 0 to -360 */
 
   return (grade);
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

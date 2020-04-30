@@ -1,13 +1,13 @@
 #include "validator.h"
 
 #include <algorithm>
+#include <iterator>
 #include <unordered_map>
 #include <vector>
-#include <iterator>
 
 #include "icuerrorcode.h"
-#include "unicode/uchar.h"    // From libicu
-#include "unicode/uscript.h"  // From libicu
+#include "unicode/uchar.h"   // From libicu
+#include "unicode/uscript.h" // From libicu
 #include "validate_grapheme.h"
 #include "validate_indic.h"
 #include "validate_khmer.h"
@@ -32,8 +32,8 @@ const char32 Validator::kInvalid = 0xfffd;
 // input, without discarding invalid text.
 /* static */
 bool Validator::ValidateCleanAndSegment(
-    GraphemeNormMode g_mode, bool report_errors, const std::vector<char32>& src,
-    std::vector<std::vector<char32>>* dest) {
+    GraphemeNormMode g_mode, bool report_errors, const std::vector<char32> &src,
+    std::vector<std::vector<char32>> *dest) {
   ValidateGrapheme g_validator(ViramaScript::kNonVirama, report_errors);
   std::vector<std::vector<char32>> graphemes;
   ViramaScript script = MostFrequentViramaScript(src);
@@ -52,7 +52,7 @@ bool Validator::ValidateCleanAndSegment(
         GraphemeNormMode::kGlyphSplit, src, &graphemes);
     std::unique_ptr<Validator> validator(
         ScriptValidator(script, report_errors));
-    for (const auto& grapheme : graphemes) {
+    for (const auto &grapheme : graphemes) {
       if (!validator->ValidateCleanAndSegmentInternal(g_mode, grapheme, dest)) {
         success = false;
       }
@@ -65,18 +65,16 @@ bool Validator::ValidateCleanAndSegment(
 std::unique_ptr<Validator> Validator::ScriptValidator(ViramaScript script,
                                                       bool report_errors) {
   switch (script) {
-    case ViramaScript::kNonVirama:
-      return std::unique_ptr<Validator>(
-          new ValidateGrapheme(script, report_errors));
-    case ViramaScript::kMyanmar:
-      return std::unique_ptr<Validator>(
-          new ValidateMyanmar(script, report_errors));
-    case ViramaScript::kKhmer:
-      return std::unique_ptr<Validator>(
-          new ValidateKhmer(script, report_errors));
-    default:
-      return std::unique_ptr<Validator>(
-          new ValidateIndic(script, report_errors));
+  case ViramaScript::kNonVirama:
+    return std::unique_ptr<Validator>(
+        new ValidateGrapheme(script, report_errors));
+  case ViramaScript::kMyanmar:
+    return std::unique_ptr<Validator>(
+        new ValidateMyanmar(script, report_errors));
+  case ViramaScript::kKhmer:
+    return std::unique_ptr<Validator>(new ValidateKhmer(script, report_errors));
+  default:
+    return std::unique_ptr<Validator>(new ValidateIndic(script, report_errors));
   }
 }
 
@@ -86,8 +84,8 @@ std::unique_ptr<Validator> Validator::ScriptValidator(ViramaScript script,
 // In case of validation error, returns false and returns as much as possible
 // of the input, without discarding invalid text.
 bool Validator::ValidateCleanAndSegmentInternal(
-    GraphemeNormMode g_mode, const std::vector<char32>& src,
-    std::vector<std::vector<char32>>* dest) {
+    GraphemeNormMode g_mode, const std::vector<char32> &src,
+    std::vector<std::vector<char32>> *dest) {
   Clear();
   ComputeClassCodes(src);
   bool success = true;
@@ -103,12 +101,13 @@ bool Validator::ValidateCleanAndSegmentInternal(
 
 // Moves the results from parts_ or output_ to dest according to g_mode.
 void Validator::MoveResultsToDest(GraphemeNormMode g_mode,
-                                  std::vector<std::vector<char32>>* dest) {
+                                  std::vector<std::vector<char32>> *dest) {
   if (g_mode == GraphemeNormMode::kIndividualUnicodes) {
     // Append each element of the combined output_ that we made as a new vector
     // in dest.
     dest->reserve(dest->size() + output_.size());
-    for (char32 ch : output_) dest->push_back({ch});
+    for (char32 ch : output_)
+      dest->push_back({ch});
   } else if (g_mode == GraphemeNormMode::kGlyphSplit) {
     // Append all the parts_ that we made onto dest.
     std::move(parts_.begin(), parts_.end(), std::back_inserter(*dest));
@@ -116,23 +115,23 @@ void Validator::MoveResultsToDest(GraphemeNormMode g_mode,
     // Append the combined output_ that we made onto dest as one new vector.
     dest->push_back(std::vector<char32>());
     output_.swap(dest->back());
-  } else {  // kNone.
+  } else { // kNone.
     // Append the combined output_ that we made onto the last existing element
     // of dest.
     dest->back().insert(dest->back().end(), output_.begin(), output_.end());
   }
 }
 
-bool CmpPairSecond(const std::pair<int, int>& p1,
-                   const std::pair<int, int>& p2) {
+bool CmpPairSecond(const std::pair<int, int> &p1,
+                   const std::pair<int, int> &p2) {
   return p1.second < p2.second;
 }
 
 // Computes and returns the ViramaScript corresponding to the most frequent
 // virama-using script in the input, or kNonVirama if none are present.
 /* static */
-ViramaScript Validator::MostFrequentViramaScript(
-    const std::vector<char32>& utf32) {
+ViramaScript
+Validator::MostFrequentViramaScript(const std::vector<char32> &utf32) {
   std::unordered_map<int, int> histogram;
   for (char32 ch : utf32) {
     // Determine the codepage base. For the Indic scripts, and Khmer, it is
@@ -187,7 +186,7 @@ bool Validator::IsSubscriptScript() const {
          script_ == ViramaScript::kMyanmar || script_ == ViramaScript::kKhmer;
 }
 
-void Validator::ComputeClassCodes(const std::vector<char32>& text) {
+void Validator::ComputeClassCodes(const std::vector<char32> &text) {
   codes_.reserve(text.size());
   for (char32 c : text) {
     codes_.push_back(std::make_pair(UnicodeToCharClass(c), c));
@@ -203,4 +202,4 @@ void Validator::Clear() {
   output_used_ = 0;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

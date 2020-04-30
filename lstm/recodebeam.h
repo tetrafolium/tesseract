@@ -67,64 +67,47 @@ namespace tesseract {
 // node, and constrain what can follow, to enforce the rules explained above.
 // We therefore have 3 different types of node determined by what can follow:
 enum NodeContinuation {
-  NC_ANYTHING,  // This node used just its own score, so anything can follow.
-  NC_ONLY_DUP,  // The current node combined another score with the score for
-                // itself, without a stand-alone duplicate before, so must be
-                // followed by a stand-alone duplicate.
-  NC_NO_DUP,    // The current node combined another score with the score for
-                // itself, after a stand-alone, so can only be followed by
-                // something other than a duplicate of the current node.
+  NC_ANYTHING, // This node used just its own score, so anything can follow.
+  NC_ONLY_DUP, // The current node combined another score with the score for
+               // itself, without a stand-alone duplicate before, so must be
+               // followed by a stand-alone duplicate.
+  NC_NO_DUP,   // The current node combined another score with the score for
+               // itself, after a stand-alone, so can only be followed by
+               // something other than a duplicate of the current node.
   NC_COUNT
 };
 
 // Enum describing the top-n status of a code.
 enum TopNState {
-  TN_TOP2,      // Winner or 2nd.
-  TN_TOPN,      // Runner up in top-n, but not 1st or 2nd.
-  TN_ALSO_RAN,  // Not in the top-n.
+  TN_TOP2,     // Winner or 2nd.
+  TN_TOPN,     // Runner up in top-n, but not 1st or 2nd.
+  TN_ALSO_RAN, // Not in the top-n.
   TN_COUNT
 };
 
 // Lattice element for Re-encode beam search.
 struct RecodeNode {
   RecodeNode()
-      : code(-1),
-        unichar_id(INVALID_UNICHAR_ID),
-        permuter(TOP_CHOICE_PERM),
-        start_of_dawg(false),
-        start_of_word(false),
-        end_of_word(false),
-        duplicate(false),
-        certainty(0.0f),
-        score(0.0f),
-        prev(NULL),
-        dawgs(NULL),
+      : code(-1), unichar_id(INVALID_UNICHAR_ID), permuter(TOP_CHOICE_PERM),
+        start_of_dawg(false), start_of_word(false), end_of_word(false),
+        duplicate(false), certainty(0.0f), score(0.0f), prev(NULL), dawgs(NULL),
         code_hash(0) {}
   RecodeNode(int c, int uni_id, PermuterType perm, bool dawg_start,
              bool word_start, bool end, bool dup, float cert, float s,
-             const RecodeNode* p, DawgPositionVector* d, uinT64 hash)
-      : code(c),
-        unichar_id(uni_id),
-        permuter(perm),
-        start_of_dawg(dawg_start),
-        start_of_word(word_start),
-        end_of_word(end),
-        duplicate(dup),
-        certainty(cert),
-        score(s),
-        prev(p),
-        dawgs(d),
-        code_hash(hash) {}
+             const RecodeNode *p, DawgPositionVector *d, uinT64 hash)
+      : code(c), unichar_id(uni_id), permuter(perm), start_of_dawg(dawg_start),
+        start_of_word(word_start), end_of_word(end), duplicate(dup),
+        certainty(cert), score(s), prev(p), dawgs(d), code_hash(hash) {}
   // NOTE: If we could use C++11, then this would be a move constructor.
   // Instead we have copy constructor that does a move!! This is because we
   // don't want to copy the whole DawgPositionVector each time, and true
   // copying isn't necessary for this struct. It does get moved around a lot
   // though inside the heap and during heap push, hence the move semantics.
-  RecodeNode(RecodeNode& src) : dawgs(NULL) {
+  RecodeNode(RecodeNode &src) : dawgs(NULL) {
     *this = src;
     ASSERT_HOST(src.dawgs == NULL);
   }
-  RecodeNode& operator=(RecodeNode& src) {
+  RecodeNode &operator=(RecodeNode &src) {
     delete dawgs;
     memcpy(this, &src, sizeof(src));
     src.dawgs = NULL;
@@ -132,7 +115,7 @@ struct RecodeNode {
   }
   ~RecodeNode() { delete dawgs; }
   // Prints details of the node.
-  void Print(int null_char, const UNICHARSET& unicharset, int depth) const;
+  void Print(int null_char, const UNICHARSET &unicharset, int depth) const;
 
   // The re-encoded code here = index to network output.
   int code;
@@ -161,9 +144,9 @@ struct RecodeNode {
   // Total certainty of the path to this position.
   float score;
   // The previous node in this chain. Borrowed pointer.
-  const RecodeNode* prev;
+  const RecodeNode *prev;
   // The currently active dawgs at this position. Owned pointer.
-  DawgPositionVector* dawgs;
+  DawgPositionVector *dawgs;
   // A hash of all codes in the prefix and this->code as well. Used for
   // duplicate path removal.
   uinT64 code_hash;
@@ -174,37 +157,37 @@ typedef GenericHeap<RecodePair> RecodeHeap;
 
 // Class that holds the entire beam search for recognition of a text line.
 class RecodeBeamSearch {
- public:
+public:
   // Borrows the pointer, which is expected to survive until *this is deleted.
-  RecodeBeamSearch(const UnicharCompress& recoder, int null_char,
-                   bool simple_text, Dict* dict);
+  RecodeBeamSearch(const UnicharCompress &recoder, int null_char,
+                   bool simple_text, Dict *dict);
 
   // Decodes the set of network outputs, storing the lattice internally.
   // If charset is not null, it enables detailed debugging of the beam search.
-  void Decode(const NetworkIO& output, double dict_ratio, double cert_offset,
-              double worst_dict_cert, const UNICHARSET* charset);
-  void Decode(const GENERIC_2D_ARRAY<float>& output, double dict_ratio,
+  void Decode(const NetworkIO &output, double dict_ratio, double cert_offset,
+              double worst_dict_cert, const UNICHARSET *charset);
+  void Decode(const GENERIC_2D_ARRAY<float> &output, double dict_ratio,
               double cert_offset, double worst_dict_cert,
-              const UNICHARSET* charset);
+              const UNICHARSET *charset);
 
   // Returns the best path as labels/scores/xcoords similar to simple CTC.
-  void ExtractBestPathAsLabels(GenericVector<int>* labels,
-                               GenericVector<int>* xcoords) const;
+  void ExtractBestPathAsLabels(GenericVector<int> *labels,
+                               GenericVector<int> *xcoords) const;
   // Returns the best path as unichar-ids/certs/ratings/xcoords skipping
   // duplicates, nulls and intermediate parts.
-  void ExtractBestPathAsUnicharIds(bool debug, const UNICHARSET* unicharset,
-                                   GenericVector<int>* unichar_ids,
-                                   GenericVector<float>* certs,
-                                   GenericVector<float>* ratings,
-                                   GenericVector<int>* xcoords) const;
+  void ExtractBestPathAsUnicharIds(bool debug, const UNICHARSET *unicharset,
+                                   GenericVector<int> *unichar_ids,
+                                   GenericVector<float> *certs,
+                                   GenericVector<float> *ratings,
+                                   GenericVector<int> *xcoords) const;
 
   // Returns the best path as a set of WERD_RES.
-  void ExtractBestPathAsWords(const TBOX& line_box, float scale_factor,
-                              bool debug, const UNICHARSET* unicharset,
-                              PointerVector<WERD_RES>* words);
+  void ExtractBestPathAsWords(const TBOX &line_box, float scale_factor,
+                              bool debug, const UNICHARSET *unicharset,
+                              PointerVector<WERD_RES> *words);
 
   // Generates debug output of the content of the beams after a Decode.
-  void DebugBeams(const UNICHARSET& unicharset) const;
+  void DebugBeams(const UNICHARSET &unicharset) const;
 
   // Clipping value for certainty inside Tesseract. Reflects the minimum value
   // of certainty that will be returned by ExtractBestPathAsUnicharIds.
@@ -229,7 +212,7 @@ class RecodeBeamSearch {
     return (is_dawg * NC_COUNT + cont) * kNumLengths + length;
   }
 
- private:
+private:
   // Struct for the Re-encode beam search. This struct holds the data for
   // a single time-step position of the output. Use a PointerVector<RecodeBeam>
   // to hold all the timesteps and prevent reallocation of the individual heaps.
@@ -265,104 +248,104 @@ class RecodeBeamSearch {
   typedef KDPairInc<float, int> TopPair;
 
   // Generates debug output of the content of a single beam position.
-  void DebugBeamPos(const UNICHARSET& unicharset, const RecodeHeap& heap) const;
+  void DebugBeamPos(const UNICHARSET &unicharset, const RecodeHeap &heap) const;
 
   // Returns the given best_nodes as unichar-ids/certs/ratings/xcoords skipping
   // duplicates, nulls and intermediate parts.
   static void ExtractPathAsUnicharIds(
-      const GenericVector<const RecodeNode*>& best_nodes,
-      GenericVector<int>* unichar_ids, GenericVector<float>* certs,
-      GenericVector<float>* ratings, GenericVector<int>* xcoords);
+      const GenericVector<const RecodeNode *> &best_nodes,
+      GenericVector<int> *unichar_ids, GenericVector<float> *certs,
+      GenericVector<float> *ratings, GenericVector<int> *xcoords);
 
   // Sets up a word with the ratings matrix and fake blobs with boxes in the
   // right places.
-  WERD_RES* InitializeWord(bool leading_space, const TBOX& line_box,
+  WERD_RES *InitializeWord(bool leading_space, const TBOX &line_box,
                            int word_start, int word_end, float space_certainty,
-                           const UNICHARSET* unicharset,
-                           const GenericVector<int>& xcoords,
+                           const UNICHARSET *unicharset,
+                           const GenericVector<int> &xcoords,
                            float scale_factor);
 
   // Fills top_n_flags_ with bools that are true iff the corresponding output
   // is one of the top_n.
-  void ComputeTopN(const float* outputs, int num_outputs, int top_n);
+  void ComputeTopN(const float *outputs, int num_outputs, int top_n);
 
   // Adds the computation for the current time-step to the beam. Call at each
   // time-step in sequence from left to right. outputs is the activation vector
   // for the current timestep.
-  void DecodeStep(const float* outputs, int t, double dict_ratio,
+  void DecodeStep(const float *outputs, int t, double dict_ratio,
                   double cert_offset, double worst_dict_cert,
-                  const UNICHARSET* charset);
+                  const UNICHARSET *charset);
 
   // Adds to the appropriate beams the legal (according to recoder)
   // continuations of context prev, which is from the given index to beams_,
   // using the given network outputs to provide scores to the choices. Uses only
   // those choices for which top_n_flags[code] == top_n_flag.
-  void ContinueContext(const RecodeNode* prev, int index, const float* outputs,
+  void ContinueContext(const RecodeNode *prev, int index, const float *outputs,
                        TopNState top_n_flag, double dict_ratio,
                        double cert_offset, double worst_dict_cert,
-                       RecodeBeam* step);
+                       RecodeBeam *step);
   // Continues for a new unichar, using dawg or non-dawg as per flag.
   void ContinueUnichar(int code, int unichar_id, float cert,
                        float worst_dict_cert, float dict_ratio, bool use_dawgs,
-                       NodeContinuation cont, const RecodeNode* prev,
-                       RecodeBeam* step);
+                       NodeContinuation cont, const RecodeNode *prev,
+                       RecodeBeam *step);
   // Adds a RecodeNode composed of the args to the correct heap in step if
   // unichar_id is a valid dictionary continuation of whatever is in prev.
   void ContinueDawg(int code, int unichar_id, float cert, NodeContinuation cont,
-                    const RecodeNode* prev, RecodeBeam* step);
+                    const RecodeNode *prev, RecodeBeam *step);
   // Sets the correct best_initial_dawgs_ with a RecodeNode composed of the args
   // if better than what is already there.
   void PushInitialDawgIfBetter(int code, int unichar_id, PermuterType permuter,
                                bool start, bool end, float cert,
-                               NodeContinuation cont, const RecodeNode* prev,
-                               RecodeBeam* step);
+                               NodeContinuation cont, const RecodeNode *prev,
+                               RecodeBeam *step);
   // Adds a RecodeNode composed of the args to the correct heap in step for
   // partial unichar or duplicate if there is room or if better than the
   // current worst element if already full.
   void PushDupOrNoDawgIfBetter(int length, bool dup, int code, int unichar_id,
                                float cert, float worst_dict_cert,
                                float dict_ratio, bool use_dawgs,
-                               NodeContinuation cont, const RecodeNode* prev,
-                               RecodeBeam* step);
+                               NodeContinuation cont, const RecodeNode *prev,
+                               RecodeBeam *step);
   // Adds a RecodeNode composed of the args to the correct heap in step if there
   // is room or if better than the current worst element if already full.
   void PushHeapIfBetter(int max_size, int code, int unichar_id,
                         PermuterType permuter, bool dawg_start, bool word_start,
-                        bool end, bool dup, float cert, const RecodeNode* prev,
-                        DawgPositionVector* d, RecodeHeap* heap);
+                        bool end, bool dup, float cert, const RecodeNode *prev,
+                        DawgPositionVector *d, RecodeHeap *heap);
   // Adds a RecodeNode to heap if there is room
   // or if better than the current worst element if already full.
-  void PushHeapIfBetter(int max_size, RecodeNode* node, RecodeHeap* heap);
+  void PushHeapIfBetter(int max_size, RecodeNode *node, RecodeHeap *heap);
   // Searches the heap for an entry matching new_node, and updates the entry
   // with reshuffle if needed. Returns true if there was a match.
-  bool UpdateHeapIfMatched(RecodeNode* new_node, RecodeHeap* heap);
+  bool UpdateHeapIfMatched(RecodeNode *new_node, RecodeHeap *heap);
   // Computes and returns the code-hash for the given code and prev.
-  uinT64 ComputeCodeHash(int code, bool dup, const RecodeNode* prev) const;
+  uinT64 ComputeCodeHash(int code, bool dup, const RecodeNode *prev) const;
   // Backtracks to extract the best path through the lattice that was built
   // during Decode. On return the best_nodes vector essentially contains the set
   // of code, score pairs that make the optimal path with the constraint that
   // the recoder can decode the code sequence back to a sequence of unichar-ids.
-  void ExtractBestPaths(GenericVector<const RecodeNode*>* best_nodes,
-                        GenericVector<const RecodeNode*>* second_nodes) const;
+  void ExtractBestPaths(GenericVector<const RecodeNode *> *best_nodes,
+                        GenericVector<const RecodeNode *> *second_nodes) const;
   // Helper backtracks through the lattice from the given node, storing the
   // path and reversing it.
-  void ExtractPath(const RecodeNode* node,
-                   GenericVector<const RecodeNode*>* path) const;
+  void ExtractPath(const RecodeNode *node,
+                   GenericVector<const RecodeNode *> *path) const;
   // Helper prints debug information on the given lattice path.
-  void DebugPath(const UNICHARSET* unicharset,
-                 const GenericVector<const RecodeNode*>& path) const;
+  void DebugPath(const UNICHARSET *unicharset,
+                 const GenericVector<const RecodeNode *> &path) const;
   // Helper prints debug information on the given unichar path.
-  void DebugUnicharPath(const UNICHARSET* unicharset,
-                        const GenericVector<const RecodeNode*>& path,
-                        const GenericVector<int>& unichar_ids,
-                        const GenericVector<float>& certs,
-                        const GenericVector<float>& ratings,
-                        const GenericVector<int>& xcoords) const;
+  void DebugUnicharPath(const UNICHARSET *unicharset,
+                        const GenericVector<const RecodeNode *> &path,
+                        const GenericVector<int> &unichar_ids,
+                        const GenericVector<float> &certs,
+                        const GenericVector<float> &ratings,
+                        const GenericVector<int> &xcoords) const;
 
   static const int kBeamWidths[RecodedCharID::kMaxCodeLen + 1];
 
   // The encoder/decoder that we will be using.
-  const UnicharCompress& recoder_;
+  const UnicharCompress &recoder_;
   // The beam for each timestep in the output.
   PointerVector<RecodeBeam> beam_;
   // The number of timesteps valid in beam_;
@@ -376,7 +359,7 @@ class RecodeBeamSearch {
   // Heap used to compute the top_n_flags_.
   GenericHeap<TopPair> top_heap_;
   // Borrowed pointer to the dictionary to use in the search.
-  Dict* dict_;
+  Dict *dict_;
   // True if the language is space-delimited, which is true for most languages
   // except chi*, jpn, tha.
   bool space_delimited_;
@@ -387,6 +370,6 @@ class RecodeBeamSearch {
   int null_char_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // THIRD_PARTY_TESSERACT_LSTM_RECODEBEAM_H_
+#endif // THIRD_PARTY_TESSERACT_LSTM_RECODEBEAM_H_

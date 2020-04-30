@@ -17,8 +17,8 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include "blobs.h"
 #include "boxword.h"
+#include "blobs.h"
 #include "normalis.h"
 #include "ocrblock.h"
 #include "pageres.h"
@@ -30,22 +30,18 @@ namespace tesseract {
 // the word bounding box.
 const int kBoxClipTolerance = 2;
 
-BoxWord::BoxWord() : length_(0) {
-}
+BoxWord::BoxWord() : length_(0) {}
 
-BoxWord::BoxWord(const BoxWord& src) {
-  CopyFrom(src);
-}
+BoxWord::BoxWord(const BoxWord &src) { CopyFrom(src); }
 
-BoxWord::~BoxWord() {
-}
+BoxWord::~BoxWord() {}
 
-BoxWord& BoxWord::operator=(const BoxWord& src) {
+BoxWord &BoxWord::operator=(const BoxWord &src) {
   CopyFrom(src);
   return *this;
 }
 
-void BoxWord::CopyFrom(const BoxWord& src) {
+void BoxWord::CopyFrom(const BoxWord &src) {
   bbox_ = src.bbox_;
   length_ = src.length_;
   boxes_.clear();
@@ -56,19 +52,19 @@ void BoxWord::CopyFrom(const BoxWord& src) {
 
 // Factory to build a BoxWord from a TWERD using the DENORMs on each blob to
 // switch back to original image coordinates.
-BoxWord* BoxWord::CopyFromNormalized(TWERD* tessword) {
-  BoxWord* boxword = new BoxWord();
+BoxWord *BoxWord::CopyFromNormalized(TWERD *tessword) {
+  BoxWord *boxword = new BoxWord();
   // Count the blobs.
   boxword->length_ = tessword->NumBlobs();
   // Allocate memory.
   boxword->boxes_.reserve(boxword->length_);
 
   for (int b = 0; b < boxword->length_; ++b) {
-    TBLOB* tblob = tessword->blobs[b];
+    TBLOB *tblob = tessword->blobs[b];
     TBOX blob_box;
-    for (TESSLINE* outline = tblob->outlines; outline != NULL;
+    for (TESSLINE *outline = tblob->outlines; outline != NULL;
          outline = outline->next) {
-      EDGEPT* edgept = outline->loop;
+      EDGEPT *edgept = outline->loop;
       // Iterate over the edges.
       do {
         if (!edgept->IsHidden() || !edgept->prev->IsHidden()) {
@@ -92,12 +88,12 @@ BoxWord* BoxWord::CopyFromNormalized(TWERD* tessword) {
 // Clean up the bounding boxes from the polygonal approximation by
 // expanding slightly, then clipping to the blobs from the original_word
 // that overlap. If not null, the block provides the inverse rotation.
-void BoxWord::ClipToOriginalWord(const BLOCK* block, WERD* original_word) {
+void BoxWord::ClipToOriginalWord(const BLOCK *block, WERD *original_word) {
   for (int i = 0; i < length_; ++i) {
     TBOX box = boxes_[i];
     // Expand by a single pixel, as the poly approximation error is 1 pixel.
-    box = TBOX(box.left() - 1, box.bottom() - 1,
-               box.right() + 1, box.top() + 1);
+    box =
+        TBOX(box.left() - 1, box.bottom() - 1, box.right() + 1, box.top() + 1);
     // Now find the original box that matches.
     TBOX original_box;
     C_BLOB_IT b_it(original_word->cblob_list());
@@ -148,7 +144,7 @@ void BoxWord::MergeBoxes(int start, int end) {
 
 // Inserts a new box before the given index.
 // Recomputes the bounding box.
-void BoxWord::InsertBox(int index, const TBOX& box) {
+void BoxWord::InsertBox(int index, const TBOX &box) {
   if (index < length_)
     boxes_.insert(box, index);
   else
@@ -159,7 +155,7 @@ void BoxWord::InsertBox(int index, const TBOX& box) {
 
 // Changes the box at the given index to the new box.
 // Recomputes the bounding box.
-void BoxWord::ChangeBox(int index, const TBOX& box) {
+void BoxWord::ChangeBox(int index, const TBOX &box) {
   boxes_[index] = box;
   ComputeBoundingBox();
 }
@@ -190,8 +186,8 @@ void BoxWord::ComputeBoundingBox() {
 // This and other putatively are the same, so call the (permanent) callback
 // for each blob index where the bounding boxes match.
 // The callback is deleted on completion.
-void BoxWord::ProcessMatchedBlobs(const TWERD& other,
-                                  TessCallback1<int>* cb) const {
+void BoxWord::ProcessMatchedBlobs(const TWERD &other,
+                                  TessCallback1<int> *cb) const {
   for (int i = 0; i < length_ && i < other.NumBlobs(); ++i) {
     TBOX blob_box = other.blobs[i]->bounding_box();
     if (blob_box == boxes_[i])
@@ -200,4 +196,4 @@ void BoxWord::ProcessMatchedBlobs(const TWERD& other,
   delete cb;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

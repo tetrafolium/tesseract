@@ -21,7 +21,6 @@
 // normalizes the text according to command-line options and generates
 // a unicharset.
 
-#include <cstdlib>
 #include "boxread.h"
 #include "commandlineflags.h"
 #include "genericvector.h"
@@ -31,6 +30,7 @@
 #include "tprintf.h"
 #include "unicharset.h"
 #include "unicharset_training_utils.h"
+#include <cstdlib>
 
 STRING_PARAM_FLAG(output_unicharset, "unicharset", "Output file path");
 INT_PARAM_FLAG(norm_mode, 1,
@@ -41,18 +41,19 @@ namespace tesseract {
 
 // Helper normalizes and segments the given strings according to norm_mode, and
 // adds the segmented parts to unicharset.
-static void AddStringsToUnicharset(const GenericVector<STRING>& strings,
-                                   int norm_mode, UNICHARSET* unicharset) {
+static void AddStringsToUnicharset(const GenericVector<STRING> &strings,
+                                   int norm_mode, UNICHARSET *unicharset) {
   for (int i = 0; i < strings.size(); ++i) {
     std::vector<string> normalized;
     if (NormalizeCleanAndSegmentUTF8(UnicodeNormMode::kNFC, OCRNorm::kNone,
                                      static_cast<GraphemeNormMode>(norm_mode),
                                      /*report_errors*/ true,
                                      strings[i].string(), &normalized)) {
-      for (const string& normed : normalized) {
+      for (const string &normed : normalized) {
 
-       // normed is a UTF-8 encoded string
-        if (normed.empty() || IsUTF8Whitespace(normed.c_str())) continue;
+        // normed is a UTF-8 encoded string
+        if (normed.empty() || IsUTF8Whitespace(normed.c_str()))
+          continue;
         unicharset->unichar_insert(normed.c_str());
       }
     } else {
@@ -61,16 +62,17 @@ static void AddStringsToUnicharset(const GenericVector<STRING>& strings,
   }
 }
 
-int Main(int argc, char** argv) {
+int Main(int argc, char **argv) {
   UNICHARSET unicharset;
   // Load input files
   for (int arg = 1; arg < argc; ++arg) {
     STRING file_data = tesseract::ReadFile(argv[arg], /*reader*/ nullptr);
-    if (file_data.length() == 0) continue;
+    if (file_data.length() == 0)
+      continue;
     GenericVector<STRING> texts;
     if (ReadMemBoxes(-1, /*skip_blanks*/ true, &file_data[0],
-                     /*continue_on_failure*/ false, /*boxes*/ nullptr,
-                     &texts, /*box_texts*/ nullptr, /*pages*/ nullptr)) {
+                     /*continue_on_failure*/ false, /*boxes*/ nullptr, &texts,
+                     /*box_texts*/ nullptr, /*pages*/ nullptr)) {
       tprintf("Extracting unicharset from box file %s\n", argv[arg]);
     } else {
       tprintf("Extracting unicharset from plain text file %s\n", argv[arg]);
@@ -92,17 +94,16 @@ int Main(int argc, char** argv) {
   return EXIT_SUCCESS;
 }
 
-}  // namespace tesseract
+} // namespace tesseract
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   if (argc > 1) {
     tesseract::ParseCommandLineFlags(argv[0], &argc, &argv, true);
   }
   if (argc < 2) {
-    tprintf(
-        "Usage: %s [--output_unicharset filename] [--norm_mode mode]"
-        " box_or_text_file [...]\n",
-        argv[0]);
+    tprintf("Usage: %s [--output_unicharset filename] [--norm_mode mode]"
+            " box_or_text_file [...]\n",
+            argv[0]);
     tprintf("Where mode means:\n");
     tprintf(" 1=combine graphemes (use for Latin and other simple scripts)\n");
     tprintf(" 2=split graphemes (use for Indic/Khmer/Myanmar)\n");

@@ -17,10 +17,10 @@
  *
  **********************************************************************/
 
-#include "scanedg.h"
+#include "edgblob.h"
 #include "drawedg.h"
 #include "edgloop.h"
-#include "edgblob.h"
+#include "scanedg.h"
 
 // Include automatically generated configuration file if running autoconf.
 #ifdef HAVE_CONFIG_H
@@ -40,22 +40,17 @@ EXTERN INT_VAR(edges_max_children_per_outline, 10,
                "Max number of children inside a character outline");
 EXTERN INT_VAR(edges_max_children_layers, 5,
                "Max layers of nested children inside a character outline");
-EXTERN BOOL_VAR(edges_debug, FALSE,
-                "turn on debugging for this module");
-
+EXTERN BOOL_VAR(edges_debug, FALSE, "turn on debugging for this module");
 
 EXTERN INT_VAR(edges_children_per_grandchild, 10,
                "Importance ratio for chucking outlines");
-EXTERN INT_VAR(edges_children_count_limit, 45,
-               "Max holes allowed in blob");
+EXTERN INT_VAR(edges_children_count_limit, 45, "Max holes allowed in blob");
 EXTERN BOOL_VAR(edges_children_fix, FALSE,
                 "Remove boxy parents of char-like children");
-EXTERN INT_VAR(edges_min_nonhole, 12,
-               "Min pixels for potential char in box");
+EXTERN INT_VAR(edges_min_nonhole, 12, "Min pixels for potential char in box");
 EXTERN INT_VAR(edges_patharea_ratio, 40,
                "Max lensq/area for acceptable child outline");
-EXTERN double_VAR(edges_childarea, 0.5,
-                  "Min area fraction of child outline");
+EXTERN double_VAR(edges_childarea, 0.5, "Min area fraction of child outline");
 EXTERN double_VAR(edges_boxarea, 0.875,
                   "Min area fraction of grandchild for box");
 
@@ -65,16 +60,15 @@ EXTERN double_VAR(edges_boxarea, 0.875,
  * Construct an array of buckets for associating outlines into blobs.
  */
 
-OL_BUCKETS::OL_BUCKETS(
-ICOORD bleft,                    // corners
-ICOORD tright):         bl(bleft), tr(tright) {
-  bxdim =(tright.x() - bleft.x()) / BUCKETSIZE + 1;
-  bydim =(tright.y() - bleft.y()) / BUCKETSIZE + 1;
-                                 // make array
+OL_BUCKETS::OL_BUCKETS(ICOORD bleft, // corners
+                       ICOORD tright)
+    : bl(bleft), tr(tright) {
+  bxdim = (tright.x() - bleft.x()) / BUCKETSIZE + 1;
+  bydim = (tright.y() - bleft.y()) / BUCKETSIZE + 1;
+  // make array
   buckets = new C_OUTLINE_LIST[bxdim * bydim];
   index = 0;
 }
-
 
 /**
  * @name OL_BUCKETS::operator(
@@ -83,13 +77,12 @@ ICOORD tright):         bl(bleft), tr(tright) {
  * given pixel coordinates.
  */
 
-C_OUTLINE_LIST *
-OL_BUCKETS::operator()(       // array access
-inT16 x,                      // image coords
-inT16 y) {
-  return &buckets[(y-bl.y()) / BUCKETSIZE * bxdim + (x-bl.x()) / BUCKETSIZE];
+C_OUTLINE_LIST *OL_BUCKETS::operator()( // array access
+    inT16 x,                            // image coords
+    inT16 y) {
+  return &buckets[(y - bl.y()) / BUCKETSIZE * bxdim +
+                  (x - bl.x()) / BUCKETSIZE];
 }
-
 
 /**
  * @name OL_BUCKETS::outline_complexity
@@ -111,27 +104,26 @@ inT16 y) {
  * flattening out boxed or reversed video text regions.
  */
 
-inT32 OL_BUCKETS::outline_complexity(
-                                     C_OUTLINE *outline,   // parent outline
-                                     inT32 max_count,      // max output
-                                     inT16 depth           // recurion depth
-                                    ) {
-  inT16 xmin, xmax;              // coord limits
+inT32 OL_BUCKETS::outline_complexity(C_OUTLINE *outline, // parent outline
+                                     inT32 max_count,    // max output
+                                     inT16 depth         // recurion depth
+) {
+  inT16 xmin, xmax; // coord limits
   inT16 ymin, ymax;
-  inT16 xindex, yindex;          // current bucket
-  C_OUTLINE *child;              // current child
-  inT32 child_count;             // no of children
-  inT32 grandchild_count;        // no of grandchildren
-  C_OUTLINE_IT child_it;         // search iterator
+  inT16 xindex, yindex;   // current bucket
+  C_OUTLINE *child;       // current child
+  inT32 child_count;      // no of children
+  inT32 grandchild_count; // no of grandchildren
+  C_OUTLINE_IT child_it;  // search iterator
 
   TBOX olbox = outline->bounding_box();
-  xmin =(olbox.left() - bl.x()) / BUCKETSIZE;
-  xmax =(olbox.right() - bl.x()) / BUCKETSIZE;
-  ymin =(olbox.bottom() - bl.y()) / BUCKETSIZE;
-  ymax =(olbox.top() - bl.y()) / BUCKETSIZE;
+  xmin = (olbox.left() - bl.x()) / BUCKETSIZE;
+  xmax = (olbox.right() - bl.x()) / BUCKETSIZE;
+  ymin = (olbox.bottom() - bl.y()) / BUCKETSIZE;
+  ymax = (olbox.top() - bl.y()) / BUCKETSIZE;
   child_count = 0;
   grandchild_count = 0;
-  if (++depth > edges_max_children_layers)  // nested loops are too deep
+  if (++depth > edges_max_children_layers) // nested loops are too deep
     return max_count + depth;
 
   for (yindex = ymin; yindex <= ymax; yindex++) {
@@ -146,7 +138,7 @@ inT32 OL_BUCKETS::outline_complexity(
           continue;
         child_count++;
 
-        if (child_count > edges_max_children_per_outline) {   // too fragmented
+        if (child_count > edges_max_children_per_outline) { // too fragmented
           if (edges_debug)
             tprintf("Discard outline on child_count=%d > "
                     "max_children_per_outline=%d\n",
@@ -160,7 +152,7 @@ inT32 OL_BUCKETS::outline_complexity(
         if (remaining_count > 0)
           grandchild_count += edges_children_per_grandchild *
                               outline_complexity(child, remaining_count, depth);
-        if (child_count + grandchild_count > max_count) {  // too complex
+        if (child_count + grandchild_count > max_count) { // too complex
           if (edges_debug)
             tprintf("Disgard outline on child_count=%d + grandchild_count=%d "
                     "> max_count=%d\n",
@@ -173,36 +165,35 @@ inT32 OL_BUCKETS::outline_complexity(
   return child_count + grandchild_count;
 }
 
-
 /**
  * @name OL_BUCKETS::count_children
  *
  * Find number of descendants of this outline.
  */
 // TODO(rays) Merge with outline_complexity.
-inT32 OL_BUCKETS::count_children(                     // recursive count
-                                 C_OUTLINE *outline,  // parent outline
-                                 inT32 max_count      // max output
-                                ) {
-  BOOL8 parent_box;              // could it be boxy
-  inT16 xmin, xmax;              // coord limits
+inT32 OL_BUCKETS::count_children( // recursive count
+    C_OUTLINE *outline,           // parent outline
+    inT32 max_count               // max output
+) {
+  BOOL8 parent_box; // could it be boxy
+  inT16 xmin, xmax; // coord limits
   inT16 ymin, ymax;
-  inT16 xindex, yindex;          // current bucket
-  C_OUTLINE *child;              // current child
-  inT32 child_count;             // no of children
-  inT32 grandchild_count;        // no of grandchildren
-  inT32 parent_area;             // potential box
-  FLOAT32 max_parent_area;       // potential box
-  inT32 child_area;              // current child
-  inT32 child_length;            // current child
+  inT16 xindex, yindex;    // current bucket
+  C_OUTLINE *child;        // current child
+  inT32 child_count;       // no of children
+  inT32 grandchild_count;  // no of grandchildren
+  inT32 parent_area;       // potential box
+  FLOAT32 max_parent_area; // potential box
+  inT32 child_area;        // current child
+  inT32 child_length;      // current child
   TBOX olbox;
-  C_OUTLINE_IT child_it;         // search iterator
+  C_OUTLINE_IT child_it; // search iterator
 
   olbox = outline->bounding_box();
-  xmin =(olbox.left() - bl.x()) / BUCKETSIZE;
-  xmax =(olbox.right() - bl.x()) / BUCKETSIZE;
-  ymin =(olbox.bottom() - bl.y()) / BUCKETSIZE;
-  ymax =(olbox.top() - bl.y()) / BUCKETSIZE;
+  xmin = (olbox.left() - bl.x()) / BUCKETSIZE;
+  xmax = (olbox.right() - bl.x()) / BUCKETSIZE;
+  ymin = (olbox.bottom() - bl.y()) / BUCKETSIZE;
+  ymax = (olbox.top() - bl.y()) / BUCKETSIZE;
   child_count = 0;
   grandchild_count = 0;
   parent_area = 0;
@@ -219,8 +210,8 @@ inT32 OL_BUCKETS::count_children(                     // recursive count
         if (child != outline && *child < *outline) {
           child_count++;
           if (child_count <= max_count) {
-            int max_grand =(max_count - child_count) /
-                            edges_children_per_grandchild;
+            int max_grand =
+                (max_count - child_count) / edges_children_per_grandchild;
             if (max_grand > 0)
               grandchild_count += count_children(child, max_grand) *
                                   edges_children_per_grandchild;
@@ -230,7 +221,7 @@ inT32 OL_BUCKETS::count_children(                     // recursive count
           if (child_count + grandchild_count > max_count) {
             if (edges_debug)
               tprintf("Discarding parent with child count=%d, gc=%d\n",
-                      child_count,grandchild_count);
+                      child_count, grandchild_count);
             return child_count + grandchild_count;
           }
           if (parent_area == 0) {
@@ -287,30 +278,27 @@ inT32 OL_BUCKETS::count_children(                     // recursive count
   return child_count + grandchild_count;
 }
 
-
-
-
 /**
  * @name OL_BUCKETS::extract_children
  *
  * Find number of descendants of this outline.
  */
 
-void OL_BUCKETS::extract_children(                     // recursive count
-                                  C_OUTLINE *outline,  // parent outline
-                                  C_OUTLINE_IT *it     // destination iterator
-                                 ) {
-  inT16 xmin, xmax;              // coord limits
+void OL_BUCKETS::extract_children( // recursive count
+    C_OUTLINE *outline,            // parent outline
+    C_OUTLINE_IT *it               // destination iterator
+) {
+  inT16 xmin, xmax; // coord limits
   inT16 ymin, ymax;
-  inT16 xindex, yindex;          // current bucket
+  inT16 xindex, yindex; // current bucket
   TBOX olbox;
-  C_OUTLINE_IT child_it;         // search iterator
+  C_OUTLINE_IT child_it; // search iterator
 
   olbox = outline->bounding_box();
-  xmin =(olbox.left() - bl.x()) / BUCKETSIZE;
-  xmax =(olbox.right() - bl.x()) / BUCKETSIZE;
-  ymin =(olbox.bottom() - bl.y()) / BUCKETSIZE;
-  ymax =(olbox.top() - bl.y()) / BUCKETSIZE;
+  xmin = (olbox.left() - bl.x()) / BUCKETSIZE;
+  xmax = (olbox.right() - bl.x()) / BUCKETSIZE;
+  ymin = (olbox.bottom() - bl.y()) / BUCKETSIZE;
+  ymax = (olbox.top() - bl.y()) / BUCKETSIZE;
   for (yindex = ymin; yindex <= ymax; yindex++) {
     for (xindex = xmin; xindex <= xmax; xindex++) {
       child_it.set_to_list(&buckets[yindex * bxdim + xindex]);
@@ -324,26 +312,24 @@ void OL_BUCKETS::extract_children(                     // recursive count
   }
 }
 
-
 /**
  * @name extract_edges
  *
  * Run the edge detector over the block and return a list of blobs.
  */
 
-void extract_edges(Pix* pix,  // thresholded image
-                   BLOCK *block) {  // block to scan
-  C_OUTLINE_LIST outlines;       // outlines in block
+void extract_edges(Pix *pix,       // thresholded image
+                   BLOCK *block) { // block to scan
+  C_OUTLINE_LIST outlines;         // outlines in block
   C_OUTLINE_IT out_it = &outlines;
 
   block_edges(pix, block, &out_it);
-  ICOORD bleft;                  // block box
+  ICOORD bleft; // block box
   ICOORD tright;
   block->bounding_box(bleft, tright);
-                                 // make blobs
+  // make blobs
   outlines_to_blobs(block, bleft, tright, &outlines);
 }
-
 
 /**
  * @name outlines_to_blobs
@@ -351,18 +337,15 @@ void extract_edges(Pix* pix,  // thresholded image
  * Gather together outlines into blobs using the usual bucket sort.
  */
 
-void outlines_to_blobs(               // find blobs
-                       BLOCK *block,  // block to scan
-                       ICOORD bleft,
-                       ICOORD tright,
-                       C_OUTLINE_LIST *outlines) {
-                                 // make buckets
+void outlines_to_blobs( // find blobs
+    BLOCK *block,       // block to scan
+    ICOORD bleft, ICOORD tright, C_OUTLINE_LIST *outlines) {
+  // make buckets
   OL_BUCKETS buckets(bleft, tright);
 
   fill_buckets(outlines, &buckets);
   empty_buckets(block, &buckets);
 }
-
 
 /**
  * @name fill_buckets
@@ -370,24 +353,23 @@ void outlines_to_blobs(               // find blobs
  * Run the edge detector over the block and return a list of blobs.
  */
 
-void fill_buckets(                           // find blobs
-                  C_OUTLINE_LIST *outlines,  // outlines in block
-                  OL_BUCKETS *buckets        // output buckets
-                 ) {
-  TBOX ol_box;                     // outline box
-  C_OUTLINE_IT out_it = outlines;  // iterator
-  C_OUTLINE_IT bucket_it;          // iterator in bucket
-  C_OUTLINE *outline;              // current outline
+void fill_buckets(            // find blobs
+    C_OUTLINE_LIST *outlines, // outlines in block
+    OL_BUCKETS *buckets       // output buckets
+) {
+  TBOX ol_box;                    // outline box
+  C_OUTLINE_IT out_it = outlines; // iterator
+  C_OUTLINE_IT bucket_it;         // iterator in bucket
+  C_OUTLINE *outline;             // current outline
 
   for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
-    outline = out_it.extract();  // take off list
-                                 // get box
+    outline = out_it.extract(); // take off list
+                                // get box
     ol_box = outline->bounding_box();
-    bucket_it.set_to_list((*buckets) (ol_box.left(), ol_box.bottom()));
+    bucket_it.set_to_list((*buckets)(ol_box.left(), ol_box.bottom()));
     bucket_it.add_to_end(outline);
   }
 }
-
 
 /**
  * @name empty_buckets
@@ -395,30 +377,30 @@ void fill_buckets(                           // find blobs
  * Run the edge detector over the block and return a list of blobs.
  */
 
-void empty_buckets(                     // find blobs
-                   BLOCK *block,        // block to scan
-                   OL_BUCKETS *buckets  // output buckets
-                  ) {
-  BOOL8 good_blob;               // healthy blob
-  C_OUTLINE_LIST outlines;       // outlines in block
-                                 // iterator
+void empty_buckets(     // find blobs
+    BLOCK *block,       // block to scan
+    OL_BUCKETS *buckets // output buckets
+) {
+  BOOL8 good_blob;         // healthy blob
+  C_OUTLINE_LIST outlines; // outlines in block
+                           // iterator
   C_OUTLINE_IT out_it = &outlines;
   C_OUTLINE_IT bucket_it = buckets->start_scan();
-  C_OUTLINE_IT parent_it;        // parent outline
+  C_OUTLINE_IT parent_it; // parent outline
   C_BLOB_IT good_blobs = block->blob_list();
   C_BLOB_IT junk_blobs = block->reject_blobs();
 
   while (!bucket_it.empty()) {
     out_it.set_to_list(&outlines);
     do {
-      parent_it = bucket_it;     // find outermost
+      parent_it = bucket_it; // find outermost
       do {
         bucket_it.forward();
       } while (!bucket_it.at_first() &&
                !(*parent_it.data() < *bucket_it.data()));
     } while (!bucket_it.at_first());
 
-                                 // move to new list
+    // move to new list
     out_it.add_after_then_move(parent_it.extract());
     good_blob = capture_children(buckets, &junk_blobs, &out_it);
     C_BLOB::ConstructBlobsFromOutlines(good_blob, &outlines, &good_blobs,
@@ -428,7 +410,6 @@ void empty_buckets(                     // find blobs
   }
 }
 
-
 /**
  * @name capture_children
  *
@@ -437,22 +418,20 @@ void empty_buckets(                     // find blobs
  * illegal and return FALSE.
  */
 
-BOOL8 capture_children(                       // find children
-                       OL_BUCKETS *buckets,   // bucket sort clanss
-                       C_BLOB_IT *reject_it,  // dead grandchildren
-                       C_OUTLINE_IT *blob_it  // output outlines
-                      ) {
-  C_OUTLINE *outline;            // master outline
-  inT32 child_count;             // no of children
+BOOL8 capture_children(   // find children
+    OL_BUCKETS *buckets,  // bucket sort clanss
+    C_BLOB_IT *reject_it, // dead grandchildren
+    C_OUTLINE_IT *blob_it // output outlines
+) {
+  C_OUTLINE *outline; // master outline
+  inT32 child_count;  // no of children
 
   outline = blob_it->data();
   if (edges_use_new_outline_complexity)
-    child_count = buckets->outline_complexity(outline,
-                                               edges_children_count_limit,
-                                               0);
+    child_count =
+        buckets->outline_complexity(outline, edges_children_count_limit, 0);
   else
-    child_count = buckets->count_children(outline,
-                                           edges_children_count_limit);
+    child_count = buckets->count_children(outline, edges_children_count_limit);
   if (child_count > edges_children_count_limit)
     return FALSE;
 

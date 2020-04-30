@@ -30,9 +30,9 @@
 // StringHash is the hashing functor needed by the stl hash map.
 #ifndef COMPILER_MSVC
 struct StringHash {
-  size_t operator()(const string& s) const {
+  size_t operator()(const string &s) const {
     size_t hash_code = 0;
-    const char* str = s.c_str();
+    const char *str = s.c_str();
     for (int ch = 0; str[ch] != 0; ++ch) {
       hash_code += str[ch] << (ch % 24);
     }
@@ -40,26 +40,25 @@ struct StringHash {
   }
 };
 #else  // COMPILER_MSVC
-struct StringHash : public stdext::hash_compare <string> {
-  size_t operator()(const string& s) const {
+struct StringHash : public stdext::hash_compare<string> {
+  size_t operator()(const string &s) const {
     size_t hash_code = 0;
-    const char* str = s.c_str();
+    const char *str = s.c_str();
     for (int ch = 0; str[ch] != 0; ++ch) {
       hash_code += str[ch] << (ch % 24);
     }
     return hash_code;
   }
-  bool operator()(const string& s1, const string& s2) const {
-    return s1 == s2;
-  }
+  bool operator()(const string &s1, const string &s2) const { return s1 == s2; }
 };
-#endif  // !COMPILER_MSVC
+#endif // !COMPILER_MSVC
 
 #ifndef USE_STD_NAMESPACE
 #include "base/heap-checker.h"
 #define DISABLE_HEAP_LEAK_CHECK HeapLeakChecker::Disabler disabler
 #else
-#define DISABLE_HEAP_LEAK_CHECK {}
+#define DISABLE_HEAP_LEAK_CHECK                                                \
+  {}
 #endif
 
-#endif  // TESSERACT_TRAINING_UTIL_H_
+#endif // TESSERACT_TRAINING_UTIL_H_

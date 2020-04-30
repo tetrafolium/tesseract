@@ -31,8 +31,8 @@
 #include "lm_pain_points.h"
 #include "lm_state.h"
 #include "matrix.h"
-#include "params.h"
 #include "pageres.h"
+#include "params.h"
 #include "params_model.h"
 
 namespace tesseract {
@@ -40,7 +40,7 @@ namespace tesseract {
 // This class that contains the data structures and functions necessary
 // to represent and use the knowledge about the language.
 class LanguageModel {
- public:
+public:
   // Masks for keeping track of top choices that should not be pruned out.
   static const LanguageModelFlagsType kSmallestRatingFlag = 0x1;
   static const LanguageModelFlagsType kLowerCaseFlag = 0x2;
@@ -65,9 +65,8 @@ class LanguageModel {
 
   // Updates data structures that are used for the duration of the segmentation
   // search on the current word;
-  void InitForWord(const WERD_CHOICE *prev_word,
-                   bool fixed_pitch, float max_char_wh_ratio,
-                   float rating_cert_scale);
+  void InitForWord(const WERD_CHOICE *prev_word, bool fixed_pitch,
+                   float max_char_wh_ratio, float rating_cert_scale);
 
   // Updates language model state of the given BLOB_CHOICE_LIST (from
   // the ratings matrix) a its parent. Updates pain_points if new
@@ -81,15 +80,11 @@ class LanguageModel {
   // of the list.
   // The list ordered by cost that is computed collectively by several
   // language model components (currently dawg and ngram components).
-  bool UpdateState(
-      bool just_classified,
-      int curr_col, int curr_row,
-      BLOB_CHOICE_LIST *curr_list,
-      LanguageModelState *parent_node,
-      LMPainPoints *pain_points,
-      WERD_RES *word_res,
-      BestChoiceBundle *best_choice_bundle,
-      BlamerBundle *blamer_bundle);
+  bool UpdateState(bool just_classified, int curr_col, int curr_row,
+                   BLOB_CHOICE_LIST *curr_list, LanguageModelState *parent_node,
+                   LMPainPoints *pain_points, WERD_RES *word_res,
+                   BestChoiceBundle *best_choice_bundle,
+                   BlamerBundle *blamer_bundle);
 
   // Returns true if an acceptable best choice was discovered.
   inline bool AcceptableChoiceFound() { return acceptable_choice_found_; }
@@ -99,8 +94,7 @@ class LanguageModel {
   // Returns the reference to ParamsModel.
   inline ParamsModel &getParamsModel() { return params_model_; }
 
- protected:
-
+protected:
   inline float CertaintyScore(float cert) {
     if (language_model_use_sigmoidal_certainty) {
       // cert is assumed to be between 0 and -dict_->certainty_scale.
@@ -114,24 +108,27 @@ class LanguageModel {
   }
 
   inline float ComputeAdjustment(int num_problems, float penalty) {
-    if (num_problems == 0) return 0.0f;
-    if (num_problems == 1) return penalty;
+    if (num_problems == 0)
+      return 0.0f;
+    if (num_problems == 1)
+      return penalty;
     return (penalty + (language_model_penalty_increment *
-                       static_cast<float>(num_problems-1)));
+                       static_cast<float>(num_problems - 1)));
   }
 
   // Computes the adjustment to the ratings sum based on the given
   // consistency_info. The paths with invalid punctuation, inconsistent
   // case and character type are penalized proportionally to the number
   // of inconsistencies on the path.
-  inline float ComputeConsistencyAdjustment(
-      const LanguageModelDawgInfo *dawg_info,
-      const LMConsistencyInfo &consistency_info) {
+  inline float
+  ComputeConsistencyAdjustment(const LanguageModelDawgInfo *dawg_info,
+                               const LMConsistencyInfo &consistency_info) {
     if (dawg_info != NULL) {
       return ComputeAdjustment(consistency_info.NumInconsistentCase(),
                                language_model_penalty_case) +
-          (consistency_info.inconsistent_script ?
-             language_model_penalty_script : 0.0f);
+             (consistency_info.inconsistent_script
+                  ? language_model_penalty_script
+                  : 0.0f);
     }
     return (ComputeAdjustment(consistency_info.NumInconsistentPunc(),
                               language_model_penalty_punc) +
@@ -141,10 +138,11 @@ class LanguageModel {
                               language_model_penalty_chartype) +
             ComputeAdjustment(consistency_info.NumInconsistentSpaces(),
                               language_model_penalty_spacing) +
-            (consistency_info.inconsistent_script ?
-             language_model_penalty_script : 0.0f) +
-            (consistency_info.inconsistent_font ?
-             language_model_penalty_font : 0.0f));
+            (consistency_info.inconsistent_script
+                 ? language_model_penalty_script
+                 : 0.0f) +
+            (consistency_info.inconsistent_font ? language_model_penalty_font
+                                                : 0.0f));
   }
 
   // Returns an adjusted ratings sum that includes inconsistency penalties,
@@ -171,22 +169,23 @@ class LanguageModel {
   // Finds the next ViterbiStateEntry with which the given unichar_id can
   // combine sensibly, taking into account any mixed alnum/mixed case
   // situation, and whether this combination has been inspected before.
-  ViterbiStateEntry* GetNextParentVSE(
-      bool just_classified, bool mixed_alnum,
-      const BLOB_CHOICE* bc, LanguageModelFlagsType blob_choice_flags,
-      const UNICHARSET& unicharset, WERD_RES* word_res,
-      ViterbiStateEntry_IT* vse_it,
-      LanguageModelFlagsType* top_choice_flags) const;
+  ViterbiStateEntry *GetNextParentVSE(
+      bool just_classified, bool mixed_alnum, const BLOB_CHOICE *bc,
+      LanguageModelFlagsType blob_choice_flags, const UNICHARSET &unicharset,
+      WERD_RES *word_res, ViterbiStateEntry_IT *vse_it,
+      LanguageModelFlagsType *top_choice_flags) const;
   // Helper function that computes the cost of the path composed of the
   // path in the given parent ViterbiStateEntry and the given BLOB_CHOICE.
   // If the new path looks good enough, adds a new ViterbiStateEntry to the
   // list of viterbi entries in the given BLOB_CHOICE and returns true.
-  bool AddViterbiStateEntry(
-      LanguageModelFlagsType top_choice_flags, float denom, bool word_end,
-      int curr_col, int curr_row, BLOB_CHOICE *b,
-      LanguageModelState *curr_state, ViterbiStateEntry *parent_vse,
-      LMPainPoints *pain_points, WERD_RES *word_res,
-      BestChoiceBundle *best_choice_bundle, BlamerBundle *blamer_bundle);
+  bool AddViterbiStateEntry(LanguageModelFlagsType top_choice_flags,
+                            float denom, bool word_end, int curr_col,
+                            int curr_row, BLOB_CHOICE *b,
+                            LanguageModelState *curr_state,
+                            ViterbiStateEntry *parent_vse,
+                            LMPainPoints *pain_points, WERD_RES *word_res,
+                            BestChoiceBundle *best_choice_bundle,
+                            BlamerBundle *blamer_bundle);
 
   // Determines whether a potential entry is a true top choice and
   // updates changed accordingly.
@@ -202,9 +201,8 @@ class LanguageModel {
   // with updated active dawgs, constraints and permuter.
   //
   // Note: the caller is responsible for deleting the returned pointer.
-  LanguageModelDawgInfo *GenerateDawgInfo(bool word_end,
-                                          int curr_col, int curr_row,
-                                          const BLOB_CHOICE &b,
+  LanguageModelDawgInfo *GenerateDawgInfo(bool word_end, int curr_col,
+                                          int curr_row, const BLOB_CHOICE &b,
                                           const ViterbiStateEntry *parent_vse);
 
   // Computes p(unichar | parent context) and records it in ngram_cost.
@@ -214,10 +212,10 @@ class LanguageModel {
   // updated context (that includes b.unichar_id() at the end) and returns it.
   //
   // Note: the caller is responsible for deleting the returned pointer.
-  LanguageModelNgramInfo *GenerateNgramInfo(
-      const char *unichar, float certainty, float denom,
-      int curr_col, int curr_row, float outline_length,
-      const ViterbiStateEntry *parent_vse);
+  LanguageModelNgramInfo *
+  GenerateNgramInfo(const char *unichar, float certainty, float denom,
+                    int curr_col, int curr_row, float outline_length,
+                    const ViterbiStateEntry *parent_vse);
 
   // Computes -(log(prob(classifier)) + log(prob(ngram model)))
   // for the given unichar in the given context. If there are multiple
@@ -236,11 +234,9 @@ class LanguageModel {
 
   // Fills the given consistenty_info based on parent_vse.consistency_info
   // and on the consistency of the given unichar_id with parent_vse.
-  void FillConsistencyInfo(
-      int curr_col, bool word_end, BLOB_CHOICE *b,
-      ViterbiStateEntry *parent_vse,
-      WERD_RES *word_res,
-      LMConsistencyInfo *consistency_info);
+  void FillConsistencyInfo(int curr_col, bool word_end, BLOB_CHOICE *b,
+                           ViterbiStateEntry *parent_vse, WERD_RES *word_res,
+                           LMConsistencyInfo *consistency_info);
 
   // Constructs WERD_CHOICE by recording unichar_ids of the BLOB_CHOICEs
   // on the path represented by the given BLOB_CHOICE and language model
@@ -249,8 +245,7 @@ class LanguageModel {
   // constructed WERD_CHOICE is better than the best/raw choice recorded
   // in the best_choice_bundle, this function updates the corresponding
   // fields and sets best_choice_bunldle->updated to true.
-  void UpdateBestChoice(ViterbiStateEntry *vse,
-                        LMPainPoints *pain_points,
+  void UpdateBestChoice(ViterbiStateEntry *vse, LMPainPoints *pain_points,
                         WERD_RES *word_res,
                         BestChoiceBundle *best_choice_bundle,
                         BlamerBundle *blamer_bundle);
@@ -262,24 +257,20 @@ class LanguageModel {
   // length equal to lmse->length).
   // The caller is responsible for freeing memory associated with the
   // returned WERD_CHOICE.
-  WERD_CHOICE *ConstructWord(ViterbiStateEntry *vse,
-                             WERD_RES *word_res,
-                             DANGERR *fixpt,
-                             BlamerBundle *blamer_bundle,
+  WERD_CHOICE *ConstructWord(ViterbiStateEntry *vse, WERD_RES *word_res,
+                             DANGERR *fixpt, BlamerBundle *blamer_bundle,
                              bool *truth_path);
 
   // Wrapper around AssociateUtils::ComputeStats().
-  inline void ComputeAssociateStats(int col, int row,
-                                    float max_char_wh_ratio,
+  inline void ComputeAssociateStats(int col, int row, float max_char_wh_ratio,
                                     ViterbiStateEntry *parent_vse,
                                     WERD_RES *word_res,
                                     AssociateStats *associate_stats) {
     AssociateUtils::ComputeStats(
-        col, row,
-        (parent_vse != NULL) ? &(parent_vse->associate_stats) : NULL,
-        (parent_vse != NULL) ? parent_vse->length : 0,
-        fixed_pitch_, max_char_wh_ratio,
-        word_res, language_model_debug_level > 2, associate_stats);
+        col, row, (parent_vse != NULL) ? &(parent_vse->associate_stats) : NULL,
+        (parent_vse != NULL) ? parent_vse->length : 0, fixed_pitch_,
+        max_char_wh_ratio, word_res, language_model_debug_level > 2,
+        associate_stats);
   }
 
   // Returns true if the path with such top_choice_flags and dawg_info
@@ -289,11 +280,12 @@ class LanguageModel {
   // words. In such languages we can not do dictionary-driven path pruning,
   // so paths with non-empty dawg_info are considered prunable.
   inline bool PrunablePath(const ViterbiStateEntry &vse) {
-    if (vse.top_choice_flags) return false;
-    if (vse.dawg_info != NULL &&
-        (vse.dawg_info->permuter == SYSTEM_DAWG_PERM ||
-         vse.dawg_info->permuter == USER_DAWG_PERM ||
-         vse.dawg_info->permuter == FREQ_DAWG_PERM)) return false;
+    if (vse.top_choice_flags)
+      return false;
+    if (vse.dawg_info != NULL && (vse.dawg_info->permuter == SYSTEM_DAWG_PERM ||
+                                  vse.dawg_info->permuter == USER_DAWG_PERM ||
+                                  vse.dawg_info->permuter == FREQ_DAWG_PERM))
+      return false;
     return true;
   }
 
@@ -303,7 +295,7 @@ class LanguageModel {
             (vse.ngram_info != NULL && !vse.ngram_info->pruned));
   }
 
- public:
+public:
   // Parameters.
   INT_VAR_H(language_model_debug_level, 0, "Language model debug level");
   BOOL_VAR_H(language_model_ngram_on, false,
@@ -355,8 +347,7 @@ class LanguageModel {
   BOOL_VAR_H(language_model_use_sigmoidal_certainty, false,
              "Use sigmoidal score for certainty");
 
-
- protected:
+protected:
   // Member Variables.
 
   // Temporary DawgArgs struct that is re-used across different words to
@@ -392,7 +383,7 @@ class LanguageModel {
   STRING prev_word_str_;
   int prev_word_unichar_step_len_;
   // Active dawg vector.
-  DawgPositionVector very_beginning_active_dawgs_;  // includes continuation
+  DawgPositionVector very_beginning_active_dawgs_; // includes continuation
   DawgPositionVector beginning_active_dawgs_;
   // Set to true if acceptable choice was discovered.
   // Note: it would be nice to use this to terminate the search once an
@@ -413,6 +404,6 @@ class LanguageModel {
   ParamsModel params_model_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_WORDREC_LANGUAGE_MODEL_H_
+#endif // TESSERACT_WORDREC_LANGUAGE_MODEL_H_

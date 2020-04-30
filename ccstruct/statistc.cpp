@@ -22,13 +22,13 @@
 #include "config_auto.h"
 #endif
 
-#include          "statistc.h"
-#include          <string.h>
-#include          <math.h>
-#include          <stdlib.h>
-#include          "helpers.h"
-#include          "scrollview.h"
-#include          "tprintf.h"
+#include "helpers.h"
+#include "scrollview.h"
+#include "statistc.h"
+#include "tprintf.h"
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 using tesseract::KDPairInc;
 
@@ -42,7 +42,7 @@ STATS::STATS(inT32 min_bucket_value, inT32 max_bucket_value_plus_1) {
     min_bucket_value = 0;
     max_bucket_value_plus_1 = 1;
   }
-  rangemin_ = min_bucket_value;                // setup
+  rangemin_ = min_bucket_value; // setup
   rangemax_ = max_bucket_value_plus_1;
   buckets_ = new inT32[rangemax_ - rangemin_];
   clear();
@@ -64,12 +64,12 @@ bool STATS::set_range(inT32 min_bucket_value, inT32 max_bucket_value_plus_1) {
     return false;
   }
   if (rangemax_ - rangemin_ != max_bucket_value_plus_1 - min_bucket_value) {
-    delete [] buckets_;
+    delete[] buckets_;
     buckets_ = new inT32[max_bucket_value_plus_1 - min_bucket_value];
   }
-  rangemin_ = min_bucket_value;                // setup
+  rangemin_ = min_bucket_value; // setup
   rangemax_ = max_bucket_value_plus_1;
-  clear();                // zero it
+  clear(); // zero it
   return true;
 }
 
@@ -78,7 +78,7 @@ bool STATS::set_range(inT32 min_bucket_value, inT32 max_bucket_value_plus_1) {
  *
  * Clear out the STATS class by zeroing all the buckets.
  **********************************************************************/
-void STATS::clear() {  // clear out buckets
+void STATS::clear() { // clear out buckets
   total_count_ = 0;
   if (buckets_ != NULL)
     memset(buckets_, 0, (rangemax_ - rangemin_) * sizeof(buckets_[0]));
@@ -102,7 +102,7 @@ void STATS::add(inT32 value, inT32 count) {
   }
   value = ClipToRange(value, rangemin_, rangemax_ - 1);
   buckets_[value - rangemin_] += count;
-  total_count_ += count;          // keep count of total
+  total_count_ += count; // keep count of total
 }
 
 /**********************************************************************
@@ -110,19 +110,19 @@ void STATS::add(inT32 value, inT32 count) {
  *
  * Find the mode of a stats class.
  **********************************************************************/
-inT32 STATS::mode() const {  // get mode of samples
+inT32 STATS::mode() const { // get mode of samples
   if (buckets_ == NULL) {
     return rangemin_;
   }
-  inT32 max = buckets_[0];           // max cell count
-  inT32 maxindex = 0;                // index of max
+  inT32 max = buckets_[0]; // max cell count
+  inT32 maxindex = 0;      // index of max
   for (int index = rangemax_ - rangemin_ - 1; index > 0; --index) {
     if (buckets_[index] > max) {
-      max = buckets_[index];      // find biggest
+      max = buckets_[index]; // find biggest
       maxindex = index;
     }
   }
-  return maxindex + rangemin_;    // index of biggest
+  return maxindex + rangemin_; // index of biggest
 }
 
 /**********************************************************************
@@ -130,7 +130,7 @@ inT32 STATS::mode() const {  // get mode of samples
  *
  * Find the mean of a stats class.
  **********************************************************************/
-double STATS::mean() const {  //get mean of samples
+double STATS::mean() const { // get mean of samples
   if (buckets_ == NULL || total_count_ <= 0) {
     return static_cast<double>(rangemin_);
   }
@@ -146,7 +146,7 @@ double STATS::mean() const {  //get mean of samples
  *
  * Find the standard deviation of a stats class.
  **********************************************************************/
-double STATS::sd() const {  //standard deviation
+double STATS::sd() const { // standard deviation
   if (buckets_ == NULL || total_count_ <= 0) {
     return 0.0;
   }
@@ -186,11 +186,12 @@ double STATS::ile(double frac) const {
   int sum = 0;
   int index = 0;
   for (index = 0; index < rangemax_ - rangemin_ && sum < target;
-       sum += buckets_[index++]);
+       sum += buckets_[index++])
+    ;
   if (index > 0) {
     ASSERT_HOST(buckets_[index - 1] > 0);
     return rangemin_ + index -
-        static_cast<double>(sum - target) / buckets_[index - 1];
+           static_cast<double>(sum - target) / buckets_[index - 1];
   } else {
     return static_cast<double>(rangemin_);
   }
@@ -201,12 +202,13 @@ double STATS::ile(double frac) const {
  *
  * Find REAL minimum bucket - ile(0.0) isn't necessarily correct
  **********************************************************************/
-inT32 STATS::min_bucket() const {  // Find min
+inT32 STATS::min_bucket() const { // Find min
   if (buckets_ == NULL || total_count_ == 0) {
     return rangemin_;
   }
   inT32 min = 0;
-  for (min = 0; (min < rangemax_ - rangemin_) && (buckets_[min] == 0); min++);
+  for (min = 0; (min < rangemax_ - rangemin_) && (buckets_[min] == 0); min++)
+    ;
   return rangemin_ + min;
 }
 
@@ -216,12 +218,13 @@ inT32 STATS::min_bucket() const {  // Find min
  * Find REAL maximum bucket - ile(1.0) isn't necessarily correct
  **********************************************************************/
 
-inT32 STATS::max_bucket() const {  // Find max
+inT32 STATS::max_bucket() const { // Find max
   if (buckets_ == NULL || total_count_ == 0) {
     return rangemin_;
   }
   inT32 max;
-  for (max = rangemax_ - rangemin_ - 1; max > 0 && buckets_[max] == 0; max--);
+  for (max = rangemax_ - rangemin_ - 1; max > 0 && buckets_[max] == 0; max--)
+    ;
   return rangemin_ + max;
 }
 
@@ -234,7 +237,7 @@ inT32 STATS::max_bucket() const {  // Find max
  * 6,6,13,14 ile(0.5) return 7.0 - when a more useful value would be midway
  * between 6 and 13 = 9.5
  **********************************************************************/
-double STATS::median() const {  //get median
+double STATS::median() const { // get median
   if (buckets_ == NULL) {
     return static_cast<double>(rangemin_);
   }
@@ -244,9 +247,11 @@ double STATS::median() const {  //get median
     inT32 min_pile;
     inT32 max_pile;
     /* Find preceding non zero pile */
-    for (min_pile = median_pile; pile_count(min_pile) == 0; min_pile--);
+    for (min_pile = median_pile; pile_count(min_pile) == 0; min_pile--)
+      ;
     /* Find following non zero pile */
-    for (max_pile = median_pile; pile_count(max_pile) == 0; max_pile++);
+    for (max_pile = median_pile; pile_count(max_pile) == 0; max_pile++)
+      ;
     median = (min_pile + max_pile) / 2.0;
   }
   return median;
@@ -264,12 +269,14 @@ bool STATS::local_min(inT32 x) const {
   x = ClipToRange(x, rangemin_, rangemax_ - 1) - rangemin_;
   if (buckets_[x] == 0)
     return true;
-  inT32 index;                   // table index
-  for (index = x - 1; index >= 0 && buckets_[index] == buckets_[x]; --index);
+  inT32 index; // table index
+  for (index = x - 1; index >= 0 && buckets_[index] == buckets_[x]; --index)
+    ;
   if (index >= 0 && buckets_[index] < buckets_[x])
     return false;
-  for (index = x + 1; index < rangemax_ - rangemin_ &&
-       buckets_[index] == buckets_[x]; ++index);
+  for (index = x + 1;
+       index < rangemax_ - rangemin_ && buckets_[index] == buckets_[x]; ++index)
+    ;
   if (index < rangemax_ - rangemin_ && buckets_[index] < buckets_[x])
     return false;
   else
@@ -291,7 +298,7 @@ void STATS::smooth(inT32 factor) {
   STATS result(rangemin_, rangemax_);
   int entrycount = rangemax_ - rangemin_;
   for (int entry = 0; entry < entrycount; entry++) {
-                                 //centre weight
+    // centre weight
     int count = buckets_[entry] * factor;
     for (int offset = 1; offset < factor; offset++) {
       if (entry - offset >= 0)
@@ -315,46 +322,46 @@ void STATS::smooth(inT32 factor) {
  * The return value is the current number of clusters.
  **********************************************************************/
 
-inT32 STATS::cluster(float lower,         // thresholds
+inT32 STATS::cluster(float lower, // thresholds
                      float upper,
-                     float multiple,      // distance threshold
-                     inT32 max_clusters,  // max no to make
-                     STATS *clusters) {   // array of clusters
-  BOOL8 new_cluster;             // added one
-  float *centres;                // cluster centres
-  inT32 entry;                   // bucket index
-  inT32 cluster;                 // cluster index
-  inT32 best_cluster;            // one to assign to
-  inT32 new_centre = 0;          // residual mode
-  inT32 new_mode;                // pile count of new_centre
-  inT32 count;                   // pile to place
-  float dist;                    // from cluster
-  float min_dist;                // from best_cluster
-  inT32 cluster_count;           // no of clusters
+                     float multiple,     // distance threshold
+                     inT32 max_clusters, // max no to make
+                     STATS *clusters) {  // array of clusters
+  BOOL8 new_cluster;                     // added one
+  float *centres;                        // cluster centres
+  inT32 entry;                           // bucket index
+  inT32 cluster;                         // cluster index
+  inT32 best_cluster;                    // one to assign to
+  inT32 new_centre = 0;                  // residual mode
+  inT32 new_mode;                        // pile count of new_centre
+  inT32 count;                           // pile to place
+  float dist;                            // from cluster
+  float min_dist;                        // from best_cluster
+  inT32 cluster_count;                   // no of clusters
 
   if (buckets_ == NULL || max_clusters < 1)
     return 0;
   centres = new float[max_clusters + 1];
-  for (cluster_count = 1; cluster_count <= max_clusters
-       && clusters[cluster_count].buckets_ != NULL
-       && clusters[cluster_count].total_count_ > 0;
+  for (cluster_count = 1; cluster_count <= max_clusters &&
+                          clusters[cluster_count].buckets_ != NULL &&
+                          clusters[cluster_count].total_count_ > 0;
        cluster_count++) {
     centres[cluster_count] =
-      static_cast<float>(clusters[cluster_count].ile(0.5));
+        static_cast<float>(clusters[cluster_count].ile(0.5));
     new_centre = clusters[cluster_count].mode();
-    for (entry = new_centre - 1; centres[cluster_count] - entry < lower
-         && entry >= rangemin_
-         && pile_count(entry) <= pile_count(entry + 1);
+    for (entry = new_centre - 1;
+         centres[cluster_count] - entry < lower && entry >= rangemin_ &&
+         pile_count(entry) <= pile_count(entry + 1);
          entry--) {
       count = pile_count(entry) - clusters[0].pile_count(entry);
       if (count > 0) {
         clusters[cluster_count].add(entry, count);
-        clusters[0].add (entry, count);
+        clusters[0].add(entry, count);
       }
     }
-    for (entry = new_centre + 1; entry - centres[cluster_count] < lower
-         && entry < rangemax_
-         && pile_count(entry) <= pile_count(entry - 1);
+    for (entry = new_centre + 1;
+         entry - centres[cluster_count] < lower && entry < rangemax_ &&
+         pile_count(entry) <= pile_count(entry - 1);
          entry++) {
       count = pile_count(entry) - clusters[0].pile_count(entry);
       if (count > 0) {
@@ -373,24 +380,24 @@ inT32 STATS::cluster(float lower,         // thresholds
     new_mode = 0;
     for (entry = 0; entry < rangemax_ - rangemin_; entry++) {
       count = buckets_[entry] - clusters[0].buckets_[entry];
-      //remaining pile
-      if (count > 0) {           //any to handle
+      // remaining pile
+      if (count > 0) { // any to handle
         min_dist = static_cast<float>(MAX_INT32);
         best_cluster = 0;
         for (cluster = 1; cluster <= cluster_count; cluster++) {
           dist = entry + rangemin_ - centres[cluster];
-          //find distance
+          // find distance
           if (dist < 0)
             dist = -dist;
           if (dist < min_dist) {
-            min_dist = dist;     //find least
+            min_dist = dist; // find least
             best_cluster = cluster;
           }
         }
-        if (min_dist > upper     //far enough for new
-          && (best_cluster == 0
-          || entry + rangemin_ > centres[best_cluster] * multiple
-        || entry + rangemin_ < centres[best_cluster] / multiple)) {
+        if (min_dist > upper // far enough for new
+            && (best_cluster == 0 ||
+                entry + rangemin_ > centres[best_cluster] * multiple ||
+                entry + rangemin_ < centres[best_cluster] / multiple)) {
           if (count > new_mode) {
             new_mode = count;
             new_centre = entry + rangemin_;
@@ -398,40 +405,42 @@ inT32 STATS::cluster(float lower,         // thresholds
         }
       }
     }
-                                 // need new and room
+    // need new and room
     if (new_mode > 0 && cluster_count < max_clusters) {
       cluster_count++;
       new_cluster = TRUE;
       if (!clusters[cluster_count].set_range(rangemin_, rangemax_)) {
-        delete [] centres;
+        delete[] centres;
         return 0;
       }
       centres[cluster_count] = static_cast<float>(new_centre);
       clusters[cluster_count].add(new_centre, new_mode);
       clusters[0].add(new_centre, new_mode);
-      for (entry = new_centre - 1; centres[cluster_count] - entry < lower
-        && entry >= rangemin_
-      && pile_count (entry) <= pile_count(entry + 1); entry--) {
+      for (entry = new_centre - 1;
+           centres[cluster_count] - entry < lower && entry >= rangemin_ &&
+           pile_count(entry) <= pile_count(entry + 1);
+           entry--) {
         count = pile_count(entry) - clusters[0].pile_count(entry);
         if (count > 0) {
           clusters[cluster_count].add(entry, count);
           clusters[0].add(entry, count);
         }
       }
-      for (entry = new_centre + 1; entry - centres[cluster_count] < lower
-        && entry < rangemax_
-      && pile_count (entry) <= pile_count(entry - 1); entry++) {
+      for (entry = new_centre + 1;
+           entry - centres[cluster_count] < lower && entry < rangemax_ &&
+           pile_count(entry) <= pile_count(entry - 1);
+           entry++) {
         count = pile_count(entry) - clusters[0].pile_count(entry);
         if (count > 0) {
           clusters[cluster_count].add(entry, count);
-          clusters[0].add (entry, count);
+          clusters[0].add(entry, count);
         }
       }
       centres[cluster_count] =
-        static_cast<float>(clusters[cluster_count].ile(0.5));
+          static_cast<float>(clusters[cluster_count].ile(0.5));
     }
   } while (new_cluster && cluster_count < max_clusters);
-  delete [] centres;
+  delete[] centres;
   return cluster_count;
 }
 
@@ -441,8 +450,8 @@ inT32 STATS::cluster(float lower,         // thresholds
 // prev_count is the histogram count of the previous index on entry and is
 // updated to the current index on return.
 // total_count and total_value are accumulating the mean of the peak.
-static bool GatherPeak(int index, const int* src_buckets, int* used_buckets,
-                       int* prev_count, int* total_count, double* total_value) {
+static bool GatherPeak(int index, const int *src_buckets, int *used_buckets,
+                       int *prev_count, int *total_count, double *total_value) {
   int pile_count = src_buckets[index] - used_buckets[index];
   if (pile_count <= *prev_count && pile_count > 0) {
     // Accumulate count and index.count product.
@@ -465,8 +474,9 @@ static bool GatherPeak(int index, const int* src_buckets, int* used_buckets,
 // more useful than decreasing total count.
 // Returns the actual number of modes found.
 int STATS::top_n_modes(int max_modes,
-                       GenericVector<KDPairInc<float, int> >* modes) const {
-  if (max_modes <= 0) return 0;
+                       GenericVector<KDPairInc<float, int>> *modes) const {
+  if (max_modes <= 0)
+    return 0;
   int src_count = rangemax_ - rangemin_;
   // Used copies the counts in buckets_ as they get used.
   STATS used(rangemin_, rangemax_);
@@ -494,14 +504,14 @@ int STATS::top_n_modes(int max_modes,
       int total_count = max_count;
       int prev_pile = max_count;
       for (int offset = 1; max_index + offset < src_count; ++offset) {
-        if (!GatherPeak(max_index + offset, buckets_, used.buckets_,
-                        &prev_pile, &total_count, &total_value))
+        if (!GatherPeak(max_index + offset, buckets_, used.buckets_, &prev_pile,
+                        &total_count, &total_value))
           break;
       }
       prev_pile = buckets_[max_index];
       for (int offset = 1; max_index - offset >= 0; ++offset) {
-        if (!GatherPeak(max_index - offset, buckets_, used.buckets_,
-                        &prev_pile, &total_count, &total_value))
+        if (!GatherPeak(max_index - offset, buckets_, used.buckets_, &prev_pile,
+                        &total_count, &total_value))
           break;
       }
       if (total_count > least_count || modes->size() < max_modes) {
@@ -541,14 +551,12 @@ void STATS::print() const {
     if (buckets_[index] != 0) {
       tprintf("%4d:%-3d ", rangemin_ + index, buckets_[index]);
       if (++num_printed % 8 == 0)
-        tprintf ("\n");
+        tprintf("\n");
     }
   }
-  tprintf ("\n");
+  tprintf("\n");
   print_summary();
 }
-
-
 
 /**********************************************************************
  * STATS::print_summary
@@ -572,7 +580,6 @@ void STATS::print_summary() const {
   tprintf("SD= %.2f\n", sd());
 }
 
-
 /**********************************************************************
  * STATS::plot
  *
@@ -580,25 +587,24 @@ void STATS::print_summary() const {
  **********************************************************************/
 
 #ifndef GRAPHICS_DISABLED
-void STATS::plot(ScrollView* window,  // to draw in
-                 float xorigin,       // bottom left
+void STATS::plot(ScrollView *window, // to draw in
+                 float xorigin,      // bottom left
                  float yorigin,
-                 float xscale,        // one x unit
-                 float yscale,        // one y unit
-                 ScrollView::Color colour) const {   // colour to draw in
+                 float xscale,                     // one x unit
+                 float yscale,                     // one y unit
+                 ScrollView::Color colour) const { // colour to draw in
   if (buckets_ == NULL) {
     return;
   }
   window->Pen(colour);
 
   for (int index = 0; index < rangemax_ - rangemin_; index++) {
-    window->Rectangle( xorigin + xscale * index, yorigin,
-      xorigin + xscale * (index + 1),
-      yorigin + yscale * buckets_[index]);
+    window->Rectangle(xorigin + xscale * index, yorigin,
+                      xorigin + xscale * (index + 1),
+                      yorigin + yscale * buckets_[index]);
   }
 }
 #endif
-
 
 /**********************************************************************
  * STATS::plotline
@@ -607,12 +613,12 @@ void STATS::plot(ScrollView* window,  // to draw in
  **********************************************************************/
 
 #ifndef GRAPHICS_DISABLED
-void STATS::plotline(ScrollView* window,  // to draw in
-                     float xorigin,       // bottom left
+void STATS::plotline(ScrollView *window, // to draw in
+                     float xorigin,      // bottom left
                      float yorigin,
-                     float xscale,        // one x unit
-                     float yscale,        // one y unit
-                     ScrollView::Color colour) const {  // colour to draw in
+                     float xscale,                     // one x unit
+                     float yscale,                     // one y unit
+                     ScrollView::Color colour) const { // colour to draw in
   if (buckets_ == NULL) {
     return;
   }
@@ -625,7 +631,6 @@ void STATS::plotline(ScrollView* window,  // to draw in
 }
 #endif
 
-
 /**********************************************************************
  * choose_nth_item
  *
@@ -634,31 +639,29 @@ void STATS::plotline(ScrollView* window,  // to draw in
  **********************************************************************/
 
 inT32 choose_nth_item(inT32 index, float *array, inT32 count) {
-  inT32 next_sample;             // next one to do
-  inT32 next_lesser;             // space for new
-  inT32 prev_greater;            // last one saved
-  inT32 equal_count;             // no of equal ones
-  float pivot;                   // proposed median
-  float sample;                  // current sample
+  inT32 next_sample;  // next one to do
+  inT32 next_lesser;  // space for new
+  inT32 prev_greater; // last one saved
+  inT32 equal_count;  // no of equal ones
+  float pivot;        // proposed median
+  float sample;       // current sample
 
   if (count <= 1)
     return 0;
   if (count == 2) {
     if (array[0] < array[1]) {
       return index >= 1 ? 1 : 0;
-    }
-    else {
+    } else {
       return index >= 1 ? 0 : 1;
     }
-  }
-  else {
+  } else {
     if (index < 0)
-      index = 0;                 // ensure legal
+      index = 0; // ensure legal
     else if (index >= count)
       index = count - 1;
-    equal_count = (inT32) (rand() % count);
+    equal_count = (inT32)(rand() % count);
     pivot = array[equal_count];
-                                 // fill gap
+    // fill gap
     array[equal_count] = array[0];
     next_lesser = 0;
     prev_greater = count;
@@ -666,17 +669,15 @@ inT32 choose_nth_item(inT32 index, float *array, inT32 count) {
     for (next_sample = 1; next_sample < prev_greater;) {
       sample = array[next_sample];
       if (sample < pivot) {
-                                 // shuffle
+        // shuffle
         array[next_lesser++] = sample;
         next_sample++;
-      }
-      else if (sample > pivot) {
+      } else if (sample > pivot) {
         prev_greater--;
-                                 // juggle
+        // juggle
         array[next_sample] = array[prev_greater];
         array[prev_greater] = sample;
-      }
-      else {
+      } else {
         equal_count++;
         next_sample++;
       }
@@ -684,13 +685,13 @@ inT32 choose_nth_item(inT32 index, float *array, inT32 count) {
     for (next_sample = next_lesser; next_sample < prev_greater;)
       array[next_sample++] = pivot;
     if (index < next_lesser)
-      return choose_nth_item (index, array, next_lesser);
+      return choose_nth_item(index, array, next_lesser);
     else if (index < prev_greater)
-      return next_lesser;        // in equal bracket
+      return next_lesser; // in equal bracket
     else
-      return choose_nth_item (index - prev_greater,
-        array + prev_greater,
-        count - prev_greater) + prev_greater;
+      return choose_nth_item(index - prev_greater, array + prev_greater,
+                             count - prev_greater) +
+             prev_greater;
   }
 }
 
@@ -701,59 +702,55 @@ inT32 choose_nth_item(inT32 index, float *array, inT32 count) {
  * if the members were sorted, without actually sorting.
  **********************************************************************/
 inT32 choose_nth_item(inT32 index, void *array, inT32 count, size_t size,
-                      int (*compar)(const void*, const void*)) {
-  int result;                    // of compar
-  inT32 next_sample;             // next one to do
-  inT32 next_lesser;             // space for new
-  inT32 prev_greater;            // last one saved
-  inT32 equal_count;             // no of equal ones
-  inT32 pivot;                   // proposed median
+                      int (*compar)(const void *, const void *)) {
+  int result;         // of compar
+  inT32 next_sample;  // next one to do
+  inT32 next_lesser;  // space for new
+  inT32 prev_greater; // last one saved
+  inT32 equal_count;  // no of equal ones
+  inT32 pivot;        // proposed median
 
   if (count <= 1)
     return 0;
   if (count == 2) {
-    if (compar (array, (char *) array + size) < 0) {
+    if (compar(array, (char *)array + size) < 0) {
       return index >= 1 ? 1 : 0;
-    }
-    else {
+    } else {
       return index >= 1 ? 0 : 1;
     }
   }
   if (index < 0)
-    index = 0;                   // ensure legal
+    index = 0; // ensure legal
   else if (index >= count)
     index = count - 1;
-  pivot = (inT32) (rand () % count);
-  swap_entries (array, size, pivot, 0);
+  pivot = (inT32)(rand() % count);
+  swap_entries(array, size, pivot, 0);
   next_lesser = 0;
   prev_greater = count;
   equal_count = 1;
   for (next_sample = 1; next_sample < prev_greater;) {
-    result =
-      compar ((char *) array + size * next_sample,
-      (char *) array + size * next_lesser);
+    result = compar((char *)array + size * next_sample,
+                    (char *)array + size * next_lesser);
     if (result < 0) {
-      swap_entries (array, size, next_lesser++, next_sample++);
+      swap_entries(array, size, next_lesser++, next_sample++);
       // shuffle
-    }
-    else if (result > 0) {
+    } else if (result > 0) {
       prev_greater--;
       swap_entries(array, size, prev_greater, next_sample);
-    }
-    else {
+    } else {
       equal_count++;
       next_sample++;
     }
   }
   if (index < next_lesser)
-    return choose_nth_item (index, array, next_lesser, size, compar);
+    return choose_nth_item(index, array, next_lesser, size, compar);
   else if (index < prev_greater)
-    return next_lesser;          // in equal bracket
+    return next_lesser; // in equal bracket
   else
-    return choose_nth_item (index - prev_greater,
-      (char *) array + size * prev_greater,
-      count - prev_greater, size,
-      compar) + prev_greater;
+    return choose_nth_item(index - prev_greater,
+                           (char *)array + size * prev_greater,
+                           count - prev_greater, size, compar) +
+           prev_greater;
 }
 
 /**********************************************************************
@@ -761,20 +758,20 @@ inT32 choose_nth_item(inT32 index, void *array, inT32 count, size_t size,
  *
  * Swap 2 entries of arbitrary size in-place in a table.
  **********************************************************************/
-void swap_entries(void *array,   // array of entries
-                  size_t size,   // size of entry
-                  inT32 index1,  // entries to swap
+void swap_entries(void *array,  // array of entries
+                  size_t size,  // size of entry
+                  inT32 index1, // entries to swap
                   inT32 index2) {
   char tmp;
-  char *ptr1;                    // to entries
+  char *ptr1; // to entries
   char *ptr2;
-  size_t count;                  // of bytes
+  size_t count; // of bytes
 
   ptr1 = static_cast<char *>(array) + index1 * size;
   ptr2 = static_cast<char *>(array) + index2 * size;
   for (count = 0; count < size; count++) {
     tmp = *ptr1;
     *ptr1++ = *ptr2;
-    *ptr2++ = tmp;               // tedious!
+    *ptr2++ = tmp; // tedious!
   }
 }

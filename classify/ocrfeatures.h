@@ -15,8 +15,8 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   FEATURES_H
-#define   FEATURES_H
+#ifndef FEATURES_H
+#define FEATURES_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
@@ -30,11 +30,11 @@ struct INT_FX_RESULT_STRUCT;
 
 #undef Min
 #undef Max
-#define FEAT_NAME_SIZE    80
+#define FEAT_NAME_SIZE 80
 
 // define trap errors which can be caused by this module
 #define ILLEGAL_FEATURE_PARAM 1000
-#define ILLEGAL_NUM_FEATURES  1001
+#define ILLEGAL_NUM_FEATURES 1001
 
 // A character is described by multiple sets of extracted features.  Each
 // set contains a number of features of a particular type, for example, a
@@ -44,32 +44,32 @@ struct INT_FX_RESULT_STRUCT;
 // parameters are required to be the first parameters in the feature.
 
 struct PARAM_DESC {
-  inT8 Circular;                   // TRUE if dimension wraps around
-  inT8 NonEssential;               // TRUE if dimension not used in searches
-  FLOAT32 Min;                     // low end of range for circular dimensions
-  FLOAT32 Max;                     // high end of range for circular dimensions
-  FLOAT32 Range;                   // Max - Min
-  FLOAT32 HalfRange;               // (Max - Min)/2
-  FLOAT32 MidRange;                // (Max + Min)/2
+  inT8 Circular;     // TRUE if dimension wraps around
+  inT8 NonEssential; // TRUE if dimension not used in searches
+  FLOAT32 Min;       // low end of range for circular dimensions
+  FLOAT32 Max;       // high end of range for circular dimensions
+  FLOAT32 Range;     // Max - Min
+  FLOAT32 HalfRange; // (Max - Min)/2
+  FLOAT32 MidRange;  // (Max + Min)/2
 };
 
 struct FEATURE_DESC_STRUCT {
-  uinT16 NumParams;                // total # of params
-  const char *ShortName;           // short name for feature
-  const PARAM_DESC *ParamDesc;     // array - one per param
+  uinT16 NumParams;            // total # of params
+  const char *ShortName;       // short name for feature
+  const PARAM_DESC *ParamDesc; // array - one per param
 };
 typedef FEATURE_DESC_STRUCT *FEATURE_DESC;
 
 struct FEATURE_STRUCT {
-  const FEATURE_DESC_STRUCT *Type;  // points to description of feature type
-  FLOAT32 Params[1];                // variable size array - params for feature
+  const FEATURE_DESC_STRUCT *Type; // points to description of feature type
+  FLOAT32 Params[1];               // variable size array - params for feature
 };
 typedef FEATURE_STRUCT *FEATURE;
 
 struct FEATURE_SET_STRUCT {
-  uinT16 NumFeatures;            // number of features in set
-  uinT16 MaxNumFeatures;         // maximum size of feature set
-  FEATURE Features[1];           // variable size array of features
+  uinT16 NumFeatures;    // number of features in set
+  uinT16 MaxNumFeatures; // maximum size of feature set
+  FEATURE Features[1];   // variable size array of features
 };
 typedef FEATURE_SET_STRUCT *FEATURE_SET;
 
@@ -82,14 +82,20 @@ typedef char *CHAR_FEATURES;
 /*----------------------------------------------------------------------
     Macros for defining the parameters of a new features
 ----------------------------------------------------------------------*/
-#define StartParamDesc(Name)	\
-const PARAM_DESC Name[] = {
+#define StartParamDesc(Name) const PARAM_DESC Name[] = {
 
-#define DefineParam(Circular, NonEssential, Min, Max)	\
-	{Circular, NonEssential, Min, Max,			\
-	(Max) - (Min), (((Max) - (Min))/2.0), (((Max) + (Min))/2.0)},
+#define DefineParam(Circular, NonEssential, Min, Max)                          \
+  {Circular,                                                                   \
+   NonEssential,                                                               \
+   Min,                                                                        \
+   Max,                                                                        \
+   (Max) - (Min),                                                              \
+   (((Max) - (Min)) / 2.0),                                                    \
+   (((Max) + (Min)) / 2.0)},
 
-#define EndParamDesc  };
+#define EndParamDesc                                                           \
+  }                                                                            \
+  ;
 
 /*----------------------------------------------------------------------
 Macro for describing a new feature.  The parameters of the macro
@@ -97,9 +103,8 @@ are as follows:
 
 DefineFeature (Name, NumLinear, NumCircular, ShortName, ParamName)
 ----------------------------------------------------------------------*/
-#define DefineFeature(Name, NL, NC, SN, PN)		\
-const FEATURE_DESC_STRUCT Name = {				\
-	((NL) + (NC)), SN, PN};
+#define DefineFeature(Name, NL, NC, SN, PN)                                    \
+  const FEATURE_DESC_STRUCT Name = {((NL) + (NC)), SN, PN};
 
 /*----------------------------------------------------------------------
         Generic routines that work for all feature types
@@ -118,8 +123,8 @@ FEATURE ReadFeature(FILE *File, const FEATURE_DESC_STRUCT *FeatureDesc);
 
 FEATURE_SET ReadFeatureSet(FILE *File, const FEATURE_DESC_STRUCT *FeatureDesc);
 
-void WriteFeature(FEATURE Feature, STRING* str);
+void WriteFeature(FEATURE Feature, STRING *str);
 
-void WriteFeatureSet(FEATURE_SET FeatureSet, STRING* str);
+void WriteFeatureSet(FEATURE_SET FeatureSet, STRING *str);
 
 #endif

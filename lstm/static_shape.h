@@ -25,16 +25,16 @@ namespace tesseract {
 // Enum describing the loss function to apply during training and/or the
 // decoding method to apply at runtime.
 enum LossType {
-  LT_NONE,      // Undefined.
-  LT_CTC,       // Softmax with standard CTC for training/decoding.
-  LT_SOFTMAX,   // Outputs sum to 1 in fixed positions.
-  LT_LOGISTIC,  // Logistic outputs with independent values.
+  LT_NONE,     // Undefined.
+  LT_CTC,      // Softmax with standard CTC for training/decoding.
+  LT_SOFTMAX,  // Outputs sum to 1 in fixed positions.
+  LT_LOGISTIC, // Logistic outputs with independent values.
 };
 
 // Simple class to hold the tensor shape that is known at network build time
 // and the LossType of the loss function.
 class StaticShape {
- public:
+public:
   StaticShape()
       : batch_(0), height_(0), width_(0), depth_(0), loss_type_(LT_NONE) {}
   int batch() const { return batch_; }
@@ -59,7 +59,7 @@ class StaticShape {
             height_, width_, depth_, loss_type_);
   }
 
- private:
+private:
   // Size of the 4-D tensor input/output to a network. A value of zero is
   // allowed for all except depth_ and means to be determined at runtime, and
   // regarded as variable.
@@ -75,6 +75,6 @@ class StaticShape {
   LossType loss_type_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_LSTM_STATIC_SHAPE_H_
+#endif // TESSERACT_LSTM_STATIC_SHAPE_H_

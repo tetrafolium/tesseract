@@ -12,108 +12,110 @@
 #ifndef GOOGLE_TESSERACT
 
 namespace tesseract {
-bool IntFlagExists(const char* flag_name, inT32* value) {
+bool IntFlagExists(const char *flag_name, inT32 *value) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<IntParam*> empty;
+  GenericVector<IntParam *> empty;
   IntParam *p = ParamUtils::FindParam<IntParam>(
       full_flag_name.string(), GlobalParams()->int_params, empty);
-  if (p == nullptr) return false;
+  if (p == nullptr)
+    return false;
   *value = (inT32)(*p);
   return true;
 }
 
-bool DoubleFlagExists(const char* flag_name, double* value) {
+bool DoubleFlagExists(const char *flag_name, double *value) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<DoubleParam*> empty;
+  GenericVector<DoubleParam *> empty;
   DoubleParam *p = ParamUtils::FindParam<DoubleParam>(
       full_flag_name.string(), GlobalParams()->double_params, empty);
-  if (p == nullptr) return false;
+  if (p == nullptr)
+    return false;
   *value = static_cast<double>(*p);
   return true;
 }
 
-bool BoolFlagExists(const char* flag_name, bool* value) {
+bool BoolFlagExists(const char *flag_name, bool *value) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<BoolParam*> empty;
+  GenericVector<BoolParam *> empty;
   BoolParam *p = ParamUtils::FindParam<BoolParam>(
       full_flag_name.string(), GlobalParams()->bool_params, empty);
-  if (p == nullptr) return false;
+  if (p == nullptr)
+    return false;
   *value = (BOOL8)(*p);
   return true;
 }
 
-bool StringFlagExists(const char* flag_name, const char** value) {
+bool StringFlagExists(const char *flag_name, const char **value) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<StringParam*> empty;
+  GenericVector<StringParam *> empty;
   StringParam *p = ParamUtils::FindParam<StringParam>(
       full_flag_name.string(), GlobalParams()->string_params, empty);
   *value = (p != nullptr) ? p->string() : nullptr;
   return p != nullptr;
 }
 
-
-void SetIntFlagValue(const char* flag_name, const inT32 new_val) {
+void SetIntFlagValue(const char *flag_name, const inT32 new_val) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<IntParam*> empty;
+  GenericVector<IntParam *> empty;
   IntParam *p = ParamUtils::FindParam<IntParam>(
       full_flag_name.string(), GlobalParams()->int_params, empty);
   ASSERT_HOST(p != nullptr);
   p->set_value(new_val);
 }
 
-void SetDoubleFlagValue(const char* flag_name, const double new_val) {
+void SetDoubleFlagValue(const char *flag_name, const double new_val) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<DoubleParam*> empty;
+  GenericVector<DoubleParam *> empty;
   DoubleParam *p = ParamUtils::FindParam<DoubleParam>(
       full_flag_name.string(), GlobalParams()->double_params, empty);
   ASSERT_HOST(p != nullptr);
   p->set_value(new_val);
 }
 
-void SetBoolFlagValue(const char* flag_name, const bool new_val) {
+void SetBoolFlagValue(const char *flag_name, const bool new_val) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<BoolParam*> empty;
+  GenericVector<BoolParam *> empty;
   BoolParam *p = ParamUtils::FindParam<BoolParam>(
       full_flag_name.string(), GlobalParams()->bool_params, empty);
   ASSERT_HOST(p != nullptr);
   p->set_value(new_val);
 }
 
-void SetStringFlagValue(const char* flag_name, const char* new_val) {
+void SetStringFlagValue(const char *flag_name, const char *new_val) {
   STRING full_flag_name("FLAGS_");
   full_flag_name += flag_name;
-  GenericVector<StringParam*> empty;
+  GenericVector<StringParam *> empty;
   StringParam *p = ParamUtils::FindParam<StringParam>(
       full_flag_name.string(), GlobalParams()->string_params, empty);
   ASSERT_HOST(p != nullptr);
   p->set_value(STRING(new_val));
 }
 
-bool SafeAtoi(const char* str, int* val) {
-  char* endptr = nullptr;
+bool SafeAtoi(const char *str, int *val) {
+  char *endptr = nullptr;
   *val = strtol(str, &endptr, 10);
   return endptr != nullptr && *endptr == '\0';
 }
 
-bool SafeAtod(const char* str, double* val) {
-  char* endptr = nullptr;
+bool SafeAtod(const char *str, double *val) {
+  char *endptr = nullptr;
   *val = strtod(str, &endptr);
   return endptr != nullptr && *endptr == '\0';
 }
 
 void PrintCommandLineFlags() {
-  const char* kFlagNamePrefix = "FLAGS_";
+  const char *kFlagNamePrefix = "FLAGS_";
   const int kFlagNamePrefixLen = strlen(kFlagNamePrefix);
   for (int i = 0; i < GlobalParams()->int_params.size(); ++i) {
-    if (!strncmp(GlobalParams()->int_params[i]->name_str(),
-                 kFlagNamePrefix, kFlagNamePrefixLen)) {
+    if (!strncmp(GlobalParams()->int_params[i]->name_str(), kFlagNamePrefix,
+                 kFlagNamePrefixLen)) {
       printf("  --%s  %s  (type:int default:%d)\n",
              GlobalParams()->int_params[i]->name_str() + kFlagNamePrefixLen,
              GlobalParams()->int_params[i]->info_str(),
@@ -121,8 +123,8 @@ void PrintCommandLineFlags() {
     }
   }
   for (int i = 0; i < GlobalParams()->double_params.size(); ++i) {
-    if (!strncmp(GlobalParams()->double_params[i]->name_str(),
-                 kFlagNamePrefix, kFlagNamePrefixLen)) {
+    if (!strncmp(GlobalParams()->double_params[i]->name_str(), kFlagNamePrefix,
+                 kFlagNamePrefixLen)) {
       printf("  --%s  %s  (type:double default:%g)\n",
              GlobalParams()->double_params[i]->name_str() + kFlagNamePrefixLen,
              GlobalParams()->double_params[i]->info_str(),
@@ -130,8 +132,8 @@ void PrintCommandLineFlags() {
     }
   }
   for (int i = 0; i < GlobalParams()->bool_params.size(); ++i) {
-    if (!strncmp(GlobalParams()->bool_params[i]->name_str(),
-                 kFlagNamePrefix, kFlagNamePrefixLen)) {
+    if (!strncmp(GlobalParams()->bool_params[i]->name_str(), kFlagNamePrefix,
+                 kFlagNamePrefixLen)) {
       printf("  --%s  %s  (type:bool default:%s)\n",
              GlobalParams()->bool_params[i]->name_str() + kFlagNamePrefixLen,
              GlobalParams()->bool_params[i]->info_str(),
@@ -139,8 +141,8 @@ void PrintCommandLineFlags() {
     }
   }
   for (int i = 0; i < GlobalParams()->string_params.size(); ++i) {
-    if (!strncmp(GlobalParams()->string_params[i]->name_str(),
-                 kFlagNamePrefix, kFlagNamePrefixLen)) {
+    if (!strncmp(GlobalParams()->string_params[i]->name_str(), kFlagNamePrefix,
+                 kFlagNamePrefixLen)) {
       printf("  --%s  %s  (type:string default:%s)\n",
              GlobalParams()->string_params[i]->name_str() + kFlagNamePrefixLen,
              GlobalParams()->string_params[i]->info_str(),
@@ -149,9 +151,7 @@ void PrintCommandLineFlags() {
   }
 }
 
-
-void ParseCommandLineFlags(const char* usage,
-                           int* argc, char*** argv,
+void ParseCommandLineFlags(const char *usage, int *argc, char ***argv,
                            const bool remove_flags) {
   if (*argc == 1) {
     printf("USAGE: %s\n", usage);
@@ -161,7 +161,7 @@ void ParseCommandLineFlags(const char* usage,
 
   unsigned int i = 1;
   for (i = 1; i < *argc; ++i) {
-    const char* current_arg = (*argv)[i];
+    const char *current_arg = (*argv)[i];
     // If argument does not start with a hyphen then break.
     if (current_arg[0] != '-') {
       break;
@@ -172,16 +172,15 @@ void ParseCommandLineFlags(const char* usage,
       ++current_arg;
     }
     // If this is asking for usage, print the help message and abort.
-    if (!strcmp(current_arg, "help") ||
-        !strcmp(current_arg, "helpshort")) {
+    if (!strcmp(current_arg, "help") || !strcmp(current_arg, "helpshort")) {
       tprintf("USAGE: %s\n", usage);
       PrintCommandLineFlags();
       exit(0);
     }
     // Find the starting position of the value if it was specified in this
     // string.
-    const char* equals_position = strchr(current_arg, '=');
-    const char* rhs = nullptr;
+    const char *equals_position = strchr(current_arg, '=');
+    const char *rhs = nullptr;
     if (equals_position != nullptr) {
       rhs = equals_position + 1;
     }
@@ -208,8 +207,8 @@ void ParseCommandLineFlags(const char* usage,
           exit(1);
         }
         if (!SafeAtoi(rhs, &int_val)) {
-          tprintf("ERROR: Could not parse int from %s in flag %s\n",
-                  rhs, (*argv)[i]);
+          tprintf("ERROR: Could not parse int from %s in flag %s\n", rhs,
+                  (*argv)[i]);
           exit(1);
         }
       } else {
@@ -240,8 +239,8 @@ void ParseCommandLineFlags(const char* usage,
           exit(1);
         }
         if (!SafeAtod(rhs, &double_val)) {
-          tprintf("ERROR: Could not parse double from %s in flag %s\n",
-                  rhs, (*argv)[i]);
+          tprintf("ERROR: Could not parse double from %s in flag %s\n", rhs,
+                  (*argv)[i]);
           exit(1);
         }
       } else {
@@ -289,7 +288,7 @@ void ParseCommandLineFlags(const char* usage,
     }
 
     // string flag
-    const char* string_val;
+    const char *string_val;
     if (StringFlagExists(lhs.string(), &string_val)) {
       if (rhs != nullptr) {
         string_val = rhs;
@@ -310,25 +309,24 @@ void ParseCommandLineFlags(const char* usage,
     // Flag was not found. Exit with an error message.
     tprintf("ERROR: Non-existent flag %s\n", (*argv)[i]);
     exit(1);
-  }  // for each argv
+  } // for each argv
   if (remove_flags) {
     (*argv)[i - 1] = (*argv)[0];
     (*argv) += (i - 1);
     (*argc) -= (i - 1);
   }
 }
-}  // namespace tesseract
+} // namespace tesseract
 
 #else
 
 #include "base/init_google.h"
 
 namespace tesseract {
-void ParseCommandLineFlags(const char* usage,
-                           int* argc, char*** argv,
+void ParseCommandLineFlags(const char *usage, int *argc, char ***argv,
                            const bool remove_flags) {
   InitGoogle(usage, argc, argv, remove_flags);
 }
-}  // namespace tesseract
+} // namespace tesseract
 
 #endif

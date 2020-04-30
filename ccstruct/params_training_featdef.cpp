@@ -27,7 +27,7 @@ int ParamsTrainingFeatureByName(const char *name) {
   if (name == NULL)
     return -1;
   int array_size = sizeof(kParamsTrainingFeatureTypeName) /
-    sizeof(kParamsTrainingFeatureTypeName[0]);
+                   sizeof(kParamsTrainingFeatureTypeName[0]);
   for (int i = 0; i < array_size; i++) {
     if (kParamsTrainingFeatureTypeName[i] == NULL)
       continue;
@@ -37,4 +37,4 @@ int ParamsTrainingFeatureByName(const char *name) {
   return -1;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

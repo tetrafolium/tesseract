@@ -47,17 +47,17 @@ tesseract::Dawg *LoadSquishedDawg(const UNICHARSET &unicharset,
 }
 
 class WordOutputter {
- public:
+public:
   WordOutputter(FILE *file) : file_(file) {}
   void output_word(const char *word) { fprintf(file_, "%s\n", word); }
- private:
+
+private:
   FILE *file_;
 };
 
 // returns 0 if successful.
 int WriteDawgAsWordlist(const UNICHARSET &unicharset,
-                        const tesseract::Dawg *dawg,
-                        const char *outfile_name) {
+                        const tesseract::Dawg *dawg, const char *outfile_name) {
   FILE *out = fopen(outfile_name, "wb");
   if (out == nullptr) {
     tprintf("Could not open %s for writing.\n", outfile_name);
@@ -74,8 +74,7 @@ int WriteDawgAsWordlist(const UNICHARSET &unicharset,
 int main(int argc, char *argv[]) {
   if (argc != 4) {
     tprintf("Print all the words in a given dawg.\n");
-    tprintf("Usage: %s <unicharset> <dawgfile> <wordlistfile>\n",
-            argv[0]);
+    tprintf("Usage: %s <unicharset> <dawgfile> <wordlistfile>\n", argv[0]);
     return 1;
   }
   const char *unicharset_file = argv[1];

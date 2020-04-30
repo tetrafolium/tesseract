@@ -25,14 +25,14 @@ namespace tesseract {
 
 // Runs multiple networks in parallel, interlacing their outputs.
 class Parallel : public Plumbing {
- public:
+public:
   // ni_ and no_ will be set by AddToStack.
-  Parallel(const STRING& name, NetworkType type);
+  Parallel(const STRING &name, NetworkType type);
   virtual ~Parallel();
 
   // Returns the shape output from the network given an input shape (which may
   // be partially unknown ie zero).
-  virtual StaticShape OutputShape(const StaticShape& input_shape) const;
+  virtual StaticShape OutputShape(const StaticShape &input_shape) const;
 
   virtual STRING spec() const {
     STRING spec;
@@ -54,7 +54,8 @@ class Parallel : public Plumbing {
         spec += stack_[0]->spec();
       } else {
         spec = "(";
-        for (int i = 0; i < stack_.size(); ++i) spec += stack_[i]->spec();
+        for (int i = 0; i < stack_.size(); ++i)
+          spec += stack_[i]->spec();
       }
       spec += ")";
     }
@@ -63,17 +64,16 @@ class Parallel : public Plumbing {
 
   // Runs forward propagation of activations on the input line.
   // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
   // Runs backward propagation of errors on the deltas line.
   // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
- private:
+private:
   // If *this is a NT_REPLICATED, then it feeds a replicated network with
   // identical inputs, and it would be extremely wasteful for them to each
   // calculate and store the same transpose of the inputs, so Parallel does it
@@ -82,6 +82,6 @@ class Parallel : public Plumbing {
   TransposedArray transposed_input_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_LSTM_PARALLEL_H_
+#endif // TESSERACT_LSTM_PARALLEL_H_

@@ -21,9 +21,9 @@
 #ifndef TESSERACT_TRAINING_VALIDATOR_H_
 #define TESSERACT_TRAINING_VALIDATOR_H_
 
+#include "unichar.h"
 #include <memory>
 #include <vector>
-#include "unichar.h"
 
 namespace tesseract {
 
@@ -69,7 +69,7 @@ enum class ViramaScript : char32 {
 // Base class offers a validation API and protected methods to allow subclasses
 // to easily build the validated/segmented output.
 class Validator {
- public:
+public:
   // Validates and cleans the src vector of unicodes to the *dest, according to
   // g_mode. In the case of kSingleString, a single vector containing the whole
   // result is added to *dest. With kCombined, multiple vectors are added to
@@ -79,8 +79,8 @@ class Validator {
   // input, without discarding invalid text.
   static bool ValidateCleanAndSegment(GraphemeNormMode g_mode,
                                       bool report_errors,
-                                      const std::vector<char32>& src,
-                                      std::vector<std::vector<char32>>* dest);
+                                      const std::vector<char32> &src,
+                                      std::vector<std::vector<char32>> *dest);
 
   // Returns true if the unicode ch is a non-printing zero-width mark of no
   // significance to OCR training or evaluation.
@@ -98,7 +98,7 @@ class Validator {
   static const char32 kRightToLeftMark;
   static const char32 kInvalid;
 
- protected:
+protected:
   // These are more or less the character class identifiers in the ISCII
   // standard, section 8.  They have been augmented with the Unicode meta
   // characters Zero Width Joiner and Zero Width Non Joiner, and the
@@ -116,26 +116,24 @@ class Validator {
     // IN A COMMENT, and still not relied upon in the code.
     kConsonant = 'C',
     kVowel = 'V',
-    kVirama = 'H',              // (aka Halant)
-    kMatra = 'M',               // (aka Dependent Vowel)
-    kMatraPiece = 'P',          // unicode provides pieces of Matras.
-    kVowelModifier = 'D',       // (candrabindu, anusvara, visarga, other marks)
-    kZeroWidthNonJoiner = 'z',  // Unicode Zero Width Non-Joiner U+200C
-    kZeroWidthJoiner = 'Z',     // Unicode Zero Width Joiner U+200D
-    kVedicMark = 'v',           // Modifiers can come modify any indic syllable.
-    kNukta = 'N',               // Occurs only immediately after consonants.
-    kRobat = 'R',               // Khmer only.
-    kOther = 'O',               // (digits, measures, non-Indic, etc)
+    kVirama = 'H',             // (aka Halant)
+    kMatra = 'M',              // (aka Dependent Vowel)
+    kMatraPiece = 'P',         // unicode provides pieces of Matras.
+    kVowelModifier = 'D',      // (candrabindu, anusvara, visarga, other marks)
+    kZeroWidthNonJoiner = 'z', // Unicode Zero Width Non-Joiner U+200C
+    kZeroWidthJoiner = 'Z',    // Unicode Zero Width Joiner U+200D
+    kVedicMark = 'v',          // Modifiers can come modify any indic syllable.
+    kNukta = 'N',              // Occurs only immediately after consonants.
+    kRobat = 'R',              // Khmer only.
+    kOther = 'O',              // (digits, measures, non-Indic, etc)
     // Additional classes used only by ValidateGrapheme.
     kWhitespace = ' ',
-    kCombiner = 'c',  // Combiners other than virama.
+    kCombiner = 'c', // Combiners other than virama.
   };
   typedef std::pair<CharClass, char32> IndicPair;
 
   Validator(ViramaScript script, bool report_errors)
-      : script_(script),
-        codes_used_(0),
-        output_used_(0),
+      : script_(script), codes_used_(0), output_used_(0),
         report_errors_(report_errors) {}
 
   // Factory method that understands how to map script to the right subclass.
@@ -148,16 +146,16 @@ class Validator {
   // In case of validation error, returns false and returns as much as possible
   // of the input, without discarding invalid text.
   bool ValidateCleanAndSegmentInternal(GraphemeNormMode g_mode,
-                                       const std::vector<char32>& src,
-                                       std::vector<std::vector<char32>>* dest);
+                                       const std::vector<char32> &src,
+                                       std::vector<std::vector<char32>> *dest);
   // Moves the results from parts_ or output_ to dest according to g_mode.
   void MoveResultsToDest(GraphemeNormMode g_mode,
-                         std::vector<std::vector<char32>>* dest);
+                         std::vector<std::vector<char32>> *dest);
 
   // Computes and returns the ViramaScript corresponding to the most frequent
   // virama-using script in the input, or kNonVirama if none are present.
-  static ViramaScript MostFrequentViramaScript(
-      const std::vector<char32>& utf32);
+  static ViramaScript
+  MostFrequentViramaScript(const std::vector<char32> &utf32);
   // Returns true if the given UTF-32 unicode is a "virama" character.
   static bool IsVirama(char32 unicode);
   // Returns true if the given UTF-32 unicode is a vedic accent.
@@ -203,7 +201,7 @@ class Validator {
   // otherwise does not increment codes_used_.
   virtual bool ConsumeGraphemeIfValid() = 0;
   // Sets codes_ to the class codes for the given unicode text.
-  void ComputeClassCodes(const std::vector<char32>& text);
+  void ComputeClassCodes(const std::vector<char32> &text);
   // Returns the CharClass corresponding to the given Unicode ch.
   virtual CharClass UnicodeToCharClass(char32 ch) const = 0;
   // Resets to the initial state.
@@ -238,6 +236,6 @@ class Validator {
   bool report_errors_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_TRAINING_VALIDATOR_H_
+#endif // TESSERACT_TRAINING_VALIDATOR_H_

@@ -21,7 +21,7 @@
 // SIMD-based faster dot product functions. Intended to be a single static
 // object, but it does no real harm to have more than one.
 class SIMDDetect {
- public:
+public:
   // Returns true if AVX is available on this system.
   static inline bool IsAVXAvailable() { return detector.avx_available_; }
   // Returns true if AVX2 (integer support) is available on this system.
@@ -37,11 +37,11 @@ class SIMDDetect {
   // Returns true if SSE4.1 is available on this system.
   static inline bool IsSSEAvailable() { return detector.sse_available_; }
 
- private:
+private:
   // Constructor, must set all static member variables.
   SIMDDetect();
 
- private:
+private:
   // Singleton.
   static SIMDDetect detector;
   // If true, then AVX has been detected.

@@ -30,18 +30,18 @@
 #include "statistc.h"
 #include "unichar.h"
 #include "unicharset.h"
-#include "unicode/uchar.h"    // from libicu
-#include "unicode/uscript.h"  // from libicu
+#include "unicode/uchar.h"   // from libicu
+#include "unicode/uscript.h" // from libicu
 
 namespace tesseract {
 
 // Helper sets the character attribute properties and sets up the script table.
 // Does not set tops and bottoms.
 void SetupBasicProperties(bool report_errors, bool decompose,
-                          UNICHARSET* unicharset) {
+                          UNICHARSET *unicharset) {
   for (int unichar_id = 0; unichar_id < unicharset->size(); ++unichar_id) {
     // Convert any custom ligatures.
-    const char* unichar_str = unicharset->id_to_unichar(unichar_id);
+    const char *unichar_str = unicharset->id_to_unichar(unichar_id);
     for (int i = 0; UNICHARSET::kCustomLigatures[i][0] != nullptr; ++i) {
       if (!strcmp(UNICHARSET::kCustomLigatures[i][1], unichar_str)) {
         unichar_str = UNICHARSET::kCustomLigatures[i][0];
@@ -61,11 +61,16 @@ void SetupBasicProperties(bool report_errors, bool decompose,
     bool unichar_ispunct = false;
 
     for (char32 u_ch : uni_vector) {
-      if (u_isalpha(u_ch)) unichar_isalpha = true;
-      if (u_islower(u_ch)) unichar_islower = true;
-      if (u_isupper(u_ch)) unichar_isupper = true;
-      if (u_isdigit(u_ch)) unichar_isdigit = true;
-      if (u_ispunct(u_ch)) unichar_ispunct = true;
+      if (u_isalpha(u_ch))
+        unichar_isalpha = true;
+      if (u_islower(u_ch))
+        unichar_islower = true;
+      if (u_isupper(u_ch))
+        unichar_isupper = true;
+      if (u_isdigit(u_ch))
+        unichar_isdigit = true;
+      if (u_ispunct(u_ch))
+        unichar_ispunct = true;
     }
 
     unicharset->set_isalpha(unichar_id, unichar_isalpha);
@@ -75,8 +80,8 @@ void SetupBasicProperties(bool report_errors, bool decompose,
     unicharset->set_ispunctuation(unichar_id, unichar_ispunct);
 
     tesseract::IcuErrorCode err;
-    unicharset->set_script(unichar_id, uscript_getName(
-        uscript_getScript(uni_vector[0], err)));
+    unicharset->set_script(
+        unichar_id, uscript_getName(uscript_getScript(uni_vector[0], err)));
 
     const int num_code_points = uni_vector.size();
     // Obtain the lower/upper case if needed and record it in the properties.
@@ -88,8 +93,8 @@ void SetupBasicProperties(bool report_errors, bool decompose,
         // However since they deal with UChars (so need a conversion function
         // from char32 or UTF8string) and require a meaningful locale string,
         // for now u_tolower()/u_toupper() are used.
-        other_case[i] = unichar_islower ? u_toupper(uni_vector[i]) :
-          u_tolower(uni_vector[i]);
+        other_case[i] = unichar_islower ? u_toupper(uni_vector[i])
+                                        : u_tolower(uni_vector[i]);
       }
       string other_case_uch = UNICHAR::UTF32ToUTF8(other_case);
       UNICHAR_ID other_case_id =
@@ -106,10 +111,10 @@ void SetupBasicProperties(bool report_errors, bool decompose,
     std::vector<char32> mirrors(num_code_points, 0);
     for (int i = 0; i < num_code_points; ++i) {
       mirrors[i] = u_charMirror(uni_vector[i]);
-      if (i == 0) {  // set directionality to that of the 1st code point
-        unicharset->set_direction(unichar_id,
-                                  static_cast<UNICHARSET::Direction>(
-                                      u_charDirection(uni_vector[i])));
+      if (i == 0) { // set directionality to that of the 1st code point
+        unicharset->set_direction(
+            unichar_id,
+            static_cast<UNICHARSET::Direction>(u_charDirection(uni_vector[i])));
       }
     }
     string mirror_uch = UNICHAR::UTF32ToUTF8(mirrors);
@@ -117,8 +122,8 @@ void SetupBasicProperties(bool report_errors, bool decompose,
     if (mirror_uch_id != INVALID_UNICHAR_ID) {
       unicharset->set_mirror(unichar_id, mirror_uch_id);
     } else if (report_errors) {
-      tprintf("Mirror %s of %s is not in unicharset\n",
-              mirror_uch.c_str(), unichar_str);
+      tprintf("Mirror %s of %s is not in unicharset\n", mirror_uch.c_str(),
+              unichar_str);
     }
 
     // Record normalized version of this unichar.
@@ -140,7 +145,7 @@ void SetupBasicProperties(bool report_errors, bool decompose,
 }
 
 // Helper sets the properties from universal script unicharsets, if found.
-void SetScriptProperties(const string& script_dir, UNICHARSET* unicharset) {
+void SetScriptProperties(const string &script_dir, UNICHARSET *unicharset) {
   for (int s = 0; s < unicharset->get_script_table_size(); ++s) {
     // Load the unicharset for the script if available.
     string filename = script_dir + "/" +
@@ -161,8 +166,8 @@ void SetScriptProperties(const string& script_dir, UNICHARSET* unicharset) {
 }
 
 // Helper gets the combined x-heights string.
-string GetXheightString(const string& script_dir,
-                        const UNICHARSET& unicharset) {
+string GetXheightString(const string &script_dir,
+                        const UNICHARSET &unicharset) {
   string xheights_str;
   for (int s = 0; s < unicharset.get_script_table_size(); ++s) {
     // Load the xheights for the script if available.
@@ -180,10 +185,10 @@ string GetXheightString(const string& script_dir,
 // script_dir directory, then the tops and bottoms are expanded using the
 // script unicharset.
 // If non-empty, xheight data for the fonts are written to the xheights_file.
-void SetPropertiesForInputFile(const string& script_dir,
-                               const string& input_unicharset_file,
-                               const string& output_unicharset_file,
-                               const string& output_xheights_file) {
+void SetPropertiesForInputFile(const string &script_dir,
+                               const string &input_unicharset_file,
+                               const string &output_unicharset_file,
+                               const string &output_xheights_file) {
   UNICHARSET unicharset;
 
   // Load the input unicharset
@@ -206,5 +211,4 @@ void SetPropertiesForInputFile(const string& script_dir,
   unicharset.save_to_file(output_unicharset_file.c_str());
 }
 
-}  // namespace tesseract
-
+} // namespace tesseract

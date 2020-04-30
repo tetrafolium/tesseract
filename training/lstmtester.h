@@ -27,7 +27,7 @@
 namespace tesseract {
 
 class LSTMTester {
- public:
+public:
   LSTMTester(inT64 max_memory);
 
   // Loads a set of lstmf files that were created using the lstm.train config to
@@ -35,11 +35,11 @@ class LSTMTester {
   // loaded. The arg is a filename of a file that lists the filenames, with one
   // name per line. Conveniently, tesstrain.sh generates such a file, along
   // with the files themselves.
-  bool LoadAllEvalData(const STRING& filenames_file);
+  bool LoadAllEvalData(const STRING &filenames_file);
   // Loads a set of lstmf files that were created using the lstm.train config to
   // tesseract into memory ready for testing. Returns false if nothing was
   // loaded.
-  bool LoadAllEvalData(const GenericVector<STRING>& filenames);
+  bool LoadAllEvalData(const GenericVector<STRING> &filenames);
 
   // Runs an evaluation asynchronously on the stored eval data and returns a
   // string describing the results of the previous test. Args match TestCallback
@@ -52,23 +52,23 @@ class LSTMTester {
   // model_data: is the model to evaluate, which should be a serialized
   //   LSTMTrainer.
   // training_stage: an arbitrary number on the progress of training.
-  STRING RunEvalAsync(int iteration, const double* training_errors,
-                      const TessdataManager& model_mgr, int training_stage);
+  STRING RunEvalAsync(int iteration, const double *training_errors,
+                      const TessdataManager &model_mgr, int training_stage);
   // Runs an evaluation synchronously on the stored eval data and returns a
   // string describing the results. Args as RunEvalAsync, except verbosity,
   // which outputs errors, if 1, or all results if 2.
-  STRING RunEvalSync(int iteration, const double* training_errors,
-                     const TessdataManager& model_mgr, int training_stage,
+  STRING RunEvalSync(int iteration, const double *training_errors,
+                     const TessdataManager &model_mgr, int training_stage,
                      int verbosity);
 
- private:
+private:
   // Static helper thread function for RunEvalAsync, with a specific signature
   // required by SVSync::StartThread. Actually a member function pretending to
   // be static, its arg is a this pointer that it will cast back to LSTMTester*
   // to call RunEvalSync using the stored args that RunEvalAsync saves in *this.
   // LockIfNotRunning must have returned true before calling ThreadFunc, and
   // it will call UnlockRunning to release the lock after RunEvalSync completes.
-  static void* ThreadFunc(void* lstmtester_void);
+  static void *ThreadFunc(void *lstmtester_void);
   // Returns true if there is currently nothing running, and takes the lock
   // if there is nothing running.
   bool LockIfNotRunning();
@@ -84,12 +84,12 @@ class LSTMTester {
   SVMutex running_mutex_;
   // Stored copies of the args for use while running asynchronously.
   int test_iteration_;
-  const double* test_training_errors_;
+  const double *test_training_errors_;
   TessdataManager test_model_mgr_;
   int test_training_stage_;
   STRING test_result_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_TRAINING_LSTMTESTER_H_
+#endif // TESSERACT_TRAINING_LSTMTESTER_H_

@@ -21,17 +21,15 @@
 
 namespace tesseract {
 
-Reconfig::Reconfig(const STRING& name, int ni, int x_scale, int y_scale)
-  : Network(NT_RECONFIG, name, ni, ni * x_scale * y_scale),
-    x_scale_(x_scale), y_scale_(y_scale) {
-}
+Reconfig::Reconfig(const STRING &name, int ni, int x_scale, int y_scale)
+    : Network(NT_RECONFIG, name, ni, ni * x_scale * y_scale), x_scale_(x_scale),
+      y_scale_(y_scale) {}
 
-Reconfig::~Reconfig() {
-}
+Reconfig::~Reconfig() {}
 
 // Returns the shape output from the network given an input shape (which may
 // be partially unknown ie zero).
-StaticShape Reconfig::OutputShape(const StaticShape& input_shape) const {
+StaticShape Reconfig::OutputShape(const StaticShape &input_shape) const {
   StaticShape result = input_shape;
   result.set_height(result.height() / y_scale_);
   result.set_width(result.width() / x_scale_);
@@ -46,31 +44,34 @@ StaticShape Reconfig::OutputShape(const StaticShape& input_shape) const {
 // WARNING: if GlobalMinimax is used to vary the scale, this will return
 // the last used scale factor. Call it before any forward, and it will return
 // the minimum scale factor of the paths through the GlobalMinimax.
-int Reconfig::XScaleFactor() const {
-  return x_scale_;
-}
+int Reconfig::XScaleFactor() const { return x_scale_; }
 
 // Writes to the given file. Returns false in case of error.
-bool Reconfig::Serialize(TFile* fp) const {
-  if (!Network::Serialize(fp)) return false;
-  if (fp->FWrite(&x_scale_, sizeof(x_scale_), 1) != 1) return false;
-  if (fp->FWrite(&y_scale_, sizeof(y_scale_), 1) != 1) return false;
+bool Reconfig::Serialize(TFile *fp) const {
+  if (!Network::Serialize(fp))
+    return false;
+  if (fp->FWrite(&x_scale_, sizeof(x_scale_), 1) != 1)
+    return false;
+  if (fp->FWrite(&y_scale_, sizeof(y_scale_), 1) != 1)
+    return false;
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
-bool Reconfig::DeSerialize(TFile* fp) {
-  if (fp->FReadEndian(&x_scale_, sizeof(x_scale_), 1) != 1) return false;
-  if (fp->FReadEndian(&y_scale_, sizeof(y_scale_), 1) != 1) return false;
+bool Reconfig::DeSerialize(TFile *fp) {
+  if (fp->FReadEndian(&x_scale_, sizeof(x_scale_), 1) != 1)
+    return false;
+  if (fp->FReadEndian(&y_scale_, sizeof(y_scale_), 1) != 1)
+    return false;
   no_ = ni_ * x_scale_ * y_scale_;
   return true;
 }
 
 // Runs forward propagation of activations on the input line.
 // See NetworkCpp for a detailed discussion of the arguments.
-void Reconfig::Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output) {
+void Reconfig::Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output) {
   output->ResizeScaled(input, x_scale_, y_scale_, no_);
   back_map_ = input.stride_map();
   StrideMap::Index dest_index(output->stride_map());
@@ -94,9 +95,8 @@ void Reconfig::Forward(bool debug, const NetworkIO& input,
 
 // Runs backward propagation of errors on the deltas line.
 // See NetworkCpp for a detailed discussion of the arguments.
-bool Reconfig::Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas) {
+bool Reconfig::Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas) {
   back_deltas->ResizeToMap(fwd_deltas.int_mode(), back_map_, ni_);
   StrideMap::Index src_index(fwd_deltas.stride_map());
   do {
@@ -119,5 +119,4 @@ bool Reconfig::Backward(bool debug, const NetworkIO& fwd_deltas,
   return needs_to_backprop_;
 }
 
-
-}  // namespace tesseract.
+} // namespace tesseract.

@@ -17,68 +17,66 @@
  *
  **********************************************************************/
 
-#ifndef           MOD128_H
-#define           MOD128_H
+#ifndef MOD128_H
+#define MOD128_H
 
-#include          "points.h"
+#include "points.h"
 
-#define MODULUS       128        /*range of directions */
-#define DIRBITS       7          //no of bits used
-#define DIRSCALE      1000       //length of vector
+#define MODULUS 128   /*range of directions */
+#define DIRBITS 7     // no of bits used
+#define DIRSCALE 1000 // length of vector
 
-class DLLSYM DIR128
-{
-  public:
-    DIR128() {
-    }                            //empty constructor
+class DLLSYM DIR128 {
+public:
+  DIR128() {} // empty constructor
 
-    DIR128(                //constructor
-           inT16 value) {  //value to assign
-      value %= MODULUS;          //modulo arithmetic
-      if (value < 0)
-        value += MODULUS;        //done properly
-      dir = (inT8) value;
-    }
-    DIR128(const FCOORD fc);  //quantize vector
+  DIR128(             // constructor
+      inT16 value) {  // value to assign
+    value %= MODULUS; // modulo arithmetic
+    if (value < 0)
+      value += MODULUS; // done properly
+    dir = (inT8)value;
+  }
+  DIR128(const FCOORD fc); // quantize vector
 
-    DIR128 & operator= (         //assign of inT16
-    inT16 value) {               //value to assign
-      value %= MODULUS;          //modulo arithmetic
-      if (value < 0)
-        value += MODULUS;        //done properly
-      dir = (inT8) value;
-      return *this;
-    }
-    inT8 operator- (             //subtraction
-      const DIR128 & minus) const//for signed result
-    {
-                                 //result
-      inT16 result = dir - minus.dir;
+  DIR128 &operator=(  // assign of inT16
+      inT16 value) {  // value to assign
+    value %= MODULUS; // modulo arithmetic
+    if (value < 0)
+      value += MODULUS; // done properly
+    dir = (inT8)value;
+    return *this;
+  }
+  inT8 operator-(                // subtraction
+      const DIR128 &minus) const // for signed result
+  {
+    // result
+    inT16 result = dir - minus.dir;
 
-      if (result > MODULUS / 2)
-        result -= MODULUS;       //get in range
-      else if (result < -MODULUS / 2)
-        result += MODULUS;
-      return (inT8) result;
-    }
-    DIR128 operator+ (           //addition
-      const DIR128 & add) const  //of itself
-    {
-      DIR128 result;             //sum
+    if (result > MODULUS / 2)
+      result -= MODULUS; // get in range
+    else if (result < -MODULUS / 2)
+      result += MODULUS;
+    return (inT8)result;
+  }
+  DIR128 operator+(            // addition
+      const DIR128 &add) const // of itself
+  {
+    DIR128 result; // sum
 
-      result = dir + add.dir;    //let = do the work
-      return result;
-    }
-    DIR128 & operator+= (        //same as +
-    const DIR128 & add) {
-      *this = dir + add.dir;     //let = do the work
-      return *this;
-    }
-    inT8 get_dir() const {  //access function
-      return dir;
-    }
+    result = dir + add.dir; // let = do the work
+    return result;
+  }
+  DIR128 &operator+=( // same as +
+      const DIR128 &add) {
+    *this = dir + add.dir; // let = do the work
+    return *this;
+  }
+  inT8 get_dir() const { // access function
+    return dir;
+  }
 
-  private:
-    inT8 dir;                    //a direction
+private:
+  inT8 dir; // a direction
 };
 #endif

@@ -18,7 +18,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
-#pragma warning(disable:4244)  // Conversion warnings
+#pragma warning(disable : 4244) // Conversion warnings
 #endif
 
 #include "tessdatamanager.h"
@@ -26,10 +26,10 @@
 #include <stdio.h>
 
 #include "helpers.h"
+#include "params.h"
 #include "serialis.h"
 #include "strngs.h"
 #include "tprintf.h"
-#include "params.h"
 
 namespace tesseract {
 
@@ -43,9 +43,11 @@ void TessdataManager::LoadFileLater(const char *data_file_name) {
 bool TessdataManager::Init(const char *data_file_name) {
   GenericVector<char> data;
   if (reader_ == nullptr) {
-    if (!LoadDataFromFile(data_file_name, &data)) return false;
+    if (!LoadDataFromFile(data_file_name, &data))
+      return false;
   } else {
-    if (!(*reader_)(data_file_name, &data)) return false;
+    if (!(*reader_)(data_file_name, &data))
+      return false;
   }
   return LoadMemBuffer(data_file_name, &data[0], data.size());
 }
@@ -58,11 +60,14 @@ bool TessdataManager::LoadMemBuffer(const char *name, const char *data,
   TFile fp;
   fp.Open(data, size);
   inT32 num_entries = TESSDATA_NUM_ENTRIES;
-  if (fp.FRead(&num_entries, sizeof(num_entries), 1) != 1) return false;
+  if (fp.FRead(&num_entries, sizeof(num_entries), 1) != 1)
+    return false;
   swap_ = num_entries > kMaxNumTessdataEntries || num_entries < 0;
   fp.set_swap(swap_);
-  if (swap_) ReverseN(&num_entries, sizeof(num_entries));
-  if (num_entries > kMaxNumTessdataEntries || num_entries < 0) return false;
+  if (swap_)
+    ReverseN(&num_entries, sizeof(num_entries));
+  if (num_entries > kMaxNumTessdataEntries || num_entries < 0)
+    return false;
   GenericVector<inT64> offset_table;
   offset_table.resize_no_init(num_entries);
   if (fp.FReadEndian(&offset_table[0], sizeof(offset_table[0]), num_entries) !=
@@ -72,10 +77,13 @@ bool TessdataManager::LoadMemBuffer(const char *name, const char *data,
     if (offset_table[i] >= 0) {
       inT64 entry_size = size - offset_table[i];
       int j = i + 1;
-      while (j < num_entries && offset_table[j] == -1) ++j;
-      if (j < num_entries) entry_size = offset_table[j] - offset_table[i];
+      while (j < num_entries && offset_table[j] == -1)
+        ++j;
+      if (j < num_entries)
+        entry_size = offset_table[j] - offset_table[i];
       entries_[i].resize_no_init(entry_size);
-      if (fp.FRead(&entries_[i][0], 1, entry_size) != entry_size) return false;
+      if (fp.FRead(&entries_[i][0], 1, entry_size) != entry_size)
+        return false;
     }
   }
   if (entries_[TESSDATA_VERSION].empty()) {
@@ -156,7 +164,8 @@ void TessdataManager::Directory() const {
 // Opens the given TFile pointer to the given component type.
 // Returns false in case of failure.
 bool TessdataManager::GetComponent(TessdataType type, TFile *fp) {
-  if (!is_loaded_ && !Init(data_file_name_.string())) return false;
+  if (!is_loaded_ && !Init(data_file_name_.string()))
+    return false;
   const TessdataManager *const_this = this;
   return const_this->GetComponent(type, fp);
 }
@@ -165,7 +174,8 @@ bool TessdataManager::GetComponent(TessdataType type, TFile *fp) {
 // loaded.
 bool TessdataManager::GetComponent(TessdataType type, TFile *fp) const {
   ASSERT_HOST(is_loaded_);
-  if (entries_[type].empty()) return false;
+  if (entries_[type].empty())
+    return false;
   fp->Open(&entries_[type][0], entries_[type].size());
   fp->set_swap(swap_);
   return true;
@@ -183,9 +193,8 @@ void TessdataManager::SetVersionString(const string &v_str) {
   memcpy(&entries_[TESSDATA_VERSION][0], v_str.data(), v_str.size());
 }
 
-bool TessdataManager::CombineDataFiles(
-    const char *language_data_path_prefix,
-    const char *output_filename) {
+bool TessdataManager::CombineDataFiles(const char *language_data_path_prefix,
+                                       const char *output_filename) {
   // Load individual tessdata components from files.
   for (int i = 0; i < TESSDATA_NUM_ENTRIES; ++i) {
     TessdataType type;
@@ -205,19 +214,17 @@ bool TessdataManager::CombineDataFiles(
 
   // Make sure that the required components are present.
   if (!IsBaseAvailable() && !IsLSTMAvailable()) {
-    tprintf(
-        "Error: traineddata file must contain at least (a unicharset file"
-        "and inttemp) OR an lstm file.\n");
+    tprintf("Error: traineddata file must contain at least (a unicharset file"
+            "and inttemp) OR an lstm file.\n");
     return false;
   }
   // Write updated data to the output traineddata file.
   return SaveFile(output_filename, nullptr);
 }
 
-bool TessdataManager::OverwriteComponents(
-    const char *new_traineddata_filename,
-    char **component_filenames,
-    int num_new_components) {
+bool TessdataManager::OverwriteComponents(const char *new_traineddata_filename,
+                                          char **component_filenames,
+                                          int num_new_components) {
   // Open the files with the new components.
   for (int i = 0; i < num_new_components; ++i) {
     TessdataType type;
@@ -237,7 +244,8 @@ bool TessdataManager::ExtractToFile(const char *filename) {
   TessdataType type = TESSDATA_NUM_ENTRIES;
   ASSERT_HOST(
       tesseract::TessdataManager::TessdataTypeFromFileName(filename, &type));
-  if (entries_[type].empty()) return false;
+  if (entries_[type].empty())
+    return false;
   return SaveDataToFile(entries_[type], filename);
 }
 
@@ -250,7 +258,8 @@ bool TessdataManager::TessdataTypeFromFileSuffix(const char *suffix,
     }
   }
   tprintf("TessdataManager can't determine which tessdata"
-         " component is represented by %s\n", suffix);
+          " component is represented by %s\n",
+          suffix);
   return false;
 }
 
@@ -258,8 +267,9 @@ bool TessdataManager::TessdataTypeFromFileName(const char *filename,
                                                TessdataType *type) {
   // Get the file suffix (extension)
   const char *suffix = strrchr(filename, '.');
-  if (suffix == nullptr || *(++suffix) == '\0') return false;
+  if (suffix == nullptr || *(++suffix) == '\0')
+    return false;
   return TessdataTypeFromFileSuffix(suffix, type);
 }
 
-}  // namespace tesseract
+} // namespace tesseract

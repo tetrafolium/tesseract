@@ -24,24 +24,24 @@
 #include <stdlib.h>
 
 namespace tesseract {
-double DotProductAVX(const double* u, const double* v, int n) {
+double DotProductAVX(const double *u, const double *v, int n) {
   fprintf(stderr, "DotProductAVX can't be used on Android\n");
   abort();
 }
-}  // namespace tesseract
+} // namespace tesseract
 
-#else  // !defined(__AVX__)
+#else // !defined(__AVX__)
 // Implementation for avx capable archs.
-#include <immintrin.h>
-#include <stdint.h>
 #include "dotproductavx.h"
 #include "host.h"
+#include <immintrin.h>
+#include <stdint.h>
 
 namespace tesseract {
 
 // Computes and returns the dot product of the n-vectors u and v.
 // Uses Intel AVX intrinsics to access the SIMD instruction set.
-double DotProductAVX(const double* u, const double* v, int n) {
+double DotProductAVX(const double *u, const double *v, int n) {
   int max_offset = n - 4;
   int offset = 0;
   // Accumulate a set of 4 sums in sum, by loading pairs of 4 values from u and
@@ -92,12 +92,12 @@ double DotProductAVX(const double* u, const double* v, int n) {
   auto cast_sum = _mm256_castpd_si256(sum);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing")
-  *(reinterpret_cast<int64_t*>(&result)) =
+  *(reinterpret_cast<int64_t *>(&result)) =
 #if defined(_WIN32) || defined(__i386__)
       // This is a very simple workaround that is activated
       // for all platforms that do not have _mm256_extract_epi64.
       // _mm256_extract_epi64(X, Y) == ((uint64_t*)&X)[Y]
-      ((uint64_t*)&cast_sum)[0]
+      ((uint64_t *)&cast_sum)[0]
 #else
       _mm256_extract_epi64(cast_sum, 0)
 #endif
@@ -110,6 +110,6 @@ double DotProductAVX(const double* u, const double* v, int n) {
   return result;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // ANDROID_BUILD
+#endif // ANDROID_BUILD

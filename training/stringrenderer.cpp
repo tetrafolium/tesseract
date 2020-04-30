@@ -20,15 +20,15 @@
 
 #include "stringrenderer.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <map>
 #include <stdio.h>
 #include <string.h>
-#include <algorithm>
-#include <map>
 #include <utility>
 #include <vector>
 
-#include "allheaders.h"     // from leptonica
+#include "allheaders.h" // from leptonica
 #include "boxchar.h"
 #include "ligature_table.h"
 #include "normstrngs.h"
@@ -36,7 +36,7 @@
 #include "pango/pango-glyph-item.h"
 #include "tlog.h"
 #include "unichar.h"
-#include "unicode/uchar.h"  // from libicu
+#include "unicode/uchar.h" // from libicu
 #include "util.h"
 
 namespace tesseract {
@@ -46,7 +46,7 @@ static const int kDefaultOutputResolution = 300;
 // Word joiner (U+2060) inserted after letters in ngram mode, as per
 // recommendation in http://unicode.org/reports/tr14/ to avoid line-breaks at
 // hyphens and other non-alpha characters.
-static const char* kWordJoinerUTF8 = "\xE2\x81\xA0";  // u8"\u2060";
+static const char *kWordJoinerUTF8 = "\xE2\x81\xA0"; // u8"\u2060";
 static const char32 kWordJoiner = 0x2060;
 
 static bool IsCombiner(int ch) {
@@ -62,14 +62,16 @@ static string EncodeAsUTF8(const char32 ch32) {
 }
 
 // Returns true with probability 'prob'.
-static bool RandBool(const double prob, TRand* rand) {
-  if (prob == 1.0) return true;
-  if (prob == 0.0) return false;
+static bool RandBool(const double prob, TRand *rand) {
+  if (prob == 1.0)
+    return true;
+  if (prob == 0.0)
+    return false;
   return rand->UnsignedRand(1.0) < prob;
 }
 
 /* static */
-Pix* CairoARGB32ToPixFormat(cairo_surface_t *surface) {
+Pix *CairoARGB32ToPixFormat(cairo_surface_t *surface) {
   if (cairo_image_surface_get_format(surface) != CAIRO_FORMAT_ARGB32) {
     printf("Unexpected surface format %d\n",
            cairo_image_surface_get_format(surface));
@@ -77,52 +79,34 @@ Pix* CairoARGB32ToPixFormat(cairo_surface_t *surface) {
   }
   const int width = cairo_image_surface_get_width(surface);
   const int height = cairo_image_surface_get_height(surface);
-  Pix* pix = pixCreate(width, height, 32);
+  Pix *pix = pixCreate(width, height, 32);
   int byte_stride = cairo_image_surface_get_stride(surface);
 
   for (int i = 0; i < height; ++i) {
-    memcpy(reinterpret_cast<unsigned char*>(pix->data + i * pix->wpl) + 1,
+    memcpy(reinterpret_cast<unsigned char *>(pix->data + i * pix->wpl) + 1,
            cairo_image_surface_get_data(surface) + i * byte_stride,
            byte_stride - ((i == height - 1) ? 1 : 0));
   }
   return pix;
 }
 
-StringRenderer::StringRenderer(const string& font_desc, int page_width,
+StringRenderer::StringRenderer(const string &font_desc, int page_width,
                                int page_height)
-    : page_width_(page_width),
-      page_height_(page_height),
-      h_margin_(50),
-      v_margin_(50),
-      pen_color_{0.0, 0.0, 0.0},
-      char_spacing_(0),
-      leading_(0),
-      vertical_text_(false),
-      gravity_hint_strong_(false),
-      render_fullwidth_latin_(false),
-      underline_start_prob_(0),
-      underline_continuation_prob_(0),
-      underline_style_(PANGO_UNDERLINE_SINGLE),
-      features_(nullptr),
-      drop_uncovered_chars_(true),
-      strip_unrenderable_words_(false),
-      add_ligatures_(false),
-      output_word_boxes_(false),
-      surface_(nullptr),
-      cr_(nullptr),
-      layout_(nullptr),
-      start_box_(0),
-      page_(0),
-      box_padding_(0),
-      page_boxes_(nullptr),
-      total_chars_(0),
-      font_index_(0),
-      last_offset_(0) {
+    : page_width_(page_width), page_height_(page_height), h_margin_(50),
+      v_margin_(50), pen_color_{0.0, 0.0, 0.0}, char_spacing_(0), leading_(0),
+      vertical_text_(false), gravity_hint_strong_(false),
+      render_fullwidth_latin_(false), underline_start_prob_(0),
+      underline_continuation_prob_(0), underline_style_(PANGO_UNDERLINE_SINGLE),
+      features_(nullptr), drop_uncovered_chars_(true),
+      strip_unrenderable_words_(false), add_ligatures_(false),
+      output_word_boxes_(false), surface_(nullptr), cr_(nullptr),
+      layout_(nullptr), start_box_(0), page_(0), box_padding_(0),
+      page_boxes_(nullptr), total_chars_(0), font_index_(0), last_offset_(0) {
   set_font(font_desc);
   set_resolution(kDefaultOutputResolution);
 }
 
-bool StringRenderer::set_font(const string& desc) {
+bool StringRenderer::set_font(const string &desc) {
   bool success = font_.ParseFontDescriptionName(desc);
   font_.set_resolution(resolution_);
   return success;
@@ -158,7 +142,7 @@ void StringRenderer::InitPangoCairo() {
   }
 
   if (vertical_text_) {
-    PangoContext* context = pango_layout_get_context(layout_);
+    PangoContext *context = pango_layout_get_context(layout_);
     pango_context_set_base_gravity(context, PANGO_GRAVITY_EAST);
     if (gravity_hint_strong_) {
       pango_context_set_gravity_hint(context, PANGO_GRAVITY_HINT_STRONG);
@@ -176,7 +160,7 @@ void StringRenderer::SetLayoutProperties() {
       pango_font_description_from_string(font_desc.c_str());
   // Assign the font description to the layout
   pango_layout_set_font_description(layout_, desc);
-  pango_font_description_free(desc);  // free the description
+  pango_font_description_free(desc); // free the description
   pango_cairo_context_set_resolution(pango_layout_get_context(layout_),
                                      resolution_);
 
@@ -192,9 +176,9 @@ void StringRenderer::SetLayoutProperties() {
   pango_layout_set_wrap(layout_, PANGO_WRAP_WORD_CHAR);
 
   // Adjust character spacing
-  PangoAttrList* attr_list = pango_attr_list_new();
+  PangoAttrList *attr_list = pango_attr_list_new();
   if (char_spacing_) {
-    PangoAttribute* spacing_attr =
+    PangoAttribute *spacing_attr =
         pango_attr_letter_spacing_new(char_spacing_ * PANGO_SCALE);
     spacing_attr->start_index = 0;
     spacing_attr->end_index = static_cast<guint>(-1);
@@ -203,7 +187,7 @@ void StringRenderer::SetLayoutProperties() {
 #if (PANGO_VERSION_MAJOR == 1 && PANGO_VERSION_MINOR >= 38)
   if (add_ligatures_) {
     set_features("liga, clig, dlig, hlig");
-    PangoAttribute* feature_attr = pango_attr_font_features_new(features_);
+    PangoAttribute *feature_attr = pango_attr_font_features_new(features_);
     pango_attr_list_change(attr_list, feature_attr);
   }
 #endif
@@ -230,19 +214,21 @@ void StringRenderer::FreePangoCairo() {
   }
 }
 
-void StringRenderer::SetWordUnderlineAttributes(const string& page_text) {
-  if (underline_start_prob_ == 0) return;
-  PangoAttrList* attr_list = pango_layout_get_attributes(layout_);
+void StringRenderer::SetWordUnderlineAttributes(const string &page_text) {
+  if (underline_start_prob_ == 0)
+    return;
+  PangoAttrList *attr_list = pango_layout_get_attributes(layout_);
 
-  const char* text = page_text.c_str();
+  const char *text = page_text.c_str();
   size_t offset = 0;
   TRand rand;
   bool started_underline = false;
-  PangoAttribute* und_attr = nullptr;
+  PangoAttribute *und_attr = nullptr;
 
   while (offset < page_text.length()) {
     offset += SpanUTF8Whitespace(text + offset);
-    if (offset == page_text.length()) break;
+    if (offset == page_text.length())
+      break;
 
     int word_start = offset;
     int word_len = SpanUTF8NotWhitespace(text + offset);
@@ -276,9 +262,10 @@ void StringRenderer::SetWordUnderlineAttributes(const string& page_text) {
 }
 
 // Returns offset in utf8 bytes to first page.
-int StringRenderer::FindFirstPageBreakOffset(const char* text,
+int StringRenderer::FindFirstPageBreakOffset(const char *text,
                                              int text_length) {
-  if (!text_length) return 0;
+  if (!text_length)
+    return 0;
   const int max_height = (page_height_ - 2 * v_margin_);
   const int max_width = (page_width_ - 2 * h_margin_);
   const int max_layout_height = vertical_text_ ? max_width : max_height;
@@ -286,12 +273,13 @@ int StringRenderer::FindFirstPageBreakOffset(const char* text,
   UNICHAR::const_iterator it = UNICHAR::begin(text, text_length);
   const UNICHAR::const_iterator it_end = UNICHAR::end(text, text_length);
   const int kMaxUnicodeBufLength = 15000;
-  for (int i = 0; i < kMaxUnicodeBufLength && it != it_end; ++it, ++i);
+  for (int i = 0; i < kMaxUnicodeBufLength && it != it_end; ++it, ++i)
+    ;
   int buf_length = it.utf8_data() - text;
   tlog(1, "len = %d  buf_len = %d\n", text_length, buf_length);
   pango_layout_set_text(layout_, text, buf_length);
 
-  PangoLayoutIter* line_iter = nullptr;
+  PangoLayoutIter *line_iter = nullptr;
   { // Fontconfig caches some info here that is not freed before exit.
     DISABLE_HEAP_LEAK_CHECK;
     line_iter = pango_layout_get_iter(layout_);
@@ -304,7 +292,7 @@ int StringRenderer::FindFirstPageBreakOffset(const char* text,
     PangoRectangle line_ink_rect;
     pango_layout_iter_get_line_extents(line_iter, &line_ink_rect, nullptr);
     pango_extents_to_pixels(&line_ink_rect, nullptr);
-    PangoLayoutLine* line = pango_layout_iter_get_line_readonly(line_iter);
+    PangoLayoutLine *line = pango_layout_iter_get_line_readonly(line_iter);
     if (first_page) {
       page_top = line_ink_rect.y;
       first_page = false;
@@ -320,22 +308,20 @@ int StringRenderer::FindFirstPageBreakOffset(const char* text,
   return offset;
 }
 
-const std::vector<BoxChar*>& StringRenderer::GetBoxes() const {
-    return boxchars_;
+const std::vector<BoxChar *> &StringRenderer::GetBoxes() const {
+  return boxchars_;
 }
 
-Boxa* StringRenderer::GetPageBoxes() const {
-    return page_boxes_;
-}
+Boxa *StringRenderer::GetPageBoxes() const { return page_boxes_; }
 
 void StringRenderer::RotatePageBoxes(float rotation) {
-  BoxChar::RotateBoxes(rotation, page_width_ / 2, page_height_ / 2,
-                       start_box_, boxchars_.size(), &boxchars_);
+  BoxChar::RotateBoxes(rotation, page_width_ / 2, page_height_ / 2, start_box_,
+                       boxchars_.size(), &boxchars_);
 }
 
-
 void StringRenderer::ClearBoxes() {
-  for (size_t i = 0; i < boxchars_.size(); ++i) delete boxchars_[i];
+  for (size_t i = 0; i < boxchars_.size(); ++i)
+    delete boxchars_[i];
   boxchars_.clear();
   boxaDestroy(&page_boxes_);
 }
@@ -345,18 +331,18 @@ string StringRenderer::GetBoxesStr() {
   return BoxChar::GetTesseractBoxStr(page_height_, boxchars_);
 }
 
-void StringRenderer::WriteAllBoxes(const string& filename) {
+void StringRenderer::WriteAllBoxes(const string &filename) {
   BoxChar::PrepareToWrite(&boxchars_);
   BoxChar::WriteTesseractBoxFile(filename, page_height_, boxchars_);
 }
 
 // Returns cluster strings in logical order.
-bool StringRenderer::GetClusterStrings(std::vector<string>* cluster_text) {
+bool StringRenderer::GetClusterStrings(std::vector<string> *cluster_text) {
   std::map<int, string> start_byte_to_text;
-  PangoLayoutIter* run_iter = pango_layout_get_iter(layout_);
-  const char* full_text = pango_layout_get_text(layout_);
+  PangoLayoutIter *run_iter = pango_layout_get_iter(layout_);
+  const char *full_text = pango_layout_get_text(layout_);
   do {
-    PangoLayoutRun* run = pango_layout_iter_get_run_readonly(run_iter);
+    PangoLayoutRun *run = pango_layout_iter_get_run_readonly(run_iter);
     if (!run) {
       // End of line nullptr run marker
       tlog(2, "Found end of line marker\n");
@@ -364,8 +350,8 @@ bool StringRenderer::GetClusterStrings(std::vector<string>* cluster_text) {
     }
     PangoGlyphItemIter cluster_iter;
     gboolean have_cluster;
-    for (have_cluster = pango_glyph_item_iter_init_start(&cluster_iter,
-                                                          run, full_text);
+    for (have_cluster =
+             pango_glyph_item_iter_init_start(&cluster_iter, run, full_text);
          have_cluster;
          have_cluster = pango_glyph_item_iter_next_cluster(&cluster_iter)) {
       const int start_byte_index = cluster_iter.start_index;
@@ -406,8 +392,8 @@ bool StringRenderer::GetClusterStrings(std::vector<string>* cluster_text) {
 // hyphens. When this is detected the word is split at that location into
 // multiple BoxChars. Otherwise, each resulting BoxChar will contain a word and
 // its bounding box.
-static void MergeBoxCharsToWords(std::vector<BoxChar*>* boxchars) {
-  std::vector<BoxChar*> result;
+static void MergeBoxCharsToWords(std::vector<BoxChar *> *boxchars) {
+  std::vector<BoxChar *> result;
   bool started_word = false;
   for (size_t i = 0; i < boxchars->size(); ++i) {
     if (boxchars->at(i)->ch() == " " || boxchars->at(i)->box() == nullptr) {
@@ -423,10 +409,10 @@ static void MergeBoxCharsToWords(std::vector<BoxChar*>* boxchars) {
       result.push_back(boxchars->at(i));
       boxchars->at(i) = nullptr;
     } else {
-      BoxChar* last_boxchar = result.back();
+      BoxChar *last_boxchar = result.back();
       // Compute bounding box union
-      const Box* box = boxchars->at(i)->box();
-      Box* last_box = last_boxchar->mutable_box();
+      const Box *box = boxchars->at(i)->box();
+      Box *last_box = last_boxchar->mutable_box();
       int left = std::min(last_box->x, box->x);
       int right = std::max(last_box->x + last_box->w, box->x + box->w);
       int top = std::min(last_box->y, box->y);
@@ -456,10 +442,9 @@ static void MergeBoxCharsToWords(std::vector<BoxChar*>* boxchars) {
   boxchars->swap(result);
 }
 
-
 void StringRenderer::ComputeClusterBoxes() {
-  const char* text = pango_layout_get_text(layout_);
-  PangoLayoutIter* cluster_iter = pango_layout_get_iter(layout_);
+  const char *text = pango_layout_get_text(layout_);
+  PangoLayoutIter *cluster_iter = pango_layout_get_iter(layout_);
 
   // Do a first pass to store cluster start indexes.
   std::vector<int> cluster_start_indices;
@@ -474,23 +459,23 @@ void StringRenderer::ComputeClusterBoxes() {
   std::sort(cluster_start_indices.begin(), cluster_start_indices.end());
   std::map<int, int> cluster_start_to_end_index;
   for (size_t i = 0; i + 1 < cluster_start_indices.size(); ++i) {
-    cluster_start_to_end_index[cluster_start_indices[i]]
-        = cluster_start_indices[i + 1];
+    cluster_start_to_end_index[cluster_start_indices[i]] =
+        cluster_start_indices[i + 1];
   }
 
   // Iterate again to compute cluster boxes and their text with the obtained
   // cluster extent information.
   cluster_iter = pango_layout_get_iter(layout_);
   // Store BoxChars* sorted by their byte start positions
-  std::map<int, BoxChar*> start_byte_to_box;
+  std::map<int, BoxChar *> start_byte_to_box;
   do {
     PangoRectangle cluster_rect;
     pango_layout_iter_get_cluster_extents(cluster_iter, &cluster_rect, nullptr);
     pango_extents_to_pixels(&cluster_rect, nullptr);
     const int start_byte_index = pango_layout_iter_get_index(cluster_iter);
     const int end_byte_index = cluster_start_to_end_index[start_byte_index];
-    string cluster_text = string(text + start_byte_index,
-                                 end_byte_index - start_byte_index);
+    string cluster_text =
+        string(text + start_byte_index, end_byte_index - start_byte_index);
     if (!cluster_text.empty() && cluster_text[0] == '\n') {
       tlog(2, "Skipping newlines at start of text.\n");
       continue;
@@ -499,16 +484,15 @@ void StringRenderer::ComputeClusterBoxes() {
         IsUTF8Whitespace(cluster_text.c_str())) {
       tlog(2, "Skipping whitespace with boxdim (%d,%d) '%s'\n",
            cluster_rect.width, cluster_rect.height, cluster_text.c_str());
-      BoxChar* boxchar = new BoxChar(" ", 1);
+      BoxChar *boxchar = new BoxChar(" ", 1);
       boxchar->set_page(page_);
       start_byte_to_box[start_byte_index] = boxchar;
       continue;
     }
     // Prepare a boxchar for addition at this byte position.
     tlog(2, "[%d %d], %d, %d : start_byte=%d end_byte=%d : '%s'\n",
-         cluster_rect.x, cluster_rect.y,
-         cluster_rect.width, cluster_rect.height,
-         start_byte_index, end_byte_index,
+         cluster_rect.x, cluster_rect.y, cluster_rect.width,
+         cluster_rect.height, start_byte_index, end_byte_index,
          cluster_text.c_str());
     ASSERT_HOST_MSG(cluster_rect.width,
                     "cluster_text:%s  start_byte_index:%d\n",
@@ -527,10 +511,10 @@ void StringRenderer::ComputeClusterBoxes() {
       // decided to use an unmapped glyph.
       cluster_text = LigatureTable::Get()->AddLigatures(cluster_text, nullptr);
     }
-    BoxChar* boxchar = new BoxChar(cluster_text.c_str(), cluster_text.size());
+    BoxChar *boxchar = new BoxChar(cluster_text.c_str(), cluster_text.size());
     boxchar->set_page(page_);
-    boxchar->AddBox(cluster_rect.x, cluster_rect.y,
-                    cluster_rect.width, cluster_rect.height);
+    boxchar->AddBox(cluster_rect.x, cluster_rect.y, cluster_rect.width,
+                    cluster_rect.height);
     start_byte_to_box[start_byte_index] = boxchar;
   } while (pango_layout_iter_next_cluster(cluster_iter));
   pango_layout_iter_free(cluster_iter);
@@ -545,17 +529,17 @@ void StringRenderer::ComputeClusterBoxes() {
   if (GetClusterStrings(&cluster_text)) {
     ASSERT_HOST(cluster_text.size() == start_byte_to_box.size());
     int ind = 0;
-    for (std::map<int, BoxChar*>::iterator it = start_byte_to_box.begin();
+    for (std::map<int, BoxChar *>::iterator it = start_byte_to_box.begin();
          it != start_byte_to_box.end(); ++it, ++ind) {
       it->second->mutable_ch()->swap(cluster_text[ind]);
     }
   }
 
   // Append to the boxchars list in byte order.
-  std::vector<BoxChar*> page_boxchars;
+  std::vector<BoxChar *> page_boxchars;
   page_boxchars.reserve(start_byte_to_box.size());
   string last_ch;
-  for (std::map<int, BoxChar*>::const_iterator it = start_byte_to_box.begin();
+  for (std::map<int, BoxChar *>::const_iterator it = start_byte_to_box.begin();
        it != start_byte_to_box.end(); ++it) {
     if (it->second->ch() == kWordJoinerUTF8) {
       // Skip zero-width joiner characters (ZWJs) here.
@@ -567,7 +551,7 @@ void StringRenderer::ComputeClusterBoxes() {
   CorrectBoxPositionsToLayout(&page_boxchars);
 
   if (render_fullwidth_latin_) {
-    for (std::map<int, BoxChar*>::iterator it = start_byte_to_box.begin();
+    for (std::map<int, BoxChar *>::iterator it = start_byte_to_box.begin();
          it != start_byte_to_box.end(); ++it) {
       // Convert fullwidth Latin characters to their halfwidth forms.
       string half(ConvertFullwidthLatinToBasicLatin(it->second->ch()));
@@ -583,45 +567,48 @@ void StringRenderer::ComputeClusterBoxes() {
   boxchars_.insert(boxchars_.end(), page_boxchars.begin(), page_boxchars.end());
 
   // Compute the page bounding box
-  Box* page_box = nullptr;
-  Boxa* all_boxes = nullptr;
+  Box *page_box = nullptr;
+  Boxa *all_boxes = nullptr;
   for (size_t i = 0; i < page_boxchars.size(); ++i) {
-    if (page_boxchars[i]->box() == nullptr) continue;
-    if (all_boxes == nullptr) all_boxes = boxaCreate(0);
+    if (page_boxchars[i]->box() == nullptr)
+      continue;
+    if (all_boxes == nullptr)
+      all_boxes = boxaCreate(0);
     boxaAddBox(all_boxes, page_boxchars[i]->mutable_box(), L_CLONE);
   }
   if (all_boxes != nullptr) {
     boxaGetExtent(all_boxes, nullptr, nullptr, &page_box);
     boxaDestroy(&all_boxes);
-    if (page_boxes_ == nullptr) page_boxes_ = boxaCreate(0);
+    if (page_boxes_ == nullptr)
+      page_boxes_ = boxaCreate(0);
     boxaAddBox(page_boxes_, page_box, L_INSERT);
   }
 }
 
-
 void StringRenderer::CorrectBoxPositionsToLayout(
-    std::vector<BoxChar*>* boxchars) {
+    std::vector<BoxChar *> *boxchars) {
   if (vertical_text_) {
-    const double rotation = - pango_gravity_to_rotation(
+    const double rotation = -pango_gravity_to_rotation(
         pango_context_get_base_gravity(pango_layout_get_context(layout_)));
     BoxChar::TranslateBoxes(page_width_ - h_margin_, v_margin_, boxchars);
-    BoxChar::RotateBoxes(rotation, page_width_ - h_margin_, v_margin_,
-                         0, boxchars->size(), boxchars);
+    BoxChar::RotateBoxes(rotation, page_width_ - h_margin_, v_margin_, 0,
+                         boxchars->size(), boxchars);
   } else {
     BoxChar::TranslateBoxes(h_margin_, v_margin_, boxchars);
   }
 }
 
-int StringRenderer::StripUnrenderableWords(string* utf8_text) const {
+int StringRenderer::StripUnrenderableWords(string *utf8_text) const {
   string output_text;
-  const char* text = utf8_text->c_str();
+  const char *text = utf8_text->c_str();
   size_t offset = 0;
   int num_dropped = 0;
   while (offset < utf8_text->length()) {
     int space_len = SpanUTF8Whitespace(text + offset);
     output_text.append(text + offset, space_len);
     offset += space_len;
-    if (offset == utf8_text->length()) break;
+    if (offset == utf8_text->length())
+      break;
 
     int word_len = SpanUTF8NotWhitespace(text + offset);
     if (font_.CanRenderString(text + offset, word_len)) {
@@ -639,9 +626,9 @@ int StringRenderer::StripUnrenderableWords(string* utf8_text) const {
   return num_dropped;
 }
 
-int StringRenderer::RenderToGrayscaleImage(const char* text, int text_length,
-                                           Pix** pix) {
-  Pix* orig_pix = nullptr;
+int StringRenderer::RenderToGrayscaleImage(const char *text, int text_length,
+                                           Pix **pix) {
+  Pix *orig_pix = nullptr;
   int offset = RenderToImage(text, text_length, &orig_pix);
   if (orig_pix) {
     *pix = pixConvertTo8(orig_pix, false);
@@ -650,12 +637,12 @@ int StringRenderer::RenderToGrayscaleImage(const char* text, int text_length,
   return offset;
 }
 
-int StringRenderer::RenderToBinaryImage(const char* text, int text_length,
-                                        int threshold, Pix** pix) {
-  Pix* orig_pix = nullptr;
+int StringRenderer::RenderToBinaryImage(const char *text, int text_length,
+                                        int threshold, Pix **pix) {
+  Pix *orig_pix = nullptr;
   int offset = RenderToImage(text, text_length, &orig_pix);
   if (orig_pix) {
-    Pix* gray_pix = pixConvertTo8(orig_pix, false);
+    Pix *gray_pix = pixConvertTo8(orig_pix, false);
     pixDestroy(&orig_pix);
     *pix = pixThresholdToBinary(gray_pix, threshold);
     pixDestroy(&gray_pix);
@@ -668,10 +655,10 @@ int StringRenderer::RenderToBinaryImage(const char* text, int text_length,
 // Add word joiner (WJ) characters between adjacent non-space characters except
 // immediately before a combiner.
 /* static */
-string StringRenderer::InsertWordJoiners(const string& text) {
+string StringRenderer::InsertWordJoiners(const string &text) {
   string out_str;
-  const UNICHAR::const_iterator it_end = UNICHAR::end(text.c_str(),
-                                                      text.length());
+  const UNICHAR::const_iterator it_end =
+      UNICHAR::end(text.c_str(), text.length());
   for (UNICHAR::const_iterator it = UNICHAR::begin(text.c_str(), text.length());
        it != it_end; ++it) {
     // Add the symbol to the output string.
@@ -680,8 +667,8 @@ string StringRenderer::InsertWordJoiners(const string& text) {
     UNICHAR::const_iterator next_it = it;
     ++next_it;
     bool next_char_is_boundary = (next_it == it_end || *next_it == ' ');
-    bool next_char_is_combiner = (next_it == it_end) ?
-        false : IsCombiner(*next_it);
+    bool next_char_is_combiner =
+        (next_it == it_end) ? false : IsCombiner(*next_it);
     if (*it != ' ' && *it != '\n' && !next_char_is_boundary &&
         !next_char_is_combiner) {
       out_str += kWordJoinerUTF8;
@@ -691,10 +678,10 @@ string StringRenderer::InsertWordJoiners(const string& text) {
 }
 
 // Convert halfwidth Basic Latin characters to their fullwidth forms.
-string StringRenderer::ConvertBasicLatinToFullwidthLatin(const string& str) {
+string StringRenderer::ConvertBasicLatinToFullwidthLatin(const string &str) {
   string full_str;
-  const UNICHAR::const_iterator it_end = UNICHAR::end(str.c_str(),
-                                                      str.length());
+  const UNICHAR::const_iterator it_end =
+      UNICHAR::end(str.c_str(), str.length());
   for (UNICHAR::const_iterator it = UNICHAR::begin(str.c_str(), str.length());
        it != it_end; ++it) {
     // Convert printable and non-space 7-bit ASCII characters to
@@ -711,7 +698,7 @@ string StringRenderer::ConvertBasicLatinToFullwidthLatin(const string& str) {
 }
 
 // Convert fullwidth Latin characters to their halfwidth forms.
-string StringRenderer::ConvertFullwidthLatinToBasicLatin(const string& str) {
+string StringRenderer::ConvertFullwidthLatinToBasicLatin(const string &str) {
   string half_str;
   UNICHAR::const_iterator it_end = UNICHAR::end(str.c_str(), str.length());
   for (UNICHAR::const_iterator it = UNICHAR::begin(str.c_str(), str.length());
@@ -719,8 +706,8 @@ string StringRenderer::ConvertFullwidthLatinToBasicLatin(const string& str) {
     char32 half_char = FullwidthToHalfwidth(*it);
     // Convert fullwidth Latin characters to their halfwidth forms
     // only if halfwidth forms are printable and non-space 7-bit ASCII.
-    if (IsInterchangeValid7BitAscii(half_char) &&
-        isprint(half_char) && !isspace(half_char)) {
+    if (IsInterchangeValid7BitAscii(half_char) && isprint(half_char) &&
+        !isspace(half_char)) {
       half_str.append(EncodeAsUTF8(half_char));
     } else {
       half_str.append(it.utf8_data(), it.utf8_len());
@@ -730,9 +717,10 @@ string StringRenderer::ConvertFullwidthLatinToBasicLatin(const string& str) {
 }
 
 // Returns offset to end of text substring rendered in this method.
-int StringRenderer::RenderToImage(const char* text, int text_length,
-                                  Pix** pix) {
-  if (pix && *pix) pixDestroy(pix);
+int StringRenderer::RenderToImage(const char *text, int text_length,
+                                  Pix **pix) {
+  if (pix && *pix)
+    pixDestroy(pix);
   InitPangoCairo();
 
   const int page_offset = FindFirstPageBreakOffset(text, text_length);
@@ -754,7 +742,7 @@ int StringRenderer::RenderToImage(const char* text, int text_length,
     // Translate to the top-right margin of page
     cairo_translate(cr_, page_width_ - h_margin_, v_margin_);
     // Rotate the layout
-    double rotation = - pango_gravity_to_rotation(
+    double rotation = -pango_gravity_to_rotation(
         pango_context_get_base_gravity(pango_layout_get_context(layout_)));
     tlog(2, "Rotating by %f radians\n", rotation);
     cairo_rotate(cr_, rotation);
@@ -787,7 +775,7 @@ int StringRenderer::RenderToImage(const char* text, int text_length,
 
   if (pix) {
     // Set a white background for the target image surface.
-    cairo_set_source_rgb(cr_, 1.0, 1.0, 1.0);  // sets drawing colour to white
+    cairo_set_source_rgb(cr_, 1.0, 1.0, 1.0); // sets drawing colour to white
     // Fill the surface with the active colour (if you don't do this, you will
     // be given a surface with a transparent background to draw on)
     cairo_paint(cr_);
@@ -797,7 +785,7 @@ int StringRenderer::RenderToImage(const char* text, int text_length,
     // have changed, update the pango layout to reflect this
     pango_cairo_update_layout(cr_, layout_);
     {
-      DISABLE_HEAP_LEAK_CHECK;  // for Fontconfig
+      DISABLE_HEAP_LEAK_CHECK; // for Fontconfig
       // Draw the pango layout onto the cairo surface
       pango_cairo_show_layout(cr_, layout_);
     }
@@ -831,9 +819,9 @@ int StringRenderer::RenderToImage(const char* text, int text_length,
 //   ...
 // } while (offset < strlen(text));
 //
-int StringRenderer::RenderAllFontsToImage(double min_coverage,
-                                          const char* text, int text_length,
-                                          string* font_used, Pix** image) {
+int StringRenderer::RenderAllFontsToImage(double min_coverage, const char *text,
+                                          int text_length, string *font_used,
+                                          Pix **image) {
   *image = nullptr;
   // Select a suitable font to render the title with.
   const char kTitleTemplate[] = "%s : %d hits = %.2f%%, raw = %d = %.2f%%";
@@ -845,7 +833,8 @@ int StringRenderer::RenderAllFontsToImage(double min_coverage,
   }
   title_font += " 8";
   tlog(1, "Selected title font: %s\n", title_font.c_str());
-  if (font_used) font_used->clear();
+  if (font_used)
+    font_used->clear();
 
   string orig_font = font_.DescriptionName();
   if (char_map_.empty()) {
@@ -858,7 +847,7 @@ int StringRenderer::RenderAllFontsToImage(double min_coverage,
     }
     tprintf("Total chars = %d\n", total_chars_);
   }
-  const std::vector<string>& all_fonts = FontUtils::ListAvailableFonts();
+  const std::vector<string> &all_fonts = FontUtils::ListAvailableFonts();
 
   for (size_t i = font_index_; i < all_fonts.size(); ++i) {
     ++font_index_;
@@ -868,24 +857,24 @@ int StringRenderer::RenderAllFontsToImage(double min_coverage,
     if (ok_chars > 0 && ok_chars >= total_chars_ * min_coverage) {
       set_font(all_fonts[i]);
       int offset = RenderToBinaryImage(text, text_length, 128, image);
-      ClearBoxes();  // Get rid of them as they are garbage.
+      ClearBoxes(); // Get rid of them as they are garbage.
       const int kMaxTitleLength = 1024;
       char title[kMaxTitleLength];
-      snprintf(title, kMaxTitleLength, kTitleTemplate,
-               all_fonts[i].c_str(), ok_chars,
-               100.0 * ok_chars / total_chars_, raw_score,
+      snprintf(title, kMaxTitleLength, kTitleTemplate, all_fonts[i].c_str(),
+               ok_chars, 100.0 * ok_chars / total_chars_, raw_score,
                100.0 * raw_score / char_map_.size());
       tprintf("%s\n", title);
       // This is a good font! Store the offset to return once we've tried all
       // the fonts.
       if (offset) {
         last_offset_ = offset;
-        if (font_used) *font_used = all_fonts[i];
+        if (font_used)
+          *font_used = all_fonts[i];
       }
       // Add the font to the image.
       set_font(title_font);
       v_margin_ /= 8;
-      Pix* title_image = nullptr;
+      Pix *title_image = nullptr;
       RenderToBinaryImage(title, strlen(title), 128, &title_image);
       pixOr(*image, *image, title_image);
       pixDestroy(&title_image);
@@ -895,8 +884,8 @@ int StringRenderer::RenderAllFontsToImage(double min_coverage,
       // We return the real offset only after cycling through the list of fonts.
       return 0;
     } else {
-      tprintf("Font %s failed with %d hits = %.2f%%\n",
-              all_fonts[i].c_str(), ok_chars, 100.0 * ok_chars / total_chars_);
+      tprintf("Font %s failed with %d hits = %.2f%%\n", all_fonts[i].c_str(),
+              ok_chars, 100.0 * ok_chars / total_chars_);
     }
   }
   font_index_ = 0;
@@ -904,4 +893,4 @@ int StringRenderer::RenderAllFontsToImage(double min_coverage,
   return last_offset_ == 0 ? -1 : last_offset_;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

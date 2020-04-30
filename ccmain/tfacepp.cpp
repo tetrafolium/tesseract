@@ -18,9 +18,9 @@
  **********************************************************************/
 
 #ifdef _MSC_VER
-#pragma warning(disable:4244)  // Conversion warnings
-#pragma warning(disable:4305)  // int/float warnings
-#pragma warning(disable:4800)  // int/bool warnings
+#pragma warning(disable : 4244) // Conversion warnings
+#pragma warning(disable : 4305) // int/float warnings
+#pragma warning(disable : 4800) // int/bool warnings
 #endif
 
 #include <math.h>
@@ -34,8 +34,6 @@
 
 #define MAX_UNDIVIDED_LENGTH 24
 
-
-
 /**********************************************************************
  * recog_word
  *
@@ -44,9 +42,11 @@
  **********************************************************************/
 namespace tesseract {
 void Tesseract::recog_word(WERD_RES *word) {
-  if (wordrec_skip_no_truth_words && (word->blamer_bundle == NULL ||
-      word->blamer_bundle->incorrect_result_reason() == IRR_NO_TRUTH)) {
-    if (classify_debug_level) tprintf("No truth for word - skipping\n");
+  if (wordrec_skip_no_truth_words &&
+      (word->blamer_bundle == NULL ||
+       word->blamer_bundle->incorrect_result_reason() == IRR_NO_TRUTH)) {
+    if (classify_debug_level)
+      tprintf("No truth for word - skipping\n");
     word->tess_failed = true;
     return;
   }
@@ -70,21 +70,21 @@ void Tesseract::recog_word(WERD_RES *word) {
   if (tessedit_override_permuter) {
     /* Override the permuter type if a straight dictionary check disagrees. */
     uint8_t perm_type = word->best_choice->permuter();
-    if ((perm_type != SYSTEM_DAWG_PERM) &&
-        (perm_type != FREQ_DAWG_PERM) && (perm_type != USER_DAWG_PERM)) {
+    if ((perm_type != SYSTEM_DAWG_PERM) && (perm_type != FREQ_DAWG_PERM) &&
+        (perm_type != USER_DAWG_PERM)) {
       uint8_t real_dict_perm_type = dict_word(*word->best_choice);
       if (((real_dict_perm_type == SYSTEM_DAWG_PERM) ||
            (real_dict_perm_type == FREQ_DAWG_PERM) ||
            (real_dict_perm_type == USER_DAWG_PERM)) &&
           (alpha_count(word->best_choice->unichar_string().string(),
                        word->best_choice->unichar_lengths().string()) > 0)) {
-        word->best_choice->set_permuter(real_dict_perm_type);  // use dict perm
+        word->best_choice->set_permuter(real_dict_perm_type); // use dict perm
       }
     }
     if (tessedit_rejection_debug &&
         perm_type != word->best_choice->permuter()) {
-      tprintf("Permuter Type Flipped from %d to %d\n",
-              perm_type, word->best_choice->permuter());
+      tprintf("Permuter Type Flipped from %d to %d\n", perm_type,
+              word->best_choice->permuter());
     }
   }
   // Factored out from control.cpp
@@ -100,7 +100,6 @@ void Tesseract::recog_word(WERD_RES *word) {
   }
 }
 
-
 /**********************************************************************
  * recog_word_recursive
  *
@@ -108,16 +107,16 @@ void Tesseract::recog_word(WERD_RES *word) {
  * Convert the output back to editor form.
  **********************************************************************/
 void Tesseract::recog_word_recursive(WERD_RES *word) {
-  int word_length = word->chopped_word->NumBlobs();  // no of blobs
+  int word_length = word->chopped_word->NumBlobs(); // no of blobs
   if (word_length > MAX_UNDIVIDED_LENGTH) {
     return split_and_recog_word(word);
   }
   cc_recog(word);
-  word_length = word->rebuild_word->NumBlobs();  // No of blobs in output.
+  word_length = word->rebuild_word->NumBlobs(); // No of blobs in output.
 
   // Do sanity checks and minor fixes on best_choice.
   if (word->best_choice->length() > word_length) {
-    word->best_choice->make_bad();  // should never happen
+    word->best_choice->make_bad(); // should never happen
     tprintf("recog_word: Discarded long string \"%s\""
             " (%d characters vs %d blobs)\n",
             word->best_choice->unichar_string().string(),
@@ -133,7 +132,6 @@ void Tesseract::recog_word_recursive(WERD_RES *word) {
     }
   }
 }
-
 
 /**********************************************************************
  * split_and_recog_word
@@ -168,7 +166,6 @@ void Tesseract::split_and_recog_word(WERD_RES *word) {
   join_words(word, word2, orig_bb);
 }
 
-
 /**********************************************************************
  * split_word
  *
@@ -179,11 +176,9 @@ void Tesseract::split_and_recog_word(WERD_RES *word) {
  * and will now be owned by the caller.  New blamer bundles are forged for the
  * two pieces.
  **********************************************************************/
-void Tesseract::split_word(WERD_RES *word,
-                           int split_pt,
-                           WERD_RES **right_piece,
+void Tesseract::split_word(WERD_RES *word, int split_pt, WERD_RES **right_piece,
                            BlamerBundle **orig_blamer_bundle) const {
-  ASSERT_HOST(split_pt >0 && split_pt < word->chopped_word->NumBlobs());
+  ASSERT_HOST(split_pt > 0 && split_pt < word->chopped_word->NumBlobs());
 
   // Save a copy of the blamer bundle so we can try to reconstruct it below.
   BlamerBundle *orig_bb =
@@ -220,14 +215,13 @@ void Tesseract::split_word(WERD_RES *word,
     word2->blamer_bundle = new BlamerBundle();
     orig_bb->SplitBundle(chopped->blobs.back()->bounding_box().right(),
                          word2->chopped_word->blobs[0]->bounding_box().left(),
-                         wordrec_debug_blamer,
-                         word->blamer_bundle, word2->blamer_bundle);
+                         wordrec_debug_blamer, word->blamer_bundle,
+                         word2->blamer_bundle);
   }
 
   *right_piece = word2;
   *orig_blamer_bundle = orig_bb;
 }
-
 
 /**********************************************************************
  * join_words
@@ -237,8 +231,7 @@ void Tesseract::split_word(WERD_RES *word,
  *  onto the right of word and then delete word2.
  *  Also, if orig_bb is provided, stitch it back into word.
  **********************************************************************/
-void Tesseract::join_words(WERD_RES *word,
-                           WERD_RES *word2,
+void Tesseract::join_words(WERD_RES *word, WERD_RES *word2,
                            BlamerBundle *orig_bb) const {
   TBOX prev_box = word->chopped_word->blobs.back()->bounding_box();
   TBOX blob_box = word2->chopped_word->blobs[0]->bounding_box();
@@ -249,8 +242,9 @@ void Tesseract::join_words(WERD_RES *word,
   word2->rebuild_word->blobs.clear();
   TPOINT split_pt;
   split_pt.x = (prev_box.right() + blob_box.left()) / 2;
-  split_pt.y = (prev_box.top() + prev_box.bottom() +
-                blob_box.top() + blob_box.bottom()) / 4;
+  split_pt.y = (prev_box.top() + prev_box.bottom() + blob_box.top() +
+                blob_box.bottom()) /
+               4;
   // Move the word2 seams onto the end of the word1 seam_array.
   // Since the seam list is one element short, an empty seam marking the
   // end of the last blob in the first word is needed first.
@@ -287,12 +281,11 @@ void Tesseract::join_words(WERD_RES *word,
   // finished with them.
   int bc2_index = 1;
   for (bc2_it.forward(); !bc2_it.at_first(); bc2_it.forward(), ++bc2_index) {
-    if (total_joined_choices >= kTooManyAltChoices &&
-        bc2_index > kAltsPerPiece)
+    if (total_joined_choices >= kTooManyAltChoices && bc2_index > kAltsPerPiece)
       break;
     int bc1_index = 0;
     for (bc1_it.move_to_first(); bc1_index < num_word1_choices;
-        ++bc1_index, bc1_it.forward()) {
+         ++bc1_index, bc1_it.forward()) {
       if (total_joined_choices >= kTooManyAltChoices &&
           bc1_index > kAltsPerPiece)
         break;
@@ -325,5 +318,4 @@ void Tesseract::join_words(WERD_RES *word,
   delete word2;
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

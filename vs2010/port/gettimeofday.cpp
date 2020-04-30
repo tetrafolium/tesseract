@@ -17,8 +17,8 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include <allheaders.h>
 #include "gettimeofday.h"
+#include <allheaders.h>
 
 int gettimeofday(struct timeval *tp, struct timezone *tzp) {
   l_int32 sec, usec;

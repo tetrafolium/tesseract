@@ -24,33 +24,33 @@
 #include "config_auto.h"
 #endif
 
-#include          "stderr.h"
-#include          "basedir.h"
-#include          "tessvars.h"
-#include          "control.h"
-#include          "reject.h"
-#include          "pageres.h"
-#include          "nwmain.h"
-#include          "pgedit.h"
-#include          "tprintf.h"
-#include          "tessedit.h"
-#include "stopper.h"
-#include "intmatcher.h"
+#include "basedir.h"
 #include "chop.h"
-#include "efio.h"
+#include "control.h"
 #include "danerror.h"
+#include "efio.h"
 #include "globals.h"
+#include "intmatcher.h"
+#include "nwmain.h"
+#include "pageres.h"
+#include "pgedit.h"
+#include "reject.h"
+#include "stderr.h"
+#include "stopper.h"
+#include "tessedit.h"
+#include "tessvars.h"
+#include "tprintf.h"
 #ifndef ANDROID_BUILD
 #include "lstmrecognizer.h"
 #endif
-#include "tesseractclass.h"
 #include "params.h"
+#include "tesseractclass.h"
 
-#define VARDIR        "configs/" /*variables files */
-                                 // config under api
-#define API_CONFIG      "configs/api_config"
+#define VARDIR "configs/" /*variables files */
+                          // config under api
+#define API_CONFIG "configs/api_config"
 
-ETEXT_DESC *global_monitor = NULL;  // progress monitor
+ETEXT_DESC *global_monitor = NULL; // progress monitor
 
 namespace tesseract {
 
@@ -62,7 +62,7 @@ void Tesseract::read_config_file(const char *filename,
   STRING path = datadir;
   path += "configs/";
   path += filename;
-  FILE* fp;
+  FILE *fp;
   if ((fp = fopen(path.string(), "rb")) != NULL) {
     fclose(fp);
   } else {
@@ -115,9 +115,8 @@ bool Tesseract::init_tesseract_lang_data(
     tessdata_path = language_data_path_prefix + kTrainedDataSuffix;
     if (!mgr->Init(tessdata_path.string())) {
       tprintf("Error opening data file %s\n", tessdata_path.string());
-      tprintf(
-          "Please make sure the TESSDATA_PREFIX environment variable is set"
-          " to your \"tessdata\" directory.\n");
+      tprintf("Please make sure the TESSDATA_PREFIX environment variable is set"
+              " to your \"tessdata\" directory.\n");
       return false;
     }
   }
@@ -140,8 +139,9 @@ bool Tesseract::init_tesseract_lang_data(
                                  this->params());
   }
 
-  SetParamConstraint set_params_constraint = set_only_non_debug_params ?
-      SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY : SET_PARAM_CONSTRAINT_NONE;
+  SetParamConstraint set_params_constraint =
+      set_only_non_debug_params ? SET_PARAM_CONSTRAINT_NON_DEBUG_ONLY
+                                : SET_PARAM_CONSTRAINT_NONE;
   // Load tesseract variables from config files. This is done after loading
   // language-specific variables from [lang].traineddata file, so that custom
   // config files can override values in [lang].traineddata file.
@@ -174,7 +174,8 @@ bool Tesseract::init_tesseract_lang_data(
   }
 
   // Determine which ocr engine(s) should be loaded and used for recognition.
-  if (oem != OEM_DEFAULT) tessedit_ocr_engine_mode.set_value(oem);
+  if (oem != OEM_DEFAULT)
+    tessedit_ocr_engine_mode.set_value(oem);
 
   // If we are only loading the config file (and so not planning on doing any
   // recognition) then there's nothing else do here.
@@ -229,8 +230,8 @@ bool Tesseract::init_tesseract_lang_data(
   // Init ParamsModel.
   // Load pass1 and pass2 weights (for now these two sets are the same, but in
   // the future separate sets of weights can be generated).
-  for (int p = ParamsModel::PTRAIN_PASS1;
-      p < ParamsModel::PTRAIN_NUM_PASSES; ++p) {
+  for (int p = ParamsModel::PTRAIN_PASS1; p < ParamsModel::PTRAIN_NUM_PASSES;
+       ++p) {
     language_model_->getParamsModel().SetPass(
         static_cast<ParamsModel::PassEnum>(p));
     if (mgr->GetComponent(TESSDATA_PARAMS_MODEL, &fp)) {
@@ -244,8 +245,8 @@ bool Tesseract::init_tesseract_lang_data(
 }
 
 // Helper returns true if the given string is in the vector of strings.
-static bool IsStrInList(const STRING& str,
-                        const GenericVector<STRING>& str_list) {
+static bool IsStrInList(const STRING &str,
+                        const GenericVector<STRING> &str_list) {
   for (int i = 0; i < str_list.size(); ++i) {
     if (str_list[i] == str)
       return true;
@@ -258,23 +259,23 @@ static bool IsStrInList(const STRING& str,
 // are not in there already.
 // Langs with ~ prefix get appended to not_to_load, provided they are not in
 // there already.
-void Tesseract::ParseLanguageString(const char* lang_str,
-                                    GenericVector<STRING>* to_load,
-                                    GenericVector<STRING>* not_to_load) {
+void Tesseract::ParseLanguageString(const char *lang_str,
+                                    GenericVector<STRING> *to_load,
+                                    GenericVector<STRING> *not_to_load) {
   STRING remains(lang_str);
   while (remains.length() > 0) {
     // Find the start of the lang code and which vector to add to.
-    const char* start = remains.string();
+    const char *start = remains.string();
     while (*start == '+')
       ++start;
-    GenericVector<STRING>* target = to_load;
+    GenericVector<STRING> *target = to_load;
     if (*start == '~') {
       target = not_to_load;
       ++start;
     }
     // Find the index of the end of the lang code in string start.
     int end = strlen(start);
-    const char* plus = strchr(start, '+');
+    const char *plus = strchr(start, '+');
     if (plus != NULL && plus - start < end)
       end = plus - start;
     STRING lang_code(start);
@@ -348,7 +349,7 @@ int Tesseract::init_tesseract(const char *arg0, const char *textbase,
   }
   if (!loaded_primary) {
     tprintf("Tesseract couldn't load any languages!\n");
-    return -1;  // Couldn't load any language!
+    return -1; // Couldn't load any language!
   }
   if (!sub_langs_.empty()) {
     // In multilingual mode word ratings have to be directly comparable,
@@ -410,12 +411,12 @@ int Tesseract::init_tesseract_internal(const char *arg0, const char *textbase,
   bool init_tesseract = tessedit_ocr_engine_mode != OEM_LSTM_ONLY;
   program_editup(textbase, init_tesseract ? mgr : nullptr,
                  init_tesseract ? mgr : nullptr);
-  return 0;                      //Normal exit
+  return 0; // Normal exit
 }
 
 // Helper builds the all_fonts table by adding new fonts from new_fonts.
-static void CollectFonts(const UnicityTable<FontInfo>& new_fonts,
-                         UnicityTable<FontInfo>* all_fonts) {
+static void CollectFonts(const UnicityTable<FontInfo> &new_fonts,
+                         UnicityTable<FontInfo> *all_fonts) {
   for (int i = 0; i < new_fonts.size(); ++i) {
     // UnicityTable uniques as we go.
     all_fonts->push_back(new_fonts.get(i));
@@ -423,8 +424,8 @@ static void CollectFonts(const UnicityTable<FontInfo>& new_fonts,
 }
 
 // Helper assigns an id to lang_fonts using the index in all_fonts table.
-static void AssignIds(const UnicityTable<FontInfo>& all_fonts,
-                      UnicityTable<FontInfo>* lang_fonts) {
+static void AssignIds(const UnicityTable<FontInfo> &all_fonts,
+                      UnicityTable<FontInfo> *lang_fonts) {
   for (int i = 0; i < lang_fonts->size(); ++i) {
     int index = all_fonts.get_id(lang_fonts->get(i));
     lang_fonts->get_mutable(i)->universal_id = index;
@@ -465,17 +466,14 @@ int Tesseract::init_tesseract_lm(const char *arg0, const char *textbase,
   return 0;
 }
 
-void Tesseract::end_tesseract() {
-  end_recog();
-}
+void Tesseract::end_tesseract() { end_recog(); }
 
 /* Define command type identifiers */
 
-enum CMD_EVENTS
-{
+enum CMD_EVENTS {
   ACTION_1_CMD_EVENT,
   RECOG_WERDS,
   RECOG_PSEUDO,
   ACTION_2_CMD_EVENT
 };
-}  // namespace tesseract
+} // namespace tesseract

@@ -24,28 +24,28 @@
  * structure alignment up to 8.
  **********************************************************************/
 
-#ifndef            CCUTIL_OCRCLASS_H_
-#define            CCUTIL_OCRCLASS_H_
+#ifndef CCUTIL_OCRCLASS_H_
+#define CCUTIL_OCRCLASS_H_
 
 #ifndef __GNUC__
 #ifdef _WIN32
-#include          "gettimeofday.h"
+#include "gettimeofday.h"
 #endif
 #else
-#include          <sys/time.h>
+#include <sys/time.h>
 #endif
-#include          <time.h>
-#include          "host.h"
+#include "host.h"
+#include <time.h>
 
 /*Maximum lengths of various strings*/
-#define MAX_FONT_NAME   34       /*name of font */
-#define MAX_OCR_NAME    32       /*name of engine */
-#define MAX_OCR_VERSION   17     /*version code of engine */
+#define MAX_FONT_NAME 34   /*name of font */
+#define MAX_OCR_NAME 32    /*name of engine */
+#define MAX_OCR_VERSION 17 /*version code of engine */
 
 /*pitch set definitions are identical to RTF*/
-#define PITCH_DEF     0          /*default */
-#define PITCH_FIXED     1        /*fixed pitch */
-#define PITCH_VAR     2          /*variable pitch */
+#define PITCH_DEF 0   /*default */
+#define PITCH_FIXED 1 /*fixed pitch */
+#define PITCH_VAR 2   /*variable pitch */
 
 /**********************************************************************
  * EANYCODE_CHAR
@@ -71,26 +71,26 @@
  * version.
  **********************************************************************/
 
-typedef struct {                  /*single character */
-// It should be noted that the format for char_code for version 2.0 and beyond
-// is UTF8 which means that ASCII characters will come out as one structure but
-// other characters will be returned in two or more instances of this structure
-// with a single byte of the  UTF8 code in each, but each will have the same
-// bounding box. Programs which want to handle languagues with different
-// characters sets will need to handle extended characters appropriately, but
-// *all* code needs to be prepared to receive UTF8 coded characters for
-// characters such as bullet and fancy quotes.
-  uinT16 char_code;              /*character itself */
-  inT16 left;                    /*of char (-1) */
-  inT16 right;                   /*of char (-1) */
-  inT16 top;                     /*of char (-1) */
-  inT16 bottom;                  /*of char (-1) */
-  inT16 font_index;              /*what font (0) */
-  uinT8 confidence;              /*0=perfect, 100=reject (0/100) */
-  uinT8 point_size;              /*of char, 72=i inch, (10) */
-  inT8 blanks;                   /*no of spaces before this char (1) */
-  uinT8 formatting;              /*char formatting (0) */
-} EANYCODE_CHAR;                 /*single character */
+typedef struct { /*single character */
+  // It should be noted that the format for char_code for version 2.0 and beyond
+  // is UTF8 which means that ASCII characters will come out as one structure
+  // but other characters will be returned in two or more instances of this
+  // structure with a single byte of the  UTF8 code in each, but each will have
+  // the same bounding box. Programs which want to handle languagues with
+  // different characters sets will need to handle extended characters
+  // appropriately, but *all* code needs to be prepared to receive UTF8 coded
+  // characters for characters such as bullet and fancy quotes.
+  uinT16 char_code; /*character itself */
+  inT16 left;       /*of char (-1) */
+  inT16 right;      /*of char (-1) */
+  inT16 top;        /*of char (-1) */
+  inT16 bottom;     /*of char (-1) */
+  inT16 font_index; /*what font (0) */
+  uinT8 confidence; /*0=perfect, 100=reject (0/100) */
+  uinT8 point_size; /*of char, 72=i inch, (10) */
+  inT8 blanks;      /*no of spaces before this char (1) */
+  uinT8 formatting; /*char formatting (0) */
+} EANYCODE_CHAR;    /*single character */
 
 /**********************************************************************
  * ETEXT_DESC
@@ -108,36 +108,30 @@ typedef struct {                  /*single character */
  * If the cancel function is not null then it is called with the number of
  * user words found. If it returns true then operation is cancelled.
  **********************************************************************/
-typedef bool (*CANCEL_FUNC)(void* cancel_this, int words);
+typedef bool (*CANCEL_FUNC)(void *cancel_this, int words);
 typedef bool (*PROGRESS_FUNC)(int progress, int left, int right, int top,
                               int bottom);
 
-class ETEXT_DESC {             // output header
- public:
-  inT16 count;     /// chars in this buffer(0)
-  inT16 progress;  /// percent complete increasing (0-100)
+class ETEXT_DESC { // output header
+public:
+  inT16 count;    /// chars in this buffer(0)
+  inT16 progress; /// percent complete increasing (0-100)
   /** Progress monitor covers word recognition and it does not cover layout
-  * analysis.
-  * See Ray comment in https://github.com/tesseract-ocr/tesseract/pull/27 */
-  inT8 more_to_come;                /// true if not last
-  volatile inT8 ocr_alive;          /// ocr sets to 1, HP 0
-  inT8 err_code;                    /// for errcode use
-  CANCEL_FUNC cancel;               /// returns true to cancel
-  PROGRESS_FUNC progress_callback;  /// called whenever progress increases
-  void* cancel_this;                /// this or other data for cancel
-  struct timeval end_time;          /// Time to stop. Expected to be set only
-                                    /// by call to set_deadline_msecs().
-  EANYCODE_CHAR text[1];            /// character data
+   * analysis.
+   * See Ray comment in https://github.com/tesseract-ocr/tesseract/pull/27 */
+  inT8 more_to_come;               /// true if not last
+  volatile inT8 ocr_alive;         /// ocr sets to 1, HP 0
+  inT8 err_code;                   /// for errcode use
+  CANCEL_FUNC cancel;              /// returns true to cancel
+  PROGRESS_FUNC progress_callback; /// called whenever progress increases
+  void *cancel_this;               /// this or other data for cancel
+  struct timeval end_time;         /// Time to stop. Expected to be set only
+                                   /// by call to set_deadline_msecs().
+  EANYCODE_CHAR text[1];           /// character data
 
   ETEXT_DESC()
-      : count(0),
-        progress(0),
-        more_to_come(0),
-        ocr_alive(0),
-        err_code(0),
-        cancel(NULL),
-        progress_callback(NULL),
-        cancel_this(NULL) {
+      : count(0), progress(0), more_to_come(0), ocr_alive(0), err_code(0),
+        cancel(NULL), progress_callback(NULL), cancel_this(NULL) {
     end_time.tv_sec = 0;
     end_time.tv_usec = 0;
   }
@@ -147,7 +141,7 @@ class ETEXT_DESC {             // output header
     gettimeofday(&end_time, NULL);
     inT32 deadline_secs = deadline_msecs / 1000;
     end_time.tv_sec += deadline_secs;
-    end_time.tv_usec += (deadline_msecs -  deadline_secs * 1000) * 1000;
+    end_time.tv_usec += (deadline_msecs - deadline_secs * 1000) * 1000;
     if (end_time.tv_usec > 1000000) {
       end_time.tv_usec -= 1000000;
       ++end_time.tv_sec;
@@ -156,12 +150,13 @@ class ETEXT_DESC {             // output header
 
   // Returns false if we've not passed the end_time, or have not set a deadline.
   bool deadline_exceeded() const {
-    if (end_time.tv_sec == 0 && end_time.tv_usec == 0) return false;
+    if (end_time.tv_sec == 0 && end_time.tv_usec == 0)
+      return false;
     struct timeval now;
     gettimeofday(&now, NULL);
-    return (now.tv_sec > end_time.tv_sec || (now.tv_sec == end_time.tv_sec &&
-                                             now.tv_usec > end_time.tv_usec));
+    return (now.tv_sec > end_time.tv_sec ||
+            (now.tv_sec == end_time.tv_sec && now.tv_usec > end_time.tv_usec));
   }
 };
 
-#endif  // CCUTIL_OCRCLASS_H_
+#endif // CCUTIL_OCRCLASS_H_

@@ -16,42 +16,36 @@
  ** limitations under the License.
  *
  **********************************************************************/
-#ifndef           POLYBLK_H
-#define           POLYBLK_H
+#ifndef POLYBLK_H
+#define POLYBLK_H
 
-#include "publictypes.h"
 #include "elst.h"
 #include "points.h"
+#include "publictypes.h"
 #include "rect.h"
 #include "scrollview.h"
 
 class DLLSYM POLY_BLOCK {
- public:
-  POLY_BLOCK() {
-  }
+public:
+  POLY_BLOCK() {}
   // Initialize from box coordinates.
-  POLY_BLOCK(const TBOX& box, PolyBlockType type);
+  POLY_BLOCK(const TBOX &box, PolyBlockType type);
   POLY_BLOCK(ICOORDELT_LIST *points, PolyBlockType type);
-  ~POLY_BLOCK () {
-  }
+  ~POLY_BLOCK() {}
 
-  TBOX *bounding_box() {  // access function
+  TBOX *bounding_box() { // access function
     return &box;
   }
 
-  ICOORDELT_LIST *points() {  // access function
+  ICOORDELT_LIST *points() { // access function
     return &vertices;
   }
 
   void compute_bb();
 
-  PolyBlockType isA() const {
-    return type;
-  }
+  PolyBlockType isA() const { return type; }
 
-  bool IsText() const {
-    return PTIsTextType(type);
-  }
+  bool IsText() const { return PTIsTextType(type); }
 
   // Rotate about the origin by the given rotation. (Analogous to
   // multiplying by a complex number.
@@ -61,11 +55,11 @@ class DLLSYM POLY_BLOCK {
   // Move by adding shift to all coordinates.
   void move(ICOORD shift);
 
-  void plot(ScrollView* window, inT32 num);
+  void plot(ScrollView *window, inT32 num);
 
-  #ifndef GRAPHICS_DISABLED
-  void fill(ScrollView* window, ScrollView::Color colour);
-  #endif  // GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
+  void fill(ScrollView *window, ScrollView::Color colour);
+#endif // GRAPHICS_DISABLED
 
   // Returns true if other is inside this.
   bool contains(POLY_BLOCK *other);
@@ -78,28 +72,24 @@ class DLLSYM POLY_BLOCK {
   // test_pt outside this.
   inT16 winding_number(const ICOORD &test_pt);
 
-  #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
   // Static utility functions to handle the PolyBlockType.
   // Returns a color to draw the given type.
   static ScrollView::Color ColorForPolyBlockType(PolyBlockType type);
-  #endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
 
- private:
-  ICOORDELT_LIST vertices;     // vertices
-  TBOX box;                     // bounding box
-  PolyBlockType type;              // Type of this region.
+private:
+  ICOORDELT_LIST vertices; // vertices
+  TBOX box;                // bounding box
+  PolyBlockType type;      // Type of this region.
 };
 
 // Class to iterate the scanlines of a polygon.
 class DLLSYM PB_LINE_IT {
- public:
-  PB_LINE_IT(POLY_BLOCK *blkptr) {
-    block = blkptr;
-  }
+public:
+  PB_LINE_IT(POLY_BLOCK *blkptr) { block = blkptr; }
 
-  void set_to_block(POLY_BLOCK * blkptr) {
-    block = blkptr;
-  }
+  void set_to_block(POLY_BLOCK *blkptr) { block = blkptr; }
 
   // Returns a list of runs of pixels for the given y coord.
   // Each element of the returned list is the start (x) and extent(y) of
@@ -107,7 +97,7 @@ class DLLSYM PB_LINE_IT {
   // Delete the returned list after use.
   ICOORDELT_LIST *get_line(inT16 y);
 
- private:
-  POLY_BLOCK * block;
+private:
+  POLY_BLOCK *block;
 };
 #endif

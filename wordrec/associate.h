@@ -49,23 +49,23 @@ struct AssociateStats {
 
   void Print() { tprintf("AssociateStats: s(%g %d)\n", shape_cost, bad_shape); }
 
-  float shape_cost;           // cost of blob shape
-  bool bad_shape;             // true if the shape of the blob is unacceptable
-  float full_wh_ratio;        // width-to-hight ratio + gap on the right
-  float full_wh_ratio_total;  // sum of width-to-hight ratios
-                              // on the path terminating at this blob
-  float full_wh_ratio_var;    // variance of full_wh_ratios on the path
-  bool bad_fixed_pitch_right_gap;  // true if there is no gap before
-                                   // the blob on the right
-  bool bad_fixed_pitch_wh_ratio;   // true if the blobs has width-to-hight
-                                   // ratio > kMaxFixedPitchCharAspectRatio
-  int gap_sum;  // sum of gaps within the blob
+  float shape_cost;          // cost of blob shape
+  bool bad_shape;            // true if the shape of the blob is unacceptable
+  float full_wh_ratio;       // width-to-hight ratio + gap on the right
+  float full_wh_ratio_total; // sum of width-to-hight ratios
+                             // on the path terminating at this blob
+  float full_wh_ratio_var;   // variance of full_wh_ratios on the path
+  bool bad_fixed_pitch_right_gap; // true if there is no gap before
+                                  // the blob on the right
+  bool bad_fixed_pitch_wh_ratio;  // true if the blobs has width-to-hight
+                                  // ratio > kMaxFixedPitchCharAspectRatio
+  int gap_sum;                    // sum of gaps within the blob
 };
 
 // Utility functions for scoring segmentation paths according to their
 // character widths, gap widths, seam characteristics.
 class AssociateUtils {
- public:
+public:
   static const float kMaxFixedPitchCharAspectRatio;
   static const float kMinGap;
 
@@ -81,8 +81,8 @@ class AssociateUtils {
                                            const BLOB_CHOICE &b) {
     return rating_cert_scale * b.rating() / b.certainty();
   }
-  static inline float ComputeRating(float rating_cert_scale,
-                                    float cert, int width) {
+  static inline float ComputeRating(float rating_cert_scale, float cert,
+                                    int width) {
     return static_cast<float>(width) * cert / rating_cert_scale;
   }
 
@@ -98,14 +98,10 @@ class AssociateUtils {
   //
   // Note: the function assumes that word_res, stats and
   // associate_cost pointers are not NULL.
-  static void ComputeStats(int col, int row,
-                           const AssociateStats *parent_stats,
-                           int parent_path_length,
-                           bool fixed_pitch,
-                           float max_char_wh_ratio,
-                           WERD_RES *word_res,
-                           bool debug,
-                           AssociateStats *stats);
+  static void ComputeStats(int col, int row, const AssociateStats *parent_stats,
+                           int parent_path_length, bool fixed_pitch,
+                           float max_char_wh_ratio, WERD_RES *word_res,
+                           bool debug, AssociateStats *stats);
 
   // Returns the width cost for fixed-pitch text.
   static float FixedPitchWidthCost(float norm_width, float right_gap,
@@ -118,6 +114,6 @@ class AssociateUtils {
   }
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
 #endif

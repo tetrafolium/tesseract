@@ -17,8 +17,8 @@
  *
  **********************************************************************/
 
-#include <stdlib.h>
 #include "clst.h"
+#include <stdlib.h>
 
 /***********************************************************************
  *  MEMBER FUNCTIONS OF CLASS: CLIST
@@ -37,20 +37,19 @@
  *  the consequential memory overhead.
  **********************************************************************/
 
-void
-CLIST::internal_deep_clear (     //destroy all links
-void (*zapper) (void *)) {       //ptr to zapper functn
+void CLIST::internal_deep_clear( // destroy all links
+    void (*zapper)(void *)) {    // ptr to zapper functn
   CLIST_LINK *ptr;
   CLIST_LINK *next;
 
-  if (!empty ()) {
-    ptr = last->next;            //set to first
-    last->next = NULL;           //break circle
-    last = NULL;                 //set list empty
+  if (!empty()) {
+    ptr = last->next;  // set to first
+    last->next = NULL; // break circle
+    last = NULL;       // set list empty
     while (ptr) {
       next = ptr->next;
-      zapper (ptr->data);
-      delete(ptr);
+      zapper(ptr->data);
+      delete (ptr);
       ptr = next;
     }
   }
@@ -65,17 +64,17 @@ void (*zapper) (void *)) {       //ptr to zapper functn
  *
  **********************************************************************/
 
-void CLIST::shallow_clear() {  //destroy all links
+void CLIST::shallow_clear() { // destroy all links
   CLIST_LINK *ptr;
   CLIST_LINK *next;
 
-  if (!empty ()) {
-    ptr = last->next;            //set to first
-    last->next = NULL;           //break circle
-    last = NULL;                 //set list empty
+  if (!empty()) {
+    ptr = last->next;  // set to first
+    last->next = NULL; // break circle
+    last = NULL;       // set list empty
     while (ptr) {
       next = ptr->next;
-      delete(ptr);
+      delete (ptr);
       ptr = next;
     }
   }
@@ -94,16 +93,16 @@ void CLIST::shallow_clear() {  //destroy all links
  *  end point is always the end_it position.
  **********************************************************************/
 
-void CLIST::assign_to_sublist(                           //to this list
-                              CLIST_ITERATOR *start_it,  //from list start
-                              CLIST_ITERATOR *end_it) {  //from list end
+void CLIST::assign_to_sublist( // to this list
+    CLIST_ITERATOR *start_it,  // from list start
+    CLIST_ITERATOR *end_it) {  // from list end
   const ERRCODE LIST_NOT_EMPTY =
-    "Destination list must be empty before extracting a sublist";
+      "Destination list must be empty before extracting a sublist";
 
-  if (!empty ())
-    LIST_NOT_EMPTY.error ("CLIST.assign_to_sublist", ABORT, NULL);
+  if (!empty())
+    LIST_NOT_EMPTY.error("CLIST.assign_to_sublist", ABORT, NULL);
 
-  last = start_it->extract_sublist (end_it);
+  last = start_it->extract_sublist(end_it);
 }
 
 /***********************************************************************
@@ -112,8 +111,8 @@ void CLIST::assign_to_sublist(                           //to this list
  *  Return count of elements on list
  **********************************************************************/
 
-inT32 CLIST::length() const {  //count elements
-  CLIST_ITERATOR it(const_cast<CLIST*>(this));
+inT32 CLIST::length() const { // count elements
+  CLIST_ITERATOR it(const_cast<CLIST *>(this));
   inT32 count = 0;
 
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward())
@@ -127,34 +126,33 @@ inT32 CLIST::length() const {  //count elements
  *  Sort elements on list
  **********************************************************************/
 
-void
-CLIST::sort (                    //sort elements
-int comparator (                 //comparison routine
-const void *, const void *)) {
+void CLIST::sort(   // sort elements
+    int comparator( // comparison routine
+        const void *, const void *)) {
   CLIST_ITERATOR it(this);
   inT32 count;
-  void **base;                   //ptr array to sort
+  void **base; // ptr array to sort
   void **current;
   inT32 i;
 
   /* Allocate an array of pointers, one per list element */
-  count = length ();
-  base = (void **) malloc (count * sizeof (void *));
+  count = length();
+  base = (void **)malloc(count * sizeof(void *));
 
   /* Extract all elements, putting the pointers in the array */
   current = base;
-  for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ()) {
-    *current = it.extract ();
+  for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
+    *current = it.extract();
     current++;
   }
 
   /* Sort the pointer array */
-  qsort ((char *) base, count, sizeof (*base), comparator);
+  qsort((char *)base, count, sizeof(*base), comparator);
 
   /* Rebuild the list from the sorted pointers */
   current = base;
   for (i = 0; i < count; i++) {
-    it.add_to_end (*current);
+    it.add_to_end(*current);
     current++;
   }
   free(base);
@@ -167,11 +165,11 @@ const void *, const void *)) {
 // Time is linear to add pre-sorted items to an empty list.
 // If unique, then don't add duplicate entries.
 // Returns true if the element was added to the list.
-bool CLIST::add_sorted(int comparator(const void*, const void*),
-                       bool unique, void* new_data) {
+bool CLIST::add_sorted(int comparator(const void *, const void *), bool unique,
+                       void *new_data) {
   // Check for adding at the end.
   if (last == NULL || comparator(&last->data, &new_data) < 0) {
-    CLIST_LINK* new_element = new CLIST_LINK;
+    CLIST_LINK *new_element = new CLIST_LINK;
     new_element->data = new_data;
     if (last == NULL) {
       new_element->next = new_element;
@@ -185,7 +183,7 @@ bool CLIST::add_sorted(int comparator(const void*, const void*),
     // Need to use an iterator.
     CLIST_ITERATOR it(this);
     for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-      void* data = it.data();
+      void *data = it.data();
       if (data == new_data && unique)
         return false;
       if (comparator(&data, &new_data) > 0)
@@ -205,21 +203,19 @@ bool CLIST::add_sorted(int comparator(const void*, const void*),
 // the set difference minuend - subtrahend to this, being the elements
 // of minuend that do not compare equal to anything in subtrahend.
 // If unique is true, any duplicates in minuend are also eliminated.
-void CLIST::set_subtract(int comparator(const void*, const void*),
-                         bool unique,
-                         CLIST* minuend, CLIST* subtrahend) {
+void CLIST::set_subtract(int comparator(const void *, const void *),
+                         bool unique, CLIST *minuend, CLIST *subtrahend) {
   shallow_clear();
   CLIST_ITERATOR m_it(minuend);
   CLIST_ITERATOR s_it(subtrahend);
   // Since both lists are sorted, finding the subtras that are not
   // minus is a case of a parallel iteration.
   for (m_it.mark_cycle_pt(); !m_it.cycled_list(); m_it.forward()) {
-    void* minu = m_it.data();
-    void* subtra = NULL;
+    void *minu = m_it.data();
+    void *subtra = NULL;
     if (!s_it.empty()) {
       subtra = s_it.data();
-      while (!s_it.at_last() &&
-             comparator(&subtra, &minu) < 0) {
+      while (!s_it.at_last() && comparator(&subtra, &minu) < 0) {
         s_it.forward();
         subtra = s_it.data();
       }
@@ -228,7 +224,6 @@ void CLIST::set_subtract(int comparator(const void*, const void*),
       add_sorted(comparator, unique, minu);
   }
 }
-
 
 /***********************************************************************
  *  MEMBER FUNCTIONS OF CLASS: CLIST_ITERATOR
@@ -243,15 +238,15 @@ void CLIST::set_subtract(int comparator(const void*, const void*),
  **********************************************************************/
 
 void *CLIST_ITERATOR::forward() {
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!list)
-    NO_LIST.error ("CLIST_ITERATOR::forward", ABORT, NULL);
-  #endif
-  if (list->empty ())
+    NO_LIST.error("CLIST_ITERATOR::forward", ABORT, NULL);
+#endif
+  if (list->empty())
     return NULL;
 
-  if (current) {                 //not removed so
-                                 //set previous
+  if (current) { // not removed so
+                 // set previous
     prev = current;
     started_cycling = TRUE;
     // In case next is deleted by another iterator, get next from current.
@@ -263,13 +258,13 @@ void *CLIST_ITERATOR::forward() {
   }
   next = current->next;
 
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!current)
-    NULL_DATA.error ("CLIST_ITERATOR::forward", ABORT, NULL);
+    NULL_DATA.error("CLIST_ITERATOR::forward", ABORT, NULL);
   if (!next)
-    NULL_NEXT.error ("CLIST_ITERATOR::forward", ABORT,
-                     "This is: %p  Current is: %p", this, current);
-  #endif
+    NULL_NEXT.error("CLIST_ITERATOR::forward", ABORT,
+                    "This is: %p  Current is: %p", this, current);
+#endif
   return current->data;
 }
 
@@ -281,29 +276,29 @@ void *CLIST_ITERATOR::forward() {
  *  (This function can't be INLINEd because it contains a loop)
  **********************************************************************/
 
-void *CLIST_ITERATOR::data_relative(                //get data + or - ...
-                                    inT8 offset) {  //offset from current
+void *CLIST_ITERATOR::data_relative( // get data + or - ...
+    inT8 offset) {                   // offset from current
   CLIST_LINK *ptr;
 
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!list)
-    NO_LIST.error ("CLIST_ITERATOR::data_relative", ABORT, NULL);
-  if (list->empty ())
-    EMPTY_LIST.error ("CLIST_ITERATOR::data_relative", ABORT, NULL);
+    NO_LIST.error("CLIST_ITERATOR::data_relative", ABORT, NULL);
+  if (list->empty())
+    EMPTY_LIST.error("CLIST_ITERATOR::data_relative", ABORT, NULL);
   if (offset < -1)
-    BAD_PARAMETER.error ("CLIST_ITERATOR::data_relative", ABORT,
-      "offset < -l");
-  #endif
+    BAD_PARAMETER.error("CLIST_ITERATOR::data_relative", ABORT, "offset < -l");
+#endif
 
   if (offset == -1)
     ptr = prev;
   else
-    for (ptr = current ? current : prev; offset-- > 0; ptr = ptr->next);
+    for (ptr = current ? current : prev; offset-- > 0; ptr = ptr->next)
+      ;
 
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!ptr)
-    NULL_DATA.error ("CLIST_ITERATOR::data_relative", ABORT, NULL);
-  #endif
+    NULL_DATA.error("CLIST_ITERATOR::data_relative", ABORT, NULL);
+#endif
 
   return ptr->data;
 }
@@ -317,10 +312,10 @@ void *CLIST_ITERATOR::data_relative(                //get data + or - ...
  **********************************************************************/
 
 void *CLIST_ITERATOR::move_to_last() {
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!list)
-    NO_LIST.error ("CLIST_ITERATOR::move_to_last", ABORT, NULL);
-  #endif
+    NO_LIST.error("CLIST_ITERATOR::move_to_last", ABORT, NULL);
+#endif
 
   while (current != list->last)
     forward();
@@ -341,58 +336,54 @@ void *CLIST_ITERATOR::move_to_last() {
  *  (This function hasn't been in-lined because its a bit big!)
  **********************************************************************/
 
-void CLIST_ITERATOR::exchange(                             //positions of 2 links
-                              CLIST_ITERATOR *other_it) {  //other iterator
+void CLIST_ITERATOR::exchange(  // positions of 2 links
+    CLIST_ITERATOR *other_it) { // other iterator
   const ERRCODE DONT_EXCHANGE_DELETED =
-    "Can't exchange deleted elements of lists";
+      "Can't exchange deleted elements of lists";
 
   CLIST_LINK *old_current;
 
-  #ifndef NDEBUG
+#ifndef NDEBUG
   if (!list)
-    NO_LIST.error ("CLIST_ITERATOR::exchange", ABORT, NULL);
+    NO_LIST.error("CLIST_ITERATOR::exchange", ABORT, NULL);
   if (!other_it)
-    BAD_PARAMETER.error ("CLIST_ITERATOR::exchange", ABORT, "other_it NULL");
+    BAD_PARAMETER.error("CLIST_ITERATOR::exchange", ABORT, "other_it NULL");
   if (!(other_it->list))
-    NO_LIST.error ("CLIST_ITERATOR::exchange", ABORT, "other_it");
-  #endif
+    NO_LIST.error("CLIST_ITERATOR::exchange", ABORT, "other_it");
+#endif
 
   /* Do nothing if either list is empty or if both iterators reference the same
   link */
 
-  if ((list->empty ()) ||
-    (other_it->list->empty ()) || (current == other_it->current))
+  if ((list->empty()) || (other_it->list->empty()) ||
+      (current == other_it->current))
     return;
 
   /* Error if either current element is deleted */
 
   if (!current || !other_it->current)
-    DONT_EXCHANGE_DELETED.error ("CLIST_ITERATOR.exchange", ABORT, NULL);
+    DONT_EXCHANGE_DELETED.error("CLIST_ITERATOR.exchange", ABORT, NULL);
 
   /* Now handle the 4 cases: doubleton list; non-doubleton adjacent elements
   (other before this); non-doubleton adjacent elements (this before other);
   non-adjacent elements. */
 
-                                 //adjacent links
-  if ((next == other_it->current) ||
-  (other_it->next == current)) {
-                                 //doubleton list
-    if ((next == other_it->current) &&
-    (other_it->next == current)) {
+  // adjacent links
+  if ((next == other_it->current) || (other_it->next == current)) {
+    // doubleton list
+    if ((next == other_it->current) && (other_it->next == current)) {
       prev = next = current;
       other_it->prev = other_it->next = other_it->current;
-    }
-    else {                       //non-doubleton with
-                                 //adjacent links
-                                 //other before this
+    } else { // non-doubleton with
+             // adjacent links
+             // other before this
       if (other_it->next == current) {
         other_it->prev->next = current;
         other_it->current->next = next;
         current->next = other_it->current;
         other_it->next = other_it->current;
         prev = current;
-      }
-      else {                     //this before other
+      } else { // this before other
         prev->next = other_it->current;
         current->next = other_it->next;
         other_it->current->next = current;
@@ -400,8 +391,7 @@ void CLIST_ITERATOR::exchange(                             //positions of 2 link
         other_it->prev = other_it->current;
       }
     }
-  }
-  else {                         //no overlap
+  } else { // no overlap
     prev->next = other_it->current;
     current->next = other_it->next;
     other_it->prev->next = current;
@@ -438,43 +428,42 @@ void CLIST_ITERATOR::exchange(                             //positions of 2 link
  *  (Can't inline this function because it contains a loop)
  **********************************************************************/
 
-CLIST_LINK *CLIST_ITERATOR::extract_sublist(                             //from this current
-                                            CLIST_ITERATOR *other_it) {  //to other current
+CLIST_LINK *CLIST_ITERATOR::extract_sublist( // from this current
+    CLIST_ITERATOR *other_it) {              // to other current
   CLIST_ITERATOR temp_it = *this;
   CLIST_LINK *end_of_new_list;
 
   const ERRCODE BAD_SUBLIST = "Can't find sublist end point in original list";
-  #ifndef NDEBUG
+#ifndef NDEBUG
   const ERRCODE BAD_EXTRACTION_PTS =
-    "Can't extract sublist from points on different lists";
+      "Can't extract sublist from points on different lists";
   const ERRCODE DONT_EXTRACT_DELETED =
-    "Can't extract a sublist marked by deleted points";
+      "Can't extract a sublist marked by deleted points";
 
   if (!other_it)
-    BAD_PARAMETER.error ("CLIST_ITERATOR::extract_sublist", ABORT,
-      "other_it NULL");
+    BAD_PARAMETER.error("CLIST_ITERATOR::extract_sublist", ABORT,
+                        "other_it NULL");
   if (!list)
-    NO_LIST.error ("CLIST_ITERATOR::extract_sublist", ABORT, NULL);
+    NO_LIST.error("CLIST_ITERATOR::extract_sublist", ABORT, NULL);
   if (list != other_it->list)
-    BAD_EXTRACTION_PTS.error ("CLIST_ITERATOR.extract_sublist", ABORT, NULL);
-  if (list->empty ())
-    EMPTY_LIST.error ("CLIST_ITERATOR::extract_sublist", ABORT, NULL);
+    BAD_EXTRACTION_PTS.error("CLIST_ITERATOR.extract_sublist", ABORT, NULL);
+  if (list->empty())
+    EMPTY_LIST.error("CLIST_ITERATOR::extract_sublist", ABORT, NULL);
 
   if (!current || !other_it->current)
-    DONT_EXTRACT_DELETED.error ("CLIST_ITERATOR.extract_sublist", ABORT,
-      NULL);
-  #endif
+    DONT_EXTRACT_DELETED.error("CLIST_ITERATOR.extract_sublist", ABORT, NULL);
+#endif
 
   ex_current_was_last = other_it->ex_current_was_last = FALSE;
   ex_current_was_cycle_pt = FALSE;
   other_it->ex_current_was_cycle_pt = FALSE;
 
-  temp_it.mark_cycle_pt ();
-  do {                           //walk sublist
-    if (temp_it.cycled_list())   // can't find end pt
-      BAD_SUBLIST.error ("CLIST_ITERATOR.extract_sublist", ABORT, NULL);
+  temp_it.mark_cycle_pt();
+  do {                         // walk sublist
+    if (temp_it.cycled_list()) // can't find end pt
+      BAD_SUBLIST.error("CLIST_ITERATOR.extract_sublist", ABORT, NULL);
 
-    if (temp_it.at_last ()) {
+    if (temp_it.at_last()) {
       list->last = prev;
       ex_current_was_last = other_it->ex_current_was_last = TRUE;
     }
@@ -485,21 +474,19 @@ CLIST_LINK *CLIST_ITERATOR::extract_sublist(                             //from 
     if (temp_it.current == other_it->cycle_pt)
       other_it->ex_current_was_cycle_pt = TRUE;
 
-    temp_it.forward ();
-  }
-  while (temp_it.prev != other_it->current);
+    temp_it.forward();
+  } while (temp_it.prev != other_it->current);
 
-                                 //circularise sublist
+  // circularise sublist
   other_it->current->next = current;
   end_of_new_list = other_it->current;
 
-                                 //sublist = whole list
+  // sublist = whole list
   if (prev == other_it->current) {
     list->last = NULL;
     prev = current = next = NULL;
     other_it->prev = other_it->current = other_it->next = NULL;
-  }
-  else {
+  } else {
     prev->next = other_it->next;
     current = other_it->current = NULL;
     next = other_it->next;

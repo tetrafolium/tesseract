@@ -45,12 +45,13 @@ STRING_PARAM_FLAG(train_listfile, "",
 STRING_PARAM_FLAG(eval_listfile, "",
                   "File listing eval files in lstmf training format.");
 BOOL_PARAM_FLAG(stop_training, false,
-               "Just convert the training model to a runtime model.");
+                "Just convert the training model to a runtime model.");
 BOOL_PARAM_FLAG(convert_to_int, false,
                 "Convert the recognition model to an integer model.");
 BOOL_PARAM_FLAG(sequential_training, false,
                 "Use the training files sequentially instead of round-robin.");
-INT_PARAM_FLAG(append_index, -1, "Index in continue_from Network at which to"
+INT_PARAM_FLAG(append_index, -1,
+               "Index in continue_from Network at which to"
                " attach the new network defined by net_spec");
 BOOL_PARAM_FLAG(debug_network, false,
                 "Get info on distribution of weight values");
@@ -109,7 +110,8 @@ int main(int argc, char **argv) {
     if (FLAGS_debug_network) {
       trainer.DebugNetwork();
     } else {
-      if (FLAGS_convert_to_int) trainer.ConvertToInt();
+      if (FLAGS_convert_to_int)
+        trainer.ConvertToInt();
       if (!trainer.SaveTraineddata(FLAGS_model_output.c_str())) {
         tprintf("Failed to write recognition model : %s\n",
                 FLAGS_model_output.c_str());
@@ -208,5 +210,3 @@ int main(int argc, char **argv) {
   tprintf("Finished! Error rate = %g\n", trainer.best_error_rate());
   return 0;
 } /* main */
-
-

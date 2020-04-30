@@ -22,13 +22,13 @@
 #include "config_auto.h"
 #endif
 
-#include "blobbox.h"
 #include "allheaders.h"
+#include "blobbox.h"
 #include "blobs.h"
 #include "helpers.h"
 #include "normalis.h"
 
-#define PROJECTION_MARGIN 10     //arbitrary
+#define PROJECTION_MARGIN 10 // arbitrary
 #define EXTERN
 
 ELISTIZE(BLOBNBOX)
@@ -84,25 +84,23 @@ void BLOBNBOX::rotate_box(FCOORD rotation) {
  *
  * Merge this blob with the given blob, which should be after this.
  **********************************************************************/
-void BLOBNBOX::merge(                    //merge blobs
-                     BLOBNBOX *nextblob  //blob to join with
-                    ) {
-  box += nextblob->box;          //merge boxes
+void BLOBNBOX::merge(  // merge blobs
+    BLOBNBOX *nextblob // blob to join with
+) {
+  box += nextblob->box; // merge boxes
   set_diacritic_box(box);
   nextblob->joined = TRUE;
 }
 
-
 // Merge this with other, taking the outlines from other.
 // Other is not deleted, but left for the caller to handle.
-void BLOBNBOX::really_merge(BLOBNBOX* other) {
+void BLOBNBOX::really_merge(BLOBNBOX *other) {
   if (cblob_ptr != NULL && other->cblob_ptr != NULL) {
     C_OUTLINE_IT ol_it(cblob_ptr->out_list());
     ol_it.add_list_after(other->cblob_ptr->out_list());
   }
   compute_bounding_box();
 }
-
 
 /**********************************************************************
  * BLOBNBOX::chop
@@ -112,59 +110,57 @@ void BLOBNBOX::really_merge(BLOBNBOX* other) {
  * with the relevant bounding boxes.
  **********************************************************************/
 
-void BLOBNBOX::chop(                        //chop blobs
-                    BLOBNBOX_IT *start_it,  //location of this
-                    BLOBNBOX_IT *end_it,    //iterator
-                    FCOORD rotation,        //for landscape
-                    float xheight           //of line
-                   ) {
-  inT16 blobcount;               //no of blobs
-  BLOBNBOX *newblob;             //fake blob
-  BLOBNBOX *blob;                //current blob
-  inT16 blobindex;               //number of chop
-  inT16 leftx;                   //left edge of blob
-  float blobwidth;               //width of each
-  float rightx;                  //right edge to scan
-  float ymin, ymax;              //limits of new blob
-  float test_ymin, test_ymax;    //limits of part blob
-  ICOORD bl, tr;                 //corners of box
-  BLOBNBOX_IT blob_it;           //blob iterator
+void BLOBNBOX::chop(       // chop blobs
+    BLOBNBOX_IT *start_it, // location of this
+    BLOBNBOX_IT *end_it,   // iterator
+    FCOORD rotation,       // for landscape
+    float xheight          // of line
+) {
+  inT16 blobcount;            // no of blobs
+  BLOBNBOX *newblob;          // fake blob
+  BLOBNBOX *blob;             // current blob
+  inT16 blobindex;            // number of chop
+  inT16 leftx;                // left edge of blob
+  float blobwidth;            // width of each
+  float rightx;               // right edge to scan
+  float ymin, ymax;           // limits of new blob
+  float test_ymin, test_ymax; // limits of part blob
+  ICOORD bl, tr;              // corners of box
+  BLOBNBOX_IT blob_it;        // blob iterator
 
-                                 //get no of chops
-  blobcount = (inT16) floor (box.width () / xheight);
+  // get no of chops
+  blobcount = (inT16)floor(box.width() / xheight);
   if (blobcount > 1 && cblob_ptr != NULL) {
-                                 //width of each
-    blobwidth = (float) (box.width () + 1) / blobcount;
-    for (blobindex = blobcount - 1, rightx = box.right ();
-    blobindex >= 0; blobindex--, rightx -= blobwidth) {
-      ymin = (float) MAX_INT32;
-      ymax = (float) -MAX_INT32;
+    // width of each
+    blobwidth = (float)(box.width() + 1) / blobcount;
+    for (blobindex = blobcount - 1, rightx = box.right(); blobindex >= 0;
+         blobindex--, rightx -= blobwidth) {
+      ymin = (float)MAX_INT32;
+      ymax = (float)-MAX_INT32;
       blob_it = *start_it;
       do {
-        blob = blob_it.data ();
-        find_cblob_vlimits(blob->cblob_ptr, rightx - blobwidth,
-                           rightx,
-            /*rotation, */ test_ymin, test_ymax);
-        blob_it.forward ();
+        blob = blob_it.data();
+        find_cblob_vlimits(blob->cblob_ptr, rightx - blobwidth, rightx,
+                           /*rotation, */ test_ymin, test_ymax);
+        blob_it.forward();
         UpdateRange(test_ymin, test_ymax, &ymin, &ymax);
-      }
-      while (blob != end_it->data ());
+      } while (blob != end_it->data());
       if (ymin < ymax) {
-        leftx = (inT16) floor (rightx - blobwidth);
-        if (leftx < box.left ())
-          leftx = box.left ();   //clip to real box
-        bl = ICOORD (leftx, (inT16) floor (ymin));
-        tr = ICOORD ((inT16) ceil (rightx), (inT16) ceil (ymax));
+        leftx = (inT16)floor(rightx - blobwidth);
+        if (leftx < box.left())
+          leftx = box.left(); // clip to real box
+        bl = ICOORD(leftx, (inT16)floor(ymin));
+        tr = ICOORD((inT16)ceil(rightx), (inT16)ceil(ymax));
         if (blobindex == 0)
-          box = TBOX (bl, tr);    //change box
+          box = TBOX(bl, tr); // change box
         else {
           newblob = new BLOBNBOX;
-                                 //box is all it has
-          newblob->box = TBOX (bl, tr);
-                                 //stay on current
+          // box is all it has
+          newblob->box = TBOX(bl, tr);
+          // stay on current
           newblob->base_char_top_ = tr.y();
           newblob->base_char_bottom_ = bl.y();
-          end_it->add_after_stay_put (newblob);
+          end_it->add_after_stay_put(newblob);
         }
       }
     }
@@ -176,9 +172,9 @@ void BLOBNBOX::chop(                        //chop blobs
 void BLOBNBOX::NeighbourGaps(int gaps[BND_COUNT]) const {
   for (int dir = 0; dir < BND_COUNT; ++dir) {
     gaps[dir] = MAX_INT16;
-    BLOBNBOX* neighbour = neighbours_[dir];
+    BLOBNBOX *neighbour = neighbours_[dir];
     if (neighbour != NULL) {
-      const TBOX& n_box = neighbour->bounding_box();
+      const TBOX &n_box = neighbour->bounding_box();
       if (dir == BND_LEFT || dir == BND_RIGHT) {
         gaps[dir] = box.x_gap(n_box);
       } else {
@@ -192,23 +188,25 @@ void BLOBNBOX::NeighbourGaps(int gaps[BND_COUNT]) const {
 // the min is less, the max is replaced with the min.
 // The objective is to catch cases where there is only a single neighbour
 // and avoid reporting the other gap as a ridiculously large number
-void BLOBNBOX::MinMaxGapsClipped(int* h_min, int* h_max,
-                                 int* v_min, int* v_max) const {
+void BLOBNBOX::MinMaxGapsClipped(int *h_min, int *h_max, int *v_min,
+                                 int *v_max) const {
   int max_dimension = MAX(box.width(), box.height());
   int gaps[BND_COUNT];
   NeighbourGaps(gaps);
   *h_min = MIN(gaps[BND_LEFT], gaps[BND_RIGHT]);
   *h_max = MAX(gaps[BND_LEFT], gaps[BND_RIGHT]);
-  if (*h_max > max_dimension && *h_min < max_dimension) *h_max = *h_min;
+  if (*h_max > max_dimension && *h_min < max_dimension)
+    *h_max = *h_min;
   *v_min = MIN(gaps[BND_ABOVE], gaps[BND_BELOW]);
   *v_max = MAX(gaps[BND_ABOVE], gaps[BND_BELOW]);
-  if (*v_max > max_dimension && *v_min < max_dimension) *v_max = *v_min;
+  if (*v_max > max_dimension && *v_min < max_dimension)
+    *v_max = *v_min;
 }
 
 // NULLs out any neighbours that are DeletableNoise to remove references.
 void BLOBNBOX::CleanNeighbours() {
   for (int dir = 0; dir < BND_COUNT; ++dir) {
-    BLOBNBOX* neighbour = neighbours_[dir];
+    BLOBNBOX *neighbour = neighbours_[dir];
     if (neighbour != NULL && neighbour->DeletableNoise()) {
       neighbours_[dir] = NULL;
       good_stroke_neighbours_[dir] = false;
@@ -233,7 +231,7 @@ int BLOBNBOX::NoisyNeighbours() const {
   int count = 0;
   for (int dir = 0; dir < BND_COUNT; ++dir) {
     BlobNeighbourDir bnd = static_cast<BlobNeighbourDir>(dir);
-    BLOBNBOX* blob = neighbour(bnd);
+    BLOBNBOX *blob = neighbour(bnd);
     if (blob != NULL && blob->region_type() == BRT_NOISE)
       ++count;
   }
@@ -245,7 +243,8 @@ int BLOBNBOX::NoisyNeighbours() const {
 // eg if it has a high aspect ratio, yet has a complex shape, such as a
 // joined word in Latin, Arabic, or Hindi, rather than being a -, I, l, 1 etc.
 bool BLOBNBOX::DefiniteIndividualFlow() {
-  if (cblob() == NULL) return false;
+  if (cblob() == NULL)
+    return false;
   int box_perimeter = 2 * (box.height() + box.width());
   if (box.width() > box.height() * kDefiniteAspectRatio) {
     // Attempt to distinguish a wide joined word from a dash.
@@ -284,7 +283,7 @@ bool BLOBNBOX::DefiniteIndividualFlow() {
 }
 
 // Returns true if there is no tabstop violation in merging this and other.
-bool BLOBNBOX::ConfirmNoTabViolation(const BLOBNBOX& other) const {
+bool BLOBNBOX::ConfirmNoTabViolation(const BLOBNBOX &other) const {
   if (box.left() < other.box.left() && box.left() < other.left_rule_)
     return false;
   if (other.box.left() < box.left() && other.box.left() < left_rule_)
@@ -297,19 +296,18 @@ bool BLOBNBOX::ConfirmNoTabViolation(const BLOBNBOX& other) const {
 }
 
 // Returns true if other has a similar stroke width to this.
-bool BLOBNBOX::MatchingStrokeWidth(const BLOBNBOX& other,
+bool BLOBNBOX::MatchingStrokeWidth(const BLOBNBOX &other,
                                    double fractional_tolerance,
                                    double constant_tolerance) const {
   // The perimeter-based width is used as a backup in case there is
   // no information in the blob.
   double p_width = area_stroke_width();
   double n_p_width = other.area_stroke_width();
-  float h_tolerance = horz_stroke_width_ * fractional_tolerance
-                     + constant_tolerance;
-  float v_tolerance = vert_stroke_width_ * fractional_tolerance
-                     + constant_tolerance;
-  double p_tolerance = p_width * fractional_tolerance
-                     + constant_tolerance;
+  float h_tolerance =
+      horz_stroke_width_ * fractional_tolerance + constant_tolerance;
+  float v_tolerance =
+      vert_stroke_width_ * fractional_tolerance + constant_tolerance;
+  double p_tolerance = p_width * fractional_tolerance + constant_tolerance;
   bool h_zero = horz_stroke_width_ == 0.0f || other.horz_stroke_width_ == 0.0f;
   bool v_zero = vert_stroke_width_ == 0.0f || other.vert_stroke_width_ == 0.0f;
   bool h_ok = !h_zero && NearlyEqual(horz_stroke_width_,
@@ -331,8 +329,7 @@ TBOX BLOBNBOX::BoundsWithinLimits(int left, int right) {
   float bottom = box.bottom();
   if (cblob_ptr != NULL) {
     find_cblob_limits(cblob_ptr, static_cast<float>(left),
-                      static_cast<float>(right), no_rotation,
-                      bottom, top);
+                      static_cast<float>(right), no_rotation, bottom, top);
   }
 
   if (top < bottom) {
@@ -350,13 +347,14 @@ TBOX BLOBNBOX::BoundsWithinLimits(int left, int right) {
 // Estimates and stores the baseline position based on the shape of the
 // outline.
 void BLOBNBOX::EstimateBaselinePosition() {
-  baseline_y_ = box.bottom();  // The default.
-  if (cblob_ptr == NULL) return;
+  baseline_y_ = box.bottom(); // The default.
+  if (cblob_ptr == NULL)
+    return;
   baseline_y_ = cblob_ptr->EstimateBaselinePosition();
 }
 
 // Helper to call CleanNeighbours on all blobs on the list.
-void BLOBNBOX::CleanNeighbours(BLOBNBOX_LIST* blobs) {
+void BLOBNBOX::CleanNeighbours(BLOBNBOX_LIST *blobs) {
   BLOBNBOX_IT blob_it(blobs);
   for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward()) {
     blob_it.data()->CleanNeighbours();
@@ -364,10 +362,10 @@ void BLOBNBOX::CleanNeighbours(BLOBNBOX_LIST* blobs) {
 }
 
 // Helper to delete all the deletable blobs on the list.
-void BLOBNBOX::DeleteNoiseBlobs(BLOBNBOX_LIST* blobs) {
+void BLOBNBOX::DeleteNoiseBlobs(BLOBNBOX_LIST *blobs) {
   BLOBNBOX_IT blob_it(blobs);
   for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward()) {
-    BLOBNBOX* blob = blob_it.data();
+    BLOBNBOX *blob = blob_it.data();
     if (blob->DeletableNoise()) {
       delete blob->cblob();
       delete blob_it.extract();
@@ -377,8 +375,8 @@ void BLOBNBOX::DeleteNoiseBlobs(BLOBNBOX_LIST* blobs) {
 
 // Helper to compute edge offsets for  all the blobs on the list.
 // See coutln.h for an explanation of edge offsets.
-void BLOBNBOX::ComputeEdgeOffsets(Pix* thresholds, Pix* grey,
-                                  BLOBNBOX_LIST* blobs) {
+void BLOBNBOX::ComputeEdgeOffsets(Pix *thresholds, Pix *grey,
+                                  BLOBNBOX_LIST *blobs) {
   int grey_height = 0;
   int thr_height = 0;
   int scale_factor = 1;
@@ -390,12 +388,12 @@ void BLOBNBOX::ComputeEdgeOffsets(Pix* thresholds, Pix* grey,
   }
   BLOBNBOX_IT blob_it(blobs);
   for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward()) {
-    BLOBNBOX* blob = blob_it.data();
+    BLOBNBOX *blob = blob_it.data();
     if (blob->cblob() != NULL) {
       // Get the threshold that applies to this blob.
       l_uint32 threshold = 128;
       if (thresholds != NULL && grey != NULL) {
-        const TBOX& box = blob->cblob()->bounding_box();
+        const TBOX &box = blob->cblob()->bounding_box();
         // Transform the coordinates if required.
         TPOINT pt((box.left() + box.right()) / 2,
                   (box.top() + box.bottom()) / 2);
@@ -407,14 +405,11 @@ void BLOBNBOX::ComputeEdgeOffsets(Pix* thresholds, Pix* grey,
   }
 }
 
-
 #ifndef GRAPHICS_DISABLED
 // Helper to draw all the blobs on the list in the given body_colour,
 // with child outlines in the child_colour.
-void BLOBNBOX::PlotBlobs(BLOBNBOX_LIST* list,
-                         ScrollView::Color body_colour,
-                         ScrollView::Color child_colour,
-                         ScrollView* win) {
+void BLOBNBOX::PlotBlobs(BLOBNBOX_LIST *list, ScrollView::Color body_colour,
+                         ScrollView::Color child_colour, ScrollView *win) {
   BLOBNBOX_IT it(list);
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
     it.data()->plot(win, body_colour, child_colour);
@@ -424,13 +419,12 @@ void BLOBNBOX::PlotBlobs(BLOBNBOX_LIST* list,
 // Helper to draw only DeletableNoise blobs (unowned, BRT_NOISE) on the
 // given list in the given body_colour, with child outlines in the
 // child_colour.
-void BLOBNBOX::PlotNoiseBlobs(BLOBNBOX_LIST* list,
+void BLOBNBOX::PlotNoiseBlobs(BLOBNBOX_LIST *list,
                               ScrollView::Color body_colour,
-                              ScrollView::Color child_colour,
-                              ScrollView* win) {
+                              ScrollView::Color child_colour, ScrollView *win) {
   BLOBNBOX_IT it(list);
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-    BLOBNBOX* blob = it.data();
+    BLOBNBOX *blob = it.data();
     if (blob->DeletableNoise())
       blob->plot(win, body_colour, child_colour);
   }
@@ -439,36 +433,36 @@ void BLOBNBOX::PlotNoiseBlobs(BLOBNBOX_LIST* list,
 ScrollView::Color BLOBNBOX::TextlineColor(BlobRegionType region_type,
                                           BlobTextFlowType flow_type) {
   switch (region_type) {
-    case BRT_HLINE:
-      return ScrollView::BROWN;
-    case BRT_VLINE:
-      return ScrollView::DARK_GREEN;
-    case BRT_RECTIMAGE:
-      return ScrollView::RED;
-    case BRT_POLYIMAGE:
-      return ScrollView::ORANGE;
-    case BRT_UNKNOWN:
-      return flow_type == BTFT_NONTEXT ? ScrollView::CYAN : ScrollView::WHITE;
-    case BRT_VERT_TEXT:
-      if (flow_type == BTFT_STRONG_CHAIN || flow_type == BTFT_TEXT_ON_IMAGE)
-        return ScrollView::GREEN;
-      if (flow_type == BTFT_CHAIN)
-        return ScrollView::LIME_GREEN;
-      return ScrollView::YELLOW;
-    case BRT_TEXT:
-      if (flow_type == BTFT_STRONG_CHAIN)
-        return ScrollView::BLUE;
-      if (flow_type == BTFT_TEXT_ON_IMAGE)
-        return ScrollView::LIGHT_BLUE;
-      if (flow_type == BTFT_CHAIN)
-        return ScrollView::MEDIUM_BLUE;
-      if (flow_type == BTFT_LEADER)
-        return ScrollView::WHEAT;
-      if (flow_type == BTFT_NONTEXT)
-        return ScrollView::PINK;
-      return ScrollView::MAGENTA;
-    default:
-      return ScrollView::GREY;
+  case BRT_HLINE:
+    return ScrollView::BROWN;
+  case BRT_VLINE:
+    return ScrollView::DARK_GREEN;
+  case BRT_RECTIMAGE:
+    return ScrollView::RED;
+  case BRT_POLYIMAGE:
+    return ScrollView::ORANGE;
+  case BRT_UNKNOWN:
+    return flow_type == BTFT_NONTEXT ? ScrollView::CYAN : ScrollView::WHITE;
+  case BRT_VERT_TEXT:
+    if (flow_type == BTFT_STRONG_CHAIN || flow_type == BTFT_TEXT_ON_IMAGE)
+      return ScrollView::GREEN;
+    if (flow_type == BTFT_CHAIN)
+      return ScrollView::LIME_GREEN;
+    return ScrollView::YELLOW;
+  case BRT_TEXT:
+    if (flow_type == BTFT_STRONG_CHAIN)
+      return ScrollView::BLUE;
+    if (flow_type == BTFT_TEXT_ON_IMAGE)
+      return ScrollView::LIGHT_BLUE;
+    if (flow_type == BTFT_CHAIN)
+      return ScrollView::MEDIUM_BLUE;
+    if (flow_type == BTFT_LEADER)
+      return ScrollView::WHEAT;
+    if (flow_type == BTFT_NONTEXT)
+      return ScrollView::PINK;
+    return ScrollView::MAGENTA;
+  default:
+    return ScrollView::GREY;
   }
 }
 
@@ -477,9 +471,9 @@ ScrollView::Color BLOBNBOX::BoxColor() const {
   return TextlineColor(region_type_, flow_);
 }
 
-void BLOBNBOX::plot(ScrollView* window,                // window to draw in
-                    ScrollView::Color blob_colour,     // for outer bits
-                    ScrollView::Color child_colour) {  // for holes
+void BLOBNBOX::plot(ScrollView *window,               // window to draw in
+                    ScrollView::Color blob_colour,    // for outer bits
+                    ScrollView::Color child_colour) { // for holes
   if (cblob_ptr != NULL)
     cblob_ptr->plot(window, blob_colour, child_colour);
 }
@@ -491,38 +485,37 @@ void BLOBNBOX::plot(ScrollView* window,                // window to draw in
  * between the given x limits.
  **********************************************************************/
 
-void find_cblob_limits(                  //get y limits
-                       C_BLOB *blob,     //blob to search
-                       float leftx,      //x limits
-                       float rightx,
-                       FCOORD rotation,  //for landscape
-                       float &ymin,      //output y limits
-                       float &ymax) {
-  inT16 stepindex;               //current point
-  ICOORD pos;                    //current coords
-  ICOORD vec;                    //rotated step
-  C_OUTLINE *outline;            //current outline
-                                 //outlines
-  C_OUTLINE_IT out_it = blob->out_list ();
+void find_cblob_limits( // get y limits
+    C_BLOB *blob,       // blob to search
+    float leftx,        // x limits
+    float rightx,
+    FCOORD rotation, // for landscape
+    float &ymin,     // output y limits
+    float &ymax) {
+  inT16 stepindex;    // current point
+  ICOORD pos;         // current coords
+  ICOORD vec;         // rotated step
+  C_OUTLINE *outline; // current outline
+                      // outlines
+  C_OUTLINE_IT out_it = blob->out_list();
 
-  ymin = (float) MAX_INT32;
-  ymax = (float) -MAX_INT32;
-  for (out_it.mark_cycle_pt (); !out_it.cycled_list (); out_it.forward ()) {
-    outline = out_it.data ();
-    pos = outline->start_pos (); //get coords
-    pos.rotate (rotation);
-    for (stepindex = 0; stepindex < outline->pathlength (); stepindex++) {
-                                 //inside
-      if (pos.x () >= leftx && pos.x () <= rightx) {
+  ymin = (float)MAX_INT32;
+  ymax = (float)-MAX_INT32;
+  for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
+    outline = out_it.data();
+    pos = outline->start_pos(); // get coords
+    pos.rotate(rotation);
+    for (stepindex = 0; stepindex < outline->pathlength(); stepindex++) {
+      // inside
+      if (pos.x() >= leftx && pos.x() <= rightx) {
         UpdateRange(pos.y(), &ymin, &ymax);
       }
-      vec = outline->step (stepindex);
-      vec.rotate (rotation);
-      pos += vec;                //move to next
+      vec = outline->step(stepindex);
+      vec.rotate(rotation);
+      pos += vec; // move to next
     }
   }
 }
-
 
 /**********************************************************************
  * find_cblob_vlimits
@@ -531,35 +524,34 @@ void find_cblob_limits(                  //get y limits
  * between the given x limits.
  **********************************************************************/
 
-void find_cblob_vlimits(               //get y limits
-                        C_BLOB *blob,  //blob to search
-                        float leftx,   //x limits
-                        float rightx,
-                        float &ymin,   //output y limits
-                        float &ymax) {
-  inT16 stepindex;               //current point
-  ICOORD pos;                    //current coords
-  ICOORD vec;                    //rotated step
-  C_OUTLINE *outline;            //current outline
-                                 //outlines
-  C_OUTLINE_IT out_it = blob->out_list ();
+void find_cblob_vlimits( // get y limits
+    C_BLOB *blob,        // blob to search
+    float leftx,         // x limits
+    float rightx,
+    float &ymin, // output y limits
+    float &ymax) {
+  inT16 stepindex;    // current point
+  ICOORD pos;         // current coords
+  ICOORD vec;         // rotated step
+  C_OUTLINE *outline; // current outline
+                      // outlines
+  C_OUTLINE_IT out_it = blob->out_list();
 
-  ymin = (float) MAX_INT32;
-  ymax = (float) -MAX_INT32;
-  for (out_it.mark_cycle_pt (); !out_it.cycled_list (); out_it.forward ()) {
-    outline = out_it.data ();
-    pos = outline->start_pos (); //get coords
-    for (stepindex = 0; stepindex < outline->pathlength (); stepindex++) {
-                                 //inside
-      if (pos.x () >= leftx && pos.x () <= rightx) {
+  ymin = (float)MAX_INT32;
+  ymax = (float)-MAX_INT32;
+  for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
+    outline = out_it.data();
+    pos = outline->start_pos(); // get coords
+    for (stepindex = 0; stepindex < outline->pathlength(); stepindex++) {
+      // inside
+      if (pos.x() >= leftx && pos.x() <= rightx) {
         UpdateRange(pos.y(), &ymin, &ymax);
       }
-      vec = outline->step (stepindex);
-      pos += vec;                //move to next
+      vec = outline->step(stepindex);
+      pos += vec; // move to next
     }
   }
 }
-
 
 /**********************************************************************
  * find_cblob_hlimits
@@ -568,31 +560,31 @@ void find_cblob_vlimits(               //get y limits
  * between the given y limits.
  **********************************************************************/
 
-void find_cblob_hlimits(                //get x limits
-                        C_BLOB *blob,   //blob to search
-                        float bottomy,  //y limits
-                        float topy,
-                        float &xmin,    //output x limits
-                        float &xmax) {
-  inT16 stepindex;               //current point
-  ICOORD pos;                    //current coords
-  ICOORD vec;                    //rotated step
-  C_OUTLINE *outline;            //current outline
-                                 //outlines
-  C_OUTLINE_IT out_it = blob->out_list ();
+void find_cblob_hlimits( // get x limits
+    C_BLOB *blob,        // blob to search
+    float bottomy,       // y limits
+    float topy,
+    float &xmin, // output x limits
+    float &xmax) {
+  inT16 stepindex;    // current point
+  ICOORD pos;         // current coords
+  ICOORD vec;         // rotated step
+  C_OUTLINE *outline; // current outline
+                      // outlines
+  C_OUTLINE_IT out_it = blob->out_list();
 
-  xmin = (float) MAX_INT32;
-  xmax = (float) -MAX_INT32;
-  for (out_it.mark_cycle_pt (); !out_it.cycled_list (); out_it.forward ()) {
-    outline = out_it.data ();
-    pos = outline->start_pos (); //get coords
-    for (stepindex = 0; stepindex < outline->pathlength (); stepindex++) {
-                                 //inside
-      if (pos.y () >= bottomy && pos.y () <= topy) {
+  xmin = (float)MAX_INT32;
+  xmax = (float)-MAX_INT32;
+  for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
+    outline = out_it.data();
+    pos = outline->start_pos(); // get coords
+    for (stepindex = 0; stepindex < outline->pathlength(); stepindex++) {
+      // inside
+      if (pos.y() >= bottomy && pos.y() <= topy) {
         UpdateRange(pos.x(), &xmin, &xmax);
       }
-      vec = outline->step (stepindex);
-      pos += vec;                //move to next
+      vec = outline->step(stepindex);
+      pos += vec; // move to next
     }
   }
 }
@@ -603,22 +595,21 @@ void find_cblob_hlimits(                //get x limits
  * Rotate the copy by the given vector and return a C_BLOB.
  **********************************************************************/
 
-C_BLOB *crotate_cblob(                 //rotate it
-                      C_BLOB *blob,    //blob to search
-                      FCOORD rotation  //for landscape
-                     ) {
-  C_OUTLINE_LIST out_list;       //output outlines
-                                 //input outlines
-  C_OUTLINE_IT in_it = blob->out_list ();
-                                 //output outlines
+C_BLOB *crotate_cblob( // rotate it
+    C_BLOB *blob,      // blob to search
+    FCOORD rotation    // for landscape
+) {
+  C_OUTLINE_LIST out_list; // output outlines
+                           // input outlines
+  C_OUTLINE_IT in_it = blob->out_list();
+  // output outlines
   C_OUTLINE_IT out_it = &out_list;
 
-  for (in_it.mark_cycle_pt (); !in_it.cycled_list (); in_it.forward ()) {
-    out_it.add_after_then_move (new C_OUTLINE (in_it.data (), rotation));
+  for (in_it.mark_cycle_pt(); !in_it.cycled_list(); in_it.forward()) {
+    out_it.add_after_then_move(new C_OUTLINE(in_it.data(), rotation));
   }
-  return new C_BLOB (&out_list);
+  return new C_BLOB(&out_list);
 }
-
 
 /**********************************************************************
  * box_next
@@ -628,26 +619,25 @@ C_BLOB *crotate_cblob(                 //rotate it
  * Then move the iterator on to the start of the next blob.
  **********************************************************************/
 
-TBOX box_next(                 //get bounding box
-             BLOBNBOX_IT *it  //iterator to blobds
-            ) {
-  BLOBNBOX *blob;                //current blob
-  TBOX result;                    //total box
+TBOX box_next(      // get bounding box
+    BLOBNBOX_IT *it // iterator to blobds
+) {
+  BLOBNBOX *blob; // current blob
+  TBOX result;    // total box
 
-  blob = it->data ();
-  result = blob->bounding_box ();
+  blob = it->data();
+  result = blob->bounding_box();
   do {
-    it->forward ();
-    blob = it->data ();
+    it->forward();
+    blob = it->data();
     if (blob->cblob() == NULL)
-                                 //was pre-chopped
-      result += blob->bounding_box ();
+      // was pre-chopped
+      result += blob->bounding_box();
   }
-                                 //until next real blob
+  // until next real blob
   while ((blob->cblob() == NULL) || blob->joined_to_prev());
   return result;
 }
-
 
 /**********************************************************************
  * box_next_pre_chopped
@@ -657,23 +647,22 @@ TBOX box_next(                 //get bounding box
  * Then move the iterator on to the start of the next pre-chopped blob.
  **********************************************************************/
 
-TBOX box_next_pre_chopped(                 //get bounding box
-                         BLOBNBOX_IT *it  //iterator to blobds
-                        ) {
-  BLOBNBOX *blob;                //current blob
-  TBOX result;                    //total box
+TBOX box_next_pre_chopped( // get bounding box
+    BLOBNBOX_IT *it        // iterator to blobds
+) {
+  BLOBNBOX *blob; // current blob
+  TBOX result;    // total box
 
-  blob = it->data ();
-  result = blob->bounding_box ();
+  blob = it->data();
+  result = blob->bounding_box();
   do {
-    it->forward ();
-    blob = it->data ();
+    it->forward();
+    blob = it->data();
   }
-                                 //until next real blob
-  while (blob->joined_to_prev ());
+  // until next real blob
+  while (blob->joined_to_prev());
   return result;
 }
-
 
 /**********************************************************************
  * TO_ROW::TO_ROW
@@ -681,27 +670,27 @@ TBOX box_next_pre_chopped(                 //get bounding box
  * Constructor to make a row from a blob.
  **********************************************************************/
 
-TO_ROW::TO_ROW (                 //constructor
-BLOBNBOX * blob,                 //first blob
-float top,                       //corrected top
-float bottom,                    //of row
-float row_size                   //ideal
+TO_ROW::TO_ROW(     // constructor
+    BLOBNBOX *blob, // first blob
+    float top,      // corrected top
+    float bottom,   // of row
+    float row_size  // ideal
 ) {
   clear();
   y_min = bottom;
   y_max = top;
   initial_y_min = bottom;
 
-  float diff;                    //in size
-  BLOBNBOX_IT it = &blobs;       //list of blobs
+  float diff;              // in size
+  BLOBNBOX_IT it = &blobs; // list of blobs
 
-  it.add_to_end (blob);
+  it.add_to_end(blob);
   diff = top - bottom - row_size;
   if (diff > 0) {
     y_max -= diff / 2;
     y_min += diff / 2;
   }
-                                 //very small object
+  // very small object
   else if ((top - bottom) * 3 < row_size) {
     diff = row_size / 3 + bottom - top;
     y_max += diff / 2;
@@ -725,25 +714,25 @@ void TO_ROW::print() const {
  * Add the blob to the end of the row.
  **********************************************************************/
 
-void TO_ROW::add_blob(                 //constructor
-                      BLOBNBOX *blob,  //first blob
-                      float top,       //corrected top
-                      float bottom,    //of row
-                      float row_size   //ideal
-                     ) {
-  float allowed;                 //allowed expansion
-  float available;               //expansion
-  BLOBNBOX_IT it = &blobs;       //list of blobs
+void TO_ROW::add_blob( // constructor
+    BLOBNBOX *blob,    // first blob
+    float top,         // corrected top
+    float bottom,      // of row
+    float row_size     // ideal
+) {
+  float allowed;           // allowed expansion
+  float available;         // expansion
+  BLOBNBOX_IT it = &blobs; // list of blobs
 
-  it.add_to_end (blob);
+  it.add_to_end(blob);
   allowed = row_size + y_min - y_max;
   if (allowed > 0) {
     available = top > y_max ? top - y_max : 0;
     if (bottom < y_min)
-                                 //total available
-        available += y_min - bottom;
+      // total available
+      available += y_min - bottom;
     if (available > 0) {
-      available += available;    //do it gradually
+      available += available; // do it gradually
       if (available < allowed)
         available = allowed;
       if (bottom < y_min)
@@ -754,33 +743,30 @@ void TO_ROW::add_blob(                 //constructor
   }
 }
 
-
 /**********************************************************************
  * TO_ROW:insert_blob
  *
  * Add the blob to the row in the correct position.
  **********************************************************************/
 
-void TO_ROW::insert_blob(                //constructor
-                         BLOBNBOX *blob  //first blob
-                        ) {
-  BLOBNBOX_IT it = &blobs;       //list of blobs
+void TO_ROW::insert_blob( // constructor
+    BLOBNBOX *blob        // first blob
+) {
+  BLOBNBOX_IT it = &blobs; // list of blobs
 
-  if (it.empty ())
-    it.add_before_then_move (blob);
+  if (it.empty())
+    it.add_before_then_move(blob);
   else {
-    it.mark_cycle_pt ();
-    while (!it.cycled_list ()
-      && it.data ()->bounding_box ().left () <=
-      blob->bounding_box ().left ())
-      it.forward ();
-    if (it.cycled_list ())
-      it.add_to_end (blob);
+    it.mark_cycle_pt();
+    while (!it.cycled_list() &&
+           it.data()->bounding_box().left() <= blob->bounding_box().left())
+      it.forward();
+    if (it.cycled_list())
+      it.add_to_end(blob);
     else
-      it.add_before_stay_put (blob);
+      it.add_before_stay_put(blob);
   }
 }
-
 
 /**********************************************************************
  * TO_ROW::compute_vertical_projection
@@ -788,29 +774,28 @@ void TO_ROW::insert_blob(                //constructor
  * Compute the vertical projection of a TO_ROW from its blobs.
  **********************************************************************/
 
-void TO_ROW::compute_vertical_projection() {  //project whole row
-  TBOX row_box;                   //bound of row
-  BLOBNBOX *blob;                //current blob
-  TBOX blob_box;                  //bounding box
-  BLOBNBOX_IT blob_it = blob_list ();
+void TO_ROW::compute_vertical_projection() { // project whole row
+  TBOX row_box;                              // bound of row
+  BLOBNBOX *blob;                            // current blob
+  TBOX blob_box;                             // bounding box
+  BLOBNBOX_IT blob_it = blob_list();
 
-  if (blob_it.empty ())
+  if (blob_it.empty())
     return;
-  row_box = blob_it.data ()->bounding_box ();
-  for (blob_it.mark_cycle_pt (); !blob_it.cycled_list (); blob_it.forward ())
-    row_box += blob_it.data ()->bounding_box ();
+  row_box = blob_it.data()->bounding_box();
+  for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward())
+    row_box += blob_it.data()->bounding_box();
 
-  projection.set_range (row_box.left () - PROJECTION_MARGIN,
-    row_box.right () + PROJECTION_MARGIN);
-  projection_left = row_box.left () - PROJECTION_MARGIN;
-  projection_right = row_box.right () + PROJECTION_MARGIN;
-  for (blob_it.mark_cycle_pt (); !blob_it.cycled_list (); blob_it.forward ()) {
+  projection.set_range(row_box.left() - PROJECTION_MARGIN,
+                       row_box.right() + PROJECTION_MARGIN);
+  projection_left = row_box.left() - PROJECTION_MARGIN;
+  projection_right = row_box.right() + PROJECTION_MARGIN;
+  for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward()) {
     blob = blob_it.data();
     if (blob->cblob() != NULL)
       vertical_cblob_projection(blob->cblob(), &projection);
   }
 }
-
 
 /**********************************************************************
  * TO_ROW::clear
@@ -852,7 +837,6 @@ void TO_ROW::clear() {
   num_repeated_sets_ = -1;
 }
 
-
 /**********************************************************************
  * vertical_cblob_projection
  *
@@ -860,18 +844,17 @@ void TO_ROW::clear() {
  * and add to the given STATS.
  **********************************************************************/
 
-void vertical_cblob_projection(               //project outlines
-                               C_BLOB *blob,  //blob to project
-                               STATS *stats   //output
-                              ) {
-                                 //outlines of blob
-  C_OUTLINE_IT out_it = blob->out_list ();
+void vertical_cblob_projection( // project outlines
+    C_BLOB *blob,               // blob to project
+    STATS *stats                // output
+) {
+  // outlines of blob
+  C_OUTLINE_IT out_it = blob->out_list();
 
-  for (out_it.mark_cycle_pt (); !out_it.cycled_list (); out_it.forward ()) {
-    vertical_coutline_projection (out_it.data (), stats);
+  for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
+    vertical_coutline_projection(out_it.data(), stats);
   }
 }
-
 
 /**********************************************************************
  * vertical_coutline_projection
@@ -880,33 +863,32 @@ void vertical_cblob_projection(               //project outlines
  * and add to the given STATS.
  **********************************************************************/
 
-void vertical_coutline_projection(                     //project outlines
-                                  C_OUTLINE *outline,  //outline to project
-                                  STATS *stats         //output
-                                 ) {
-  ICOORD pos;                    //current point
-  ICOORD step;                   //edge step
-  inT32 length;                  //of outline
-  inT16 stepindex;               //current step
-  C_OUTLINE_IT out_it = outline->child ();
+void vertical_coutline_projection( // project outlines
+    C_OUTLINE *outline,            // outline to project
+    STATS *stats                   // output
+) {
+  ICOORD pos;      // current point
+  ICOORD step;     // edge step
+  inT32 length;    // of outline
+  inT16 stepindex; // current step
+  C_OUTLINE_IT out_it = outline->child();
 
-  pos = outline->start_pos ();
-  length = outline->pathlength ();
+  pos = outline->start_pos();
+  length = outline->pathlength();
   for (stepindex = 0; stepindex < length; stepindex++) {
-    step = outline->step (stepindex);
-    if (step.x () > 0) {
-     stats->add (pos.x (), -pos.y ());
-    } else if (step.x () < 0) {
-      stats->add (pos.x () - 1, pos.y ());
+    step = outline->step(stepindex);
+    if (step.x() > 0) {
+      stats->add(pos.x(), -pos.y());
+    } else if (step.x() < 0) {
+      stats->add(pos.x() - 1, pos.y());
     }
     pos += step;
   }
 
-  for (out_it.mark_cycle_pt (); !out_it.cycled_list (); out_it.forward ()) {
-    vertical_coutline_projection (out_it.data (), stats);
+  for (out_it.mark_cycle_pt(); !out_it.cycled_list(); out_it.forward()) {
+    vertical_coutline_projection(out_it.data(), stats);
   }
 }
-
 
 /**********************************************************************
  * TO_BLOCK::TO_BLOCK
@@ -914,19 +896,19 @@ void vertical_coutline_projection(                     //project outlines
  * Constructor to make a TO_BLOCK from a real block.
  **********************************************************************/
 
-TO_BLOCK::TO_BLOCK(                  //make a block
-                   BLOCK *src_block  //real block
-                  ) {
+TO_BLOCK::TO_BLOCK(  // make a block
+    BLOCK *src_block // real block
+) {
   clear();
   block = src_block;
 }
 
-static void clear_blobnboxes(BLOBNBOX_LIST* boxes) {
+static void clear_blobnboxes(BLOBNBOX_LIST *boxes) {
   BLOBNBOX_IT it = boxes;
   // A BLOBNBOX generally doesn't own its blobs, so if they do, you
   // have to delete them explicitly.
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-    BLOBNBOX* box = it.data();
+    BLOBNBOX *box = it.data();
     if (box->cblob() != NULL)
       delete box->cblob();
   }
@@ -957,7 +939,6 @@ void TO_BLOCK::clear() {
   key_row = NULL;
 }
 
-
 TO_BLOCK::~TO_BLOCK() {
   // Any residual BLOBNBOXes at this stage own their blobs, so delete them.
   clear_blobnboxes(&blobs);
@@ -973,22 +954,20 @@ TO_BLOCK::~TO_BLOCK() {
 // medium and large are by height.
 // SIDE-EFFECT: reset all blobs to initial state by calling Init().
 static void SizeFilterBlobs(int min_height, int max_height,
-                            BLOBNBOX_LIST* src_list,
-                            BLOBNBOX_LIST* noise_list,
-                            BLOBNBOX_LIST* small_list,
-                            BLOBNBOX_LIST* medium_list,
-                            BLOBNBOX_LIST* large_list) {
+                            BLOBNBOX_LIST *src_list, BLOBNBOX_LIST *noise_list,
+                            BLOBNBOX_LIST *small_list,
+                            BLOBNBOX_LIST *medium_list,
+                            BLOBNBOX_LIST *large_list) {
   BLOBNBOX_IT noise_it(noise_list);
   BLOBNBOX_IT small_it(small_list);
   BLOBNBOX_IT medium_it(medium_list);
   BLOBNBOX_IT large_it(large_list);
   for (BLOBNBOX_IT src_it(src_list); !src_it.empty(); src_it.forward()) {
-    BLOBNBOX* blob = src_it.extract();
+    BLOBNBOX *blob = src_it.extract();
     blob->ReInit();
     int width = blob->bounding_box().width();
     int height = blob->bounding_box().height();
-    if (height < min_height  &&
-        (width < min_height || width > max_height))
+    if (height < min_height && (width < min_height || width > max_height))
       noise_it.add_after_then_move(blob);
     else if (height > max_height)
       large_it.add_after_then_move(blob);
@@ -1011,14 +990,14 @@ void TO_BLOCK::ReSetAndReFilterBlobs() {
   BLOBNBOX_LIST small_list;
   BLOBNBOX_LIST medium_list;
   BLOBNBOX_LIST large_list;
-  SizeFilterBlobs(min_height, max_height, &blobs,
-                  &noise_list, &small_list, &medium_list, &large_list);
-  SizeFilterBlobs(min_height, max_height, &large_blobs,
-                  &noise_list, &small_list, &medium_list, &large_list);
-  SizeFilterBlobs(min_height, max_height, &small_blobs,
-                  &noise_list, &small_list, &medium_list, &large_list);
-  SizeFilterBlobs(min_height, max_height, &noise_blobs,
-                  &noise_list, &small_list, &medium_list, &large_list);
+  SizeFilterBlobs(min_height, max_height, &blobs, &noise_list, &small_list,
+                  &medium_list, &large_list);
+  SizeFilterBlobs(min_height, max_height, &large_blobs, &noise_list,
+                  &small_list, &medium_list, &large_list);
+  SizeFilterBlobs(min_height, max_height, &small_blobs, &noise_list,
+                  &small_list, &medium_list, &large_list);
+  SizeFilterBlobs(min_height, max_height, &noise_blobs, &noise_list,
+                  &small_list, &medium_list, &large_list);
   BLOBNBOX_IT blob_it(&blobs);
   blob_it.add_list_after(&medium_list);
   blob_it.set_to_list(&large_blobs);
@@ -1048,7 +1027,7 @@ void TO_BLOCK::DeleteUnownedNoise() {
 // Thresholds must either be the same size as grey or an integer down-scale
 // of grey.
 // See coutln.h for an explanation of edge offsets.
-void TO_BLOCK::ComputeEdgeOffsets(Pix* thresholds, Pix* grey) {
+void TO_BLOCK::ComputeEdgeOffsets(Pix *thresholds, Pix *grey) {
   BLOBNBOX::ComputeEdgeOffsets(thresholds, grey, &blobs);
   BLOBNBOX::ComputeEdgeOffsets(thresholds, grey, &small_blobs);
   BLOBNBOX::ComputeEdgeOffsets(thresholds, grey, &noise_blobs);
@@ -1056,7 +1035,7 @@ void TO_BLOCK::ComputeEdgeOffsets(Pix* thresholds, Pix* grey) {
 
 #ifndef GRAPHICS_DISABLED
 // Draw the noise blobs from all lists in red.
-void TO_BLOCK::plot_noise_blobs(ScrollView* win) {
+void TO_BLOCK::plot_noise_blobs(ScrollView *win) {
   BLOBNBOX::PlotNoiseBlobs(&noise_blobs, ScrollView::RED, ScrollView::RED, win);
   BLOBNBOX::PlotNoiseBlobs(&small_blobs, ScrollView::RED, ScrollView::RED, win);
   BLOBNBOX::PlotNoiseBlobs(&large_blobs, ScrollView::RED, ScrollView::RED, win);
@@ -1064,7 +1043,7 @@ void TO_BLOCK::plot_noise_blobs(ScrollView* win) {
 }
 
 // Draw the blobs on the various lists in the block in different colors.
-void TO_BLOCK::plot_graded_blobs(ScrollView* win) {
+void TO_BLOCK::plot_graded_blobs(ScrollView *win) {
   BLOBNBOX::PlotBlobs(&noise_blobs, ScrollView::CORAL, ScrollView::BLUE, win);
   BLOBNBOX::PlotBlobs(&small_blobs, ScrollView::GOLDENROD, ScrollView::YELLOW,
                       win);
@@ -1079,13 +1058,13 @@ void TO_BLOCK::plot_graded_blobs(ScrollView* win) {
  * Draw a list of blobs.
  **********************************************************************/
 
-void plot_blob_list(ScrollView* win,                   // window to draw in
-                    BLOBNBOX_LIST *list,               // blob list
-                    ScrollView::Color body_colour,     // colour to draw
-                    ScrollView::Color child_colour) {  // colour of child
+void plot_blob_list(ScrollView *win,                  // window to draw in
+                    BLOBNBOX_LIST *list,              // blob list
+                    ScrollView::Color body_colour,    // colour to draw
+                    ScrollView::Color child_colour) { // colour of child
   BLOBNBOX_IT it = list;
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
     it.data()->plot(win, body_colour, child_colour);
   }
 }
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED

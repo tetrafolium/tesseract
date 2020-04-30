@@ -8,24 +8,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "unicharcompress.h"
 #include "gunit.h"
-#include "serialis.h"
 #include "printf.h"
+#include "serialis.h"
+#include "unicharcompress.h"
 
 namespace tesseract {
 namespace {
 
 class UnicharcompressTest : public ::testing::Test {
- protected:
+protected:
   // Loads and compresses the given unicharset.
-  void LoadUnicharset(const string& unicharset_name) {
+  void LoadUnicharset(const string &unicharset_name) {
     string radical_stroke_file =
-        file::JoinPath(FLAGS_test_srcdir,
-                       "langdata/radical-stroke.txt");
-    string unicharset_file = file::JoinPath(
-        FLAGS_test_srcdir, "testdata",
-        unicharset_name);
+        file::JoinPath(FLAGS_test_srcdir, "langdata/radical-stroke.txt");
+    string unicharset_file =
+        file::JoinPath(FLAGS_test_srcdir, "testdata", unicharset_name);
     string uni_data;
     CHECK_OK(file::GetContents(unicharset_file, &uni_data, file::Defaults()));
     string radical_data;
@@ -59,12 +57,12 @@ class UnicharcompressTest : public ::testing::Test {
     EXPECT_TRUE(compressed_.DeSerialize(&rfp));
   }
   // Returns true if the lang is in CJK.
-  bool IsCJKLang(const string& lang) {
+  bool IsCJKLang(const string &lang) {
     return lang == "chi_sim" || lang == "chi_tra" || lang == "kor" ||
            lang == "jpn";
   }
   // Returns true if the lang is Indic.
-  bool IsIndicLang(const string& lang) {
+  bool IsIndicLang(const string &lang) {
     return lang == "asm" || lang == "ben" || lang == "bih" || lang == "hin" ||
            lang == "mar" || lang == "nep" || lang == "san" || lang == "bod" ||
            lang == "dzo" || lang == "guj" || lang == "kan" || lang == "mal" ||
@@ -73,18 +71,19 @@ class UnicharcompressTest : public ::testing::Test {
   }
 
   // Expects the appropriate results from the compressed_  unicharset_.
-  void ExpectCorrect(const string& lang) {
+  void ExpectCorrect(const string &lang) {
     // Count the number of times each code is used in each element of
     // RecodedCharID.
     RecodedCharID zeros;
-    for (int i = 0; i < RecodedCharID::kMaxCodeLen; ++i) zeros.Set(i, 0);
+    for (int i = 0; i < RecodedCharID::kMaxCodeLen; ++i)
+      zeros.Set(i, 0);
     int code_range = compressed_.code_range();
     std::vector<RecodedCharID> times_seen(code_range, zeros);
     for (int u = 0; u <= unicharset_.size(); ++u) {
       if (u != UNICHAR_SPACE && u != null_char_ &&
           (u == unicharset_.size() || (unicharset_.has_special_codes() &&
                                        u < SPECIAL_UNICHAR_CODES_COUNT))) {
-        continue;  // Not used so not encoded.
+        continue; // Not used so not encoded.
       }
       RecodedCharID code;
       int len = compressed_.EncodeUnichar(u, &code);
@@ -109,7 +108,8 @@ class UnicharcompressTest : public ::testing::Test {
     for (int c = 0; c < code_range; ++c) {
       int num_used = 0;
       for (int i = 0; i < RecodedCharID::kMaxCodeLen; ++i) {
-        if (times_seen[c](i) != 0) ++num_used;
+        if (times_seen[c](i) != 0)
+          ++num_used;
       }
       EXPECT_GE(num_used, 1) << "c=" << c << "/" << code_range;
     }
@@ -130,11 +130,11 @@ class UnicharcompressTest : public ::testing::Test {
   }
   // Checks for extensions of the current code that either finish a code, or
   // extend it and checks those extensions recursively.
-  void CheckCodeExtensions(const RecodedCharID& code,
-                           const std::vector<RecodedCharID>& times_seen) {
+  void CheckCodeExtensions(const RecodedCharID &code,
+                           const std::vector<RecodedCharID> &times_seen) {
     RecodedCharID extended = code;
     int length = code.length();
-    const GenericVector<int>* final_codes = compressed_.GetFinalCodes(code);
+    const GenericVector<int> *final_codes = compressed_.GetFinalCodes(code);
     if (final_codes != NULL) {
       for (int i = 0; i < final_codes->size(); ++i) {
         int ending = (*final_codes)[i];
@@ -144,7 +144,7 @@ class UnicharcompressTest : public ::testing::Test {
         EXPECT_NE(INVALID_UNICHAR_ID, unichar_id);
       }
     }
-    const GenericVector<int>* next_codes = compressed_.GetNextCodes(code);
+    const GenericVector<int> *next_codes = compressed_.GetNextCodes(code);
     if (next_codes != NULL) {
       for (int i = 0; i < next_codes->size(); ++i) {
         int extension = (*next_codes)[i];
@@ -246,5 +246,5 @@ TEST_F(UnicharcompressTest, GetEncodingAsString) {
   EXPECT_EQ("3\t<nul>", lines[4]);
 }
 
-}  // namespace
-}  // namespace tesseract
+} // namespace
+} // namespace tesseract

@@ -70,8 +70,8 @@ CLISTIZE(EDGEPT)
 // point of intersection lies on both of the line segments. If it does
 // then these two segments cross.
 /* static */
-bool TPOINT::IsCrossed(const TPOINT& a0, const TPOINT& a1, const TPOINT& b0,
-                       const TPOINT& b1) {
+bool TPOINT::IsCrossed(const TPOINT &a0, const TPOINT &a1, const TPOINT &b0,
+                       const TPOINT &b1) {
   int b0a1xb0b1, b0b1xb0a0;
   int a1b1xa1a0, a1a0xa1b0;
 
@@ -101,38 +101,38 @@ bool TPOINT::IsCrossed(const TPOINT& a0, const TPOINT& a1, const TPOINT& b0,
 }
 
 // Consume the circular list of EDGEPTs to make a TESSLINE.
-TESSLINE* TESSLINE::BuildFromOutlineList(EDGEPT* outline) {
-  TESSLINE* result = new TESSLINE;
+TESSLINE *TESSLINE::BuildFromOutlineList(EDGEPT *outline) {
+  TESSLINE *result = new TESSLINE;
   result->loop = outline;
   if (outline->src_outline != NULL) {
     // ASSUMPTION: This function is only ever called from ApproximateOutline
     // and therefore either all points have a src_outline or all do not.
-		// Just as SetupFromPos sets the vectors from the vertices, setup the
-		// step_count members to indicate the (positive) number of original
-		// C_OUTLINE steps to the next vertex.
-		EDGEPT* pt = outline;
-		do {
-		  pt->step_count = pt->next->start_step - pt->start_step;
-		  if (pt->step_count < 0)
-		    pt->step_count += pt->src_outline->pathlength();
-		  pt = pt->next;
-		} while (pt != outline);
+    // Just as SetupFromPos sets the vectors from the vertices, setup the
+    // step_count members to indicate the (positive) number of original
+    // C_OUTLINE steps to the next vertex.
+    EDGEPT *pt = outline;
+    do {
+      pt->step_count = pt->next->start_step - pt->start_step;
+      if (pt->step_count < 0)
+        pt->step_count += pt->src_outline->pathlength();
+      pt = pt->next;
+    } while (pt != outline);
   }
   result->SetupFromPos();
   return result;
 }
 
 // Copies the data and the outline, but leaves next untouched.
-void TESSLINE::CopyFrom(const TESSLINE& src) {
+void TESSLINE::CopyFrom(const TESSLINE &src) {
   Clear();
   topleft = src.topleft;
   botright = src.botright;
   start = src.start;
   is_hole = src.is_hole;
   if (src.loop != NULL) {
-    EDGEPT* prevpt = NULL;
-    EDGEPT* newpt = NULL;
-    EDGEPT* srcpt = src.loop;
+    EDGEPT *prevpt = NULL;
+    EDGEPT *newpt = NULL;
+    EDGEPT *srcpt = src.loop;
     do {
       newpt = new EDGEPT(*srcpt);
       if (prevpt == NULL) {
@@ -154,9 +154,9 @@ void TESSLINE::Clear() {
   if (loop == NULL)
     return;
 
-  EDGEPT* this_edge = loop;
+  EDGEPT *this_edge = loop;
   do {
-    EDGEPT* next_edge = this_edge->next;
+    EDGEPT *next_edge = this_edge->next;
     delete this_edge;
     this_edge = next_edge;
   } while (this_edge != loop);
@@ -164,8 +164,8 @@ void TESSLINE::Clear() {
 }
 
 // Normalize in-place using the DENORM.
-void TESSLINE::Normalize(const DENORM& denorm) {
-  EDGEPT* pt = loop;
+void TESSLINE::Normalize(const DENORM &denorm) {
+  EDGEPT *pt = loop;
   do {
     denorm.LocalNormTransform(pt->pos, &pt->pos);
     pt = pt->next;
@@ -175,12 +175,12 @@ void TESSLINE::Normalize(const DENORM& denorm) {
 
 // Rotates by the given rotation in place.
 void TESSLINE::Rotate(const FCOORD rot) {
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
-    int tmp = static_cast<int>(floor(pt->pos.x * rot.x() -
-                                     pt->pos.y * rot.y() + 0.5));
-    pt->pos.y = static_cast<int>(floor(pt->pos.y * rot.x() +
-                                       pt->pos.x * rot.y() + 0.5));
+    int tmp = static_cast<int>(
+        floor(pt->pos.x * rot.x() - pt->pos.y * rot.y() + 0.5));
+    pt->pos.y = static_cast<int>(
+        floor(pt->pos.y * rot.x() + pt->pos.x * rot.y() + 0.5));
     pt->pos.x = tmp;
     pt = pt->next;
   } while (pt != loop);
@@ -189,7 +189,7 @@ void TESSLINE::Rotate(const FCOORD rot) {
 
 // Moves by the given vec in place.
 void TESSLINE::Move(const ICOORD vec) {
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
     pt->pos.x += vec.x();
     pt->pos.y += vec.y();
@@ -200,7 +200,7 @@ void TESSLINE::Move(const ICOORD vec) {
 
 // Scales by the given factor in place.
 void TESSLINE::Scale(float factor) {
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
     pt->pos.x = static_cast<int>(floor(pt->pos.x * factor + 0.5));
     pt->pos.y = static_cast<int>(floor(pt->pos.y * factor + 0.5));
@@ -211,7 +211,7 @@ void TESSLINE::Scale(float factor) {
 
 // Sets up the start and vec members of the loop from the pos members.
 void TESSLINE::SetupFromPos() {
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
     pt->vec.x = pt->next->pos.x - pt->pos.x;
     pt->vec.y = pt->next->pos.y - pt->pos.y;
@@ -230,7 +230,7 @@ void TESSLINE::ComputeBoundingBox() {
 
   // Find boundaries.
   start = loop->pos;
-  EDGEPT* this_edge = loop;
+  EDGEPT *this_edge = loop;
   do {
     if (!this_edge->IsHidden() || !this_edge->prev->IsHidden()) {
       if (this_edge->pos.x < minx)
@@ -256,11 +256,11 @@ void TESSLINE::ComputeBoundingBox() {
 // this is the left and right edge of the outline perpendicular to the
 // given direction, but to get the distance units correct, you would
 // have to divide by the modulus of vec.
-void TESSLINE::MinMaxCrossProduct(const TPOINT vec,
-                                  int* min_xp, int* max_xp) const {
+void TESSLINE::MinMaxCrossProduct(const TPOINT vec, int *min_xp,
+                                  int *max_xp) const {
   *min_xp = MAX_INT32;
   *max_xp = MIN_INT32;
-  EDGEPT* this_edge = loop;
+  EDGEPT *this_edge = loop;
   do {
     if (!this_edge->IsHidden() || !this_edge->prev->IsHidden()) {
       int product = CROSS(this_edge->pos, vec);
@@ -275,14 +275,14 @@ TBOX TESSLINE::bounding_box() const {
 }
 
 #ifndef GRAPHICS_DISABLED
-void TESSLINE::plot(ScrollView* window, ScrollView::Color color,
+void TESSLINE::plot(ScrollView *window, ScrollView::Color color,
                     ScrollView::Color child_color) {
   if (is_hole)
     window->Pen(child_color);
   else
     window->Pen(color);
   window->SetCursor(start.x, start.y);
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
     bool prev_hidden = pt->IsHidden();
     pt = pt->next;
@@ -292,19 +292,20 @@ void TESSLINE::plot(ScrollView* window, ScrollView::Color color,
       window->DrawTo(pt->pos.x, pt->pos.y);
   } while (pt != loop);
 }
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
 
 // Returns the first non-hidden EDGEPT that has a different src_outline to
 // its predecessor, or, if all the same, the lowest indexed point.
-EDGEPT* TESSLINE::FindBestStartPt() const {
-  EDGEPT* best_start = loop;
+EDGEPT *TESSLINE::FindBestStartPt() const {
+  EDGEPT *best_start = loop;
   int best_step = loop->start_step;
   // Iterate the polygon.
-  EDGEPT* pt = loop;
+  EDGEPT *pt = loop;
   do {
-    if (pt->IsHidden()) continue;
+    if (pt->IsHidden())
+      continue;
     if (pt->prev->IsHidden() || pt->prev->src_outline != pt->src_outline)
-      return pt;  // Qualifies as the best.
+      return pt; // Qualifies as the best.
     if (pt->start_step < best_step) {
       best_step = pt->start_step;
       best_start = pt;
@@ -316,15 +317,14 @@ EDGEPT* TESSLINE::FindBestStartPt() const {
 // Iterate the given list of outlines, converting to TESSLINE by polygonal
 // approximation and recursively any children, returning the current tail
 // of the resulting list of TESSLINEs.
-static TESSLINE** ApproximateOutlineList(bool allow_detailed_fx,
-                                         C_OUTLINE_LIST* outlines,
-                                         bool children,
-                                         TESSLINE** tail) {
+static TESSLINE **ApproximateOutlineList(bool allow_detailed_fx,
+                                         C_OUTLINE_LIST *outlines,
+                                         bool children, TESSLINE **tail) {
   C_OUTLINE_IT ol_it(outlines);
   for (ol_it.mark_cycle_pt(); !ol_it.cycled_list(); ol_it.forward()) {
-    C_OUTLINE* outline = ol_it.data();
+    C_OUTLINE *outline = ol_it.data();
     if (outline->pathlength() > 0) {
-      TESSLINE* tessline = ApproximateOutline(allow_detailed_fx, outline);
+      TESSLINE *tessline = ApproximateOutline(allow_detailed_fx, outline);
       tessline->is_hole = children;
       *tail = tessline;
       tail = &tessline->next;
@@ -341,16 +341,16 @@ static TESSLINE** ApproximateOutlineList(bool allow_detailed_fx,
 // the way. If allow_detailed_fx is true, the EDGEPTs in the returned TBLOB
 // contain pointers to the input C_OUTLINEs that enable higher-resolution
 // feature extraction that does not use the polygonal approximation.
-TBLOB* TBLOB::PolygonalCopy(bool allow_detailed_fx, C_BLOB* src) {
-  TBLOB* tblob = new TBLOB;
+TBLOB *TBLOB::PolygonalCopy(bool allow_detailed_fx, C_BLOB *src) {
+  TBLOB *tblob = new TBLOB;
   ApproximateOutlineList(allow_detailed_fx, src->out_list(), false,
                          &tblob->outlines);
   return tblob;
 }
 
 // Factory builds a blob with no outlines, but copies the other member data.
-TBLOB* TBLOB::ShallowCopy(const TBLOB& src) {
-  TBLOB* blob = new TBLOB;
+TBLOB *TBLOB::ShallowCopy(const TBLOB &src) {
+  TBLOB *blob = new TBLOB;
   blob->denorm_ = src.denorm_;
   return blob;
 }
@@ -360,8 +360,8 @@ TBLOB* TBLOB::ShallowCopy(const TBLOB& src) {
 // If no Normalization is needed, then NULL is returned, and the input blob
 // can be used directly. Otherwise a new TBLOB is returned which must be
 // deleted after use.
-TBLOB* TBLOB::ClassifyNormalizeIfNeeded() const {
-  TBLOB* rotated_blob = NULL;
+TBLOB *TBLOB::ClassifyNormalizeIfNeeded() const {
+  TBLOB *rotated_blob = NULL;
   // If necessary, copy the blob and rotate it. The rotation is always
   // +/- 90 degrees, as 180 was already taken care of.
   if (denorm_.block() != NULL &&
@@ -370,25 +370,26 @@ TBLOB* TBLOB::ClassifyNormalizeIfNeeded() const {
     int x_middle = (box.left() + box.right()) / 2;
     int y_middle = (box.top() + box.bottom()) / 2;
     rotated_blob = new TBLOB(*this);
-    const FCOORD& rotation = denorm_.block()->classify_rotation();
+    const FCOORD &rotation = denorm_.block()->classify_rotation();
     // Move the rotated blob back to the same y-position so that we
     // can still distinguish similar glyphs with differeny y-position.
-    float target_y = kBlnBaselineOffset +
+    float target_y =
+        kBlnBaselineOffset +
         (rotation.y() > 0 ? x_middle - box.left() : box.right() - x_middle);
-    rotated_blob->Normalize(NULL, &rotation, &denorm_, x_middle, y_middle,
-                            1.0f, 1.0f, 0.0f, target_y,
-                            denorm_.inverse(), denorm_.pix());
+    rotated_blob->Normalize(NULL, &rotation, &denorm_, x_middle, y_middle, 1.0f,
+                            1.0f, 0.0f, target_y, denorm_.inverse(),
+                            denorm_.pix());
   }
   return rotated_blob;
 }
 
 // Copies the data and the outline, but leaves next untouched.
-void TBLOB::CopyFrom(const TBLOB& src) {
+void TBLOB::CopyFrom(const TBLOB &src) {
   Clear();
-  TESSLINE* prev_outline = NULL;
-  for (TESSLINE* srcline = src.outlines; srcline != NULL;
+  TESSLINE *prev_outline = NULL;
+  for (TESSLINE *srcline = src.outlines; srcline != NULL;
        srcline = srcline->next) {
-    TESSLINE* new_outline = new TESSLINE(*srcline);
+    TESSLINE *new_outline = new TESSLINE(*srcline);
     if (outlines == NULL)
       outlines = new_outline;
     else
@@ -400,7 +401,7 @@ void TBLOB::CopyFrom(const TBLOB& src) {
 
 // Deletes owned data.
 void TBLOB::Clear() {
-  for (TESSLINE* next_outline = NULL; outlines != NULL;
+  for (TESSLINE *next_outline = NULL; outlines != NULL;
        outlines = next_outline) {
     next_outline = outlines->next;
     delete outlines;
@@ -410,13 +411,10 @@ void TBLOB::Clear() {
 // Sets up the built-in DENORM and normalizes the blob in-place.
 // For parameters see DENORM::SetupNormalization, plus the inverse flag for
 // this blob and the Pix for the full image.
-void TBLOB::Normalize(const BLOCK* block,
-                      const FCOORD* rotation,
-                      const DENORM* predecessor,
-                      float x_origin, float y_origin,
-                      float x_scale, float y_scale,
-                      float final_xshift, float final_yshift,
-                      bool inverse, Pix* pix) {
+void TBLOB::Normalize(const BLOCK *block, const FCOORD *rotation,
+                      const DENORM *predecessor, float x_origin, float y_origin,
+                      float x_scale, float y_scale, float final_xshift,
+                      float final_yshift, bool inverse, Pix *pix) {
   denorm_.SetupNormalization(block, rotation, predecessor, x_origin, y_origin,
                              x_scale, y_scale, final_xshift, final_yshift);
   denorm_.set_inverse(inverse);
@@ -439,28 +437,28 @@ void TBLOB::Normalize(const BLOCK* block,
 
 // Rotates by the given rotation in place.
 void TBLOB::Rotate(const FCOORD rotation) {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next) {
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next) {
     outline->Rotate(rotation);
   }
 }
 
 // Moves by the given vec in place.
 void TBLOB::Move(const ICOORD vec) {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next) {
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next) {
     outline->Move(vec);
   }
 }
 
 // Scales by the given factor in place.
 void TBLOB::Scale(float factor) {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next) {
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next) {
     outline->Scale(factor);
   }
 }
 
 // Recomputes the bounding boxes of the outlines.
 void TBLOB::ComputeBoundingBoxes() {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next) {
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next) {
     outline->ComputeBoundingBox();
   }
 }
@@ -468,7 +466,7 @@ void TBLOB::ComputeBoundingBoxes() {
 // Returns the number of outlines.
 int TBLOB::NumOutlines() const {
   int result = 0;
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next)
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next)
     ++result;
   return result;
 }
@@ -493,9 +491,9 @@ TBOX TBLOB::bounding_box() const {
 // Finds and deletes any duplicate outlines in this blob, without deleting
 // their EDGEPTs.
 void TBLOB::EliminateDuplicateOutlines() {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next) {
-    TESSLINE* last_outline = outline;
-    for (TESSLINE* other_outline = outline->next; other_outline != NULL;
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next) {
+    TESSLINE *last_outline = outline;
+    for (TESSLINE *other_outline = outline->next; other_outline != NULL;
          last_outline = other_outline, other_outline = other_outline->next) {
       if (outline->SameBox(*other_outline)) {
         last_outline->next = other_outline->next;
@@ -512,7 +510,7 @@ void TBLOB::EliminateDuplicateOutlines() {
 
 // Swaps the outlines of *this and next if needed to keep the centers in
 // increasing x.
-void TBLOB::CorrectBlobOrder(TBLOB* next) {
+void TBLOB::CorrectBlobOrder(TBLOB *next) {
   TBOX box = bounding_box();
   TBOX next_box = next->bounding_box();
   if (box.x_middle() > next_box.x_middle()) {
@@ -521,18 +519,18 @@ void TBLOB::CorrectBlobOrder(TBLOB* next) {
 }
 
 #ifndef GRAPHICS_DISABLED
-void TBLOB::plot(ScrollView* window, ScrollView::Color color,
+void TBLOB::plot(ScrollView *window, ScrollView::Color color,
                  ScrollView::Color child_color) {
-  for (TESSLINE* outline = outlines; outline != NULL; outline = outline->next)
+  for (TESSLINE *outline = outlines; outline != NULL; outline = outline->next)
     outline->plot(window, color, child_color);
 }
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
 
 // Computes the center of mass and second moments for the old baseline and
 // 2nd moment normalizations. Returns the outline length.
 // The input denorm should be the normalizations that have been applied from
 // the image to the current state of this TBLOB.
-int TBLOB::ComputeMoments(FCOORD* center, FCOORD* second_moments) const {
+int TBLOB::ComputeMoments(FCOORD *center, FCOORD *second_moments) const {
   // Compute 1st and 2nd moments of the original outline.
   LLSQ accumulator;
   TBOX box = bounding_box();
@@ -542,8 +540,10 @@ int TBLOB::ComputeMoments(FCOORD* center, FCOORD* second_moments) const {
   // The 2nd moments are just the standard deviation of the point positions.
   double x2nd = sqrt(accumulator.x_variance());
   double y2nd = sqrt(accumulator.y_variance());
-  if (x2nd < 1.0) x2nd = 1.0;
-  if (y2nd < 1.0) y2nd = 1.0;
+  if (x2nd < 1.0)
+    x2nd = 1.0;
+  if (y2nd < 1.0)
+    y2nd = 1.0;
   second_moments->set_x(x2nd);
   second_moments->set_y(y2nd);
   return accumulator.count();
@@ -551,7 +551,7 @@ int TBLOB::ComputeMoments(FCOORD* center, FCOORD* second_moments) const {
 
 // Computes the precise bounding box of the coords that are generated by
 // GetEdgeCoords. This may be different from the bounding box of the polygon.
-void TBLOB::GetPreciseBoundingBox(TBOX* precise_box) const {
+void TBLOB::GetPreciseBoundingBox(TBOX *precise_box) const {
   TBOX box = bounding_box();
   *precise_box = TBOX();
   CollectEdges(box, precise_box, NULL, NULL, NULL);
@@ -567,9 +567,9 @@ void TBLOB::GetPreciseBoundingBox(TBOX* precise_box) const {
 // x-coord starting at box.left().
 // Eg x_coords[0] is a collection of the x-coords of edges at y=bottom.
 // Eg x_coords[1] is a collection of the x-coords of edges at y=bottom + 1.
-void TBLOB::GetEdgeCoords(const TBOX& box,
-                          GenericVector<GenericVector<int> >* x_coords,
-                          GenericVector<GenericVector<int> >* y_coords) const {
+void TBLOB::GetEdgeCoords(const TBOX &box,
+                          GenericVector<GenericVector<int>> *x_coords,
+                          GenericVector<GenericVector<int>> *y_coords) const {
   GenericVector<int> empty;
   x_coords->init_to_size(box.height(), empty);
   y_coords->init_to_size(box.width(), empty);
@@ -583,15 +583,16 @@ void TBLOB::GetEdgeCoords(const TBOX& box,
 
 // Accumulates the segment between pt1 and pt2 in the LLSQ, quantizing over
 // the integer coordinate grid to properly weight long vectors.
-static void SegmentLLSQ(const FCOORD& pt1, const FCOORD& pt2,
-                        LLSQ* accumulator) {
+static void SegmentLLSQ(const FCOORD &pt1, const FCOORD &pt2,
+                        LLSQ *accumulator) {
   FCOORD step(pt2);
   step -= pt1;
   int xstart = IntCastRounded(MIN(pt1.x(), pt2.x()));
   int xend = IntCastRounded(MAX(pt1.x(), pt2.x()));
   int ystart = IntCastRounded(MIN(pt1.y(), pt2.y()));
   int yend = IntCastRounded(MAX(pt1.y(), pt2.y()));
-  if (xstart == xend && ystart == yend) return;  // Nothing to do.
+  if (xstart == xend && ystart == yend)
+    return; // Nothing to do.
   double weight = step.length() / (xend - xstart + yend - ystart);
   // Compute and save the y-position at the middle of each x-step.
   for (int x = xstart; x < xend; ++x) {
@@ -610,10 +611,10 @@ static void SegmentLLSQ(const FCOORD& pt1, const FCOORD& pt2,
 // bottom-left of the bounding box, hence indices to x_coords, y_coords
 // are clipped to ([0,x_limit], [0,y_limit]).
 // See GetEdgeCoords above for a description of x_coords, y_coords.
-static void SegmentCoords(const FCOORD& pt1, const FCOORD& pt2,
-                          int x_limit, int y_limit,
-                          GenericVector<GenericVector<int> >* x_coords,
-                          GenericVector<GenericVector<int> >* y_coords) {
+static void SegmentCoords(const FCOORD &pt1, const FCOORD &pt2, int x_limit,
+                          int y_limit,
+                          GenericVector<GenericVector<int>> *x_coords,
+                          GenericVector<GenericVector<int>> *y_coords) {
   FCOORD step(pt2);
   step -= pt1;
   int start = ClipToRange(IntCastRounded(MIN(pt1.x(), pt2.x())), 0, x_limit);
@@ -633,26 +634,26 @@ static void SegmentCoords(const FCOORD& pt1, const FCOORD& pt2,
 // Adds any edges from a single segment of outline between pt1 and pt2 to
 // the bbox such that it guarantees to contain anything produced by
 // SegmentCoords.
-static void SegmentBBox(const FCOORD& pt1, const FCOORD& pt2, TBOX* bbox) {
+static void SegmentBBox(const FCOORD &pt1, const FCOORD &pt2, TBOX *bbox) {
   FCOORD step(pt2);
   step -= pt1;
   int x1 = IntCastRounded(MIN(pt1.x(), pt2.x()));
   int x2 = IntCastRounded(MAX(pt1.x(), pt2.x()));
   if (x2 > x1) {
-    int y1 = IntCastRounded(pt1.y() + step.y() * (x1 + 0.5 - pt1.x()) /
-                            step.x());
-    int y2 = IntCastRounded(pt1.y() + step.y() * (x2 - 0.5 - pt1.x()) /
-                            step.x());
+    int y1 =
+        IntCastRounded(pt1.y() + step.y() * (x1 + 0.5 - pt1.x()) / step.x());
+    int y2 =
+        IntCastRounded(pt1.y() + step.y() * (x2 - 0.5 - pt1.x()) / step.x());
     TBOX point(x1, MIN(y1, y2), x2, MAX(y1, y2));
     *bbox += point;
   }
   int y1 = IntCastRounded(MIN(pt1.y(), pt2.y()));
   int y2 = IntCastRounded(MAX(pt1.y(), pt2.y()));
   if (y2 > y1) {
-    int x1 = IntCastRounded(pt1.x() + step.x() * (y1 + 0.5 - pt1.y()) /
-                            step.y());
-    int x2 = IntCastRounded(pt1.x() + step.x() * (y2 - 0.5 - pt1.y()) /
-                            step.y());
+    int x1 =
+        IntCastRounded(pt1.x() + step.x() * (y1 + 0.5 - pt1.y()) / step.y());
+    int x2 =
+        IntCastRounded(pt1.x() + step.x() * (y2 - 0.5 - pt1.y()) / step.y());
     TBOX point(MIN(x1, x2), y1, MAX(x1, x2), y2);
     *bbox += point;
   }
@@ -668,13 +669,12 @@ static void SegmentBBox(const FCOORD& pt1, const FCOORD& pt2, TBOX* bbox) {
 // the image to the current state of the TBLOB from which startpt, lastpt come.
 // box is the bounding box of the blob from which the EDGEPTs are taken and
 // indices into x_coords, y_coords are offset by box.botleft().
-static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
-                              const DENORM& denorm, const TBOX& box,
-                              TBOX* bounding_box,
-                              LLSQ* accumulator,
-                              GenericVector<GenericVector<int> > *x_coords,
-                              GenericVector<GenericVector<int> > *y_coords) {
-  const C_OUTLINE* outline = startpt->src_outline;
+static void CollectEdgesOfRun(const EDGEPT *startpt, const EDGEPT *lastpt,
+                              const DENORM &denorm, const TBOX &box,
+                              TBOX *bounding_box, LLSQ *accumulator,
+                              GenericVector<GenericVector<int>> *x_coords,
+                              GenericVector<GenericVector<int>> *y_coords) {
+  const C_OUTLINE *outline = startpt->src_outline;
   int x_limit = box.width() - 1;
   int y_limit = box.height() - 1;
   if (outline != NULL) {
@@ -682,7 +682,7 @@ static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
     // The outline coordinates may not match the binary image because of the
     // rotation for vertical text lines, but the root_denorm IS the matching
     // start of the DENORM chain.
-    const DENORM* root_denorm = denorm.RootDenorm();
+    const DENORM *root_denorm = denorm.RootDenorm();
     int step_length = outline->pathlength();
     int start_index = startpt->start_step;
     // Note that if this run straddles the wrap-around point of the outline,
@@ -716,8 +716,8 @@ static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
       // with a greyscale image, the positioning of the edge there may be a
       // fictitious extrapolation, so previous processing has eliminated it.
       if (outline->edge_strength_at_index(index % step_length) > 0) {
-        FCOORD f_pos = outline->sub_pixel_pos_at_index(pos,
-                                                       index % step_length);
+        FCOORD f_pos =
+            outline->sub_pixel_pos_at_index(pos, index % step_length);
         FCOORD pos_normed;
         denorm.NormTransform(root_denorm, f_pos, &pos_normed);
         pos_normed -= origin;
@@ -729,8 +729,8 @@ static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
           SegmentLLSQ(pos_normed, prev_normed, accumulator);
         }
         if (x_coords != NULL && y_coords != NULL) {
-          SegmentCoords(pos_normed, prev_normed, x_limit, y_limit,
-                        x_coords, y_coords);
+          SegmentCoords(pos_normed, prev_normed, x_limit, y_limit, x_coords,
+                        y_coords);
         }
         prev_normed = pos_normed;
       }
@@ -738,8 +738,8 @@ static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
     }
   } else {
     // There is no outline, so we are forced to use the polygonal approximation.
-    const EDGEPT* endpt = lastpt->next;
-    const EDGEPT* pt = startpt;
+    const EDGEPT *endpt = lastpt->next;
+    const EDGEPT *pt = startpt;
     do {
       FCOORD next_pos(pt->next->pos.x - box.left(),
                       pt->next->pos.y - box.bottom());
@@ -762,27 +762,28 @@ static void CollectEdgesOfRun(const EDGEPT* startpt, const EDGEPT* lastpt,
 // llsq and/or the x_coords/y_coords. Both are used in different kinds of
 // normalization.
 // For a description of x_coords, y_coords, see GetEdgeCoords above.
-void TBLOB::CollectEdges(const TBOX& box,
-                         TBOX* bounding_box, LLSQ* llsq,
-                         GenericVector<GenericVector<int> >* x_coords,
-                         GenericVector<GenericVector<int> >* y_coords) const {
+void TBLOB::CollectEdges(const TBOX &box, TBOX *bounding_box, LLSQ *llsq,
+                         GenericVector<GenericVector<int>> *x_coords,
+                         GenericVector<GenericVector<int>> *y_coords) const {
   // Iterate the outlines.
-  for (const TESSLINE* ol = outlines; ol != NULL; ol = ol->next) {
+  for (const TESSLINE *ol = outlines; ol != NULL; ol = ol->next) {
     // Iterate the polygon.
-    EDGEPT* loop_pt = ol->FindBestStartPt();
-    EDGEPT* pt = loop_pt;
-    if (pt == NULL) continue;
+    EDGEPT *loop_pt = ol->FindBestStartPt();
+    EDGEPT *pt = loop_pt;
+    if (pt == NULL)
+      continue;
     do {
-      if (pt->IsHidden()) continue;
+      if (pt->IsHidden())
+        continue;
       // Find a run of equal src_outline.
-      EDGEPT* last_pt = pt;
+      EDGEPT *last_pt = pt;
       do {
         last_pt = last_pt->next;
       } while (last_pt != loop_pt && !last_pt->IsHidden() &&
                last_pt->src_outline == pt->src_outline);
       last_pt = last_pt->prev;
-      CollectEdgesOfRun(pt, last_pt, denorm_, box,
-                        bounding_box, llsq, x_coords, y_coords);
+      CollectEdgesOfRun(pt, last_pt, denorm_, box, bounding_box, llsq, x_coords,
+                        y_coords);
       pt = last_pt;
     } while ((pt = pt->next) != loop_pt);
   }
@@ -790,13 +791,13 @@ void TBLOB::CollectEdges(const TBOX& box,
 
 // Factory to build a TWERD from a (C_BLOB) WERD, with polygonal
 // approximation along the way.
-TWERD* TWERD::PolygonalCopy(bool allow_detailed_fx, WERD* src) {
-  TWERD* tessword = new TWERD;
+TWERD *TWERD::PolygonalCopy(bool allow_detailed_fx, WERD *src) {
+  TWERD *tessword = new TWERD;
   tessword->latin_script = src->flag(W_SCRIPT_IS_LATIN);
   C_BLOB_IT b_it(src->cblob_list());
   for (b_it.mark_cycle_pt(); !b_it.cycled_list(); b_it.forward()) {
-    C_BLOB* blob = b_it.data();
-    TBLOB* tblob = TBLOB::PolygonalCopy(allow_detailed_fx, blob);
+    C_BLOB *blob = b_it.data();
+    TBLOB *tblob = TBLOB::PolygonalCopy(allow_detailed_fx, blob);
     tessword->blobs.push_back(tblob);
   }
   return tessword;
@@ -804,13 +805,13 @@ TWERD* TWERD::PolygonalCopy(bool allow_detailed_fx, WERD* src) {
 
 // Baseline normalizes the blobs in-place, recording the normalization in the
 // DENORMs in the blobs.
-void TWERD::BLNormalize(const BLOCK* block, const ROW* row, Pix* pix,
+void TWERD::BLNormalize(const BLOCK *block, const ROW *row, Pix *pix,
                         bool inverse, float x_height, float baseline_shift,
                         bool numeric_mode, tesseract::OcrEngineMode hint,
-                        const TBOX* norm_box,
-                        DENORM* word_denorm) {
+                        const TBOX *norm_box, DENORM *word_denorm) {
   TBOX word_box = bounding_box();
-  if (norm_box != NULL) word_box = *norm_box;
+  if (norm_box != NULL)
+    word_box = *norm_box;
   float word_middle = (word_box.left() + word_box.right()) / 2.0f;
   float input_y_offset = 0.0f;
   float final_y_offset = static_cast<float>(kBlnBaselineOffset);
@@ -823,7 +824,7 @@ void TWERD::BLNormalize(const BLOCK* block, const ROW* row, Pix* pix,
     input_y_offset = row->base_line(word_middle) + baseline_shift;
   }
   for (int b = 0; b < blobs.size(); ++b) {
-    TBLOB* blob = blobs[b];
+    TBLOB *blob = blobs[b];
     TBOX blob_box = blob->bounding_box();
     float mid_x = (blob_box.left() + blob_box.right()) / 2.0f;
     float baseline = input_y_offset;
@@ -846,19 +847,19 @@ void TWERD::BLNormalize(const BLOCK* block, const ROW* row, Pix* pix,
   }
   if (word_denorm != NULL) {
     word_denorm->SetupNormalization(block, NULL, NULL, word_middle,
-                                    input_y_offset, scale, scale,
-                                    0.0f, final_y_offset);
+                                    input_y_offset, scale, scale, 0.0f,
+                                    final_y_offset);
     word_denorm->set_inverse(inverse);
     word_denorm->set_pix(pix);
   }
 }
 
 // Copies the data and the blobs, but leaves next untouched.
-void TWERD::CopyFrom(const TWERD& src) {
+void TWERD::CopyFrom(const TWERD &src) {
   Clear();
   latin_script = src.latin_script;
   for (int b = 0; b < src.blobs.size(); ++b) {
-    TBLOB* new_blob = new TBLOB(*src.blobs[b]);
+    TBLOB *new_blob = new TBLOB(*src.blobs[b]);
     blobs.push_back(new_blob);
   }
 }
@@ -888,10 +889,11 @@ TBOX TWERD::bounding_box() const {
 // Merges the blobs from start to end, not including end, and deletes
 // the blobs between start and end.
 void TWERD::MergeBlobs(int start, int end) {
-  if (start >= blobs.size() - 1)  return;  // Nothing to do.
-  TESSLINE* outline = blobs[start]->outlines;
+  if (start >= blobs.size() - 1)
+    return; // Nothing to do.
+  TESSLINE *outline = blobs[start]->outlines;
   for (int i = start + 1; i < end && i < blobs.size(); ++i) {
-    TBLOB* next_blob = blobs[i];
+    TBLOB *next_blob = blobs[i];
     // Take the outlines from the next blob.
     if (outline == NULL) {
       blobs[start]->outlines = next_blob->outlines;
@@ -913,14 +915,14 @@ void TWERD::MergeBlobs(int start, int end) {
 }
 
 #ifndef GRAPHICS_DISABLED
-void TWERD::plot(ScrollView* window) {
+void TWERD::plot(ScrollView *window) {
   ScrollView::Color color = WERD::NextColor(ScrollView::BLACK);
   for (int b = 0; b < blobs.size(); ++b) {
     blobs[b]->plot(window, color, ScrollView::BROWN);
     color = WERD::NextColor(color);
   }
 }
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
 
 /**********************************************************************
  * divisible_blob
@@ -929,29 +931,29 @@ void TWERD::plot(ScrollView* window) {
  * separated using divide_blobs. Sets the location to be used in the
  * call to divide_blobs.
  **********************************************************************/
-bool divisible_blob(TBLOB *blob, bool italic_blob, TPOINT* location) {
+bool divisible_blob(TBLOB *blob, bool italic_blob, TPOINT *location) {
   if (blob->outlines == NULL || blob->outlines->next == NULL)
-    return false;  // Need at least 2 outlines for it to be possible.
+    return false; // Need at least 2 outlines for it to be possible.
   int max_gap = 0;
-  TPOINT vertical = italic_blob ? kDivisibleVerticalItalic
-                                : kDivisibleVerticalUpright;
-  for (TESSLINE* outline1 = blob->outlines; outline1 != NULL;
+  TPOINT vertical =
+      italic_blob ? kDivisibleVerticalItalic : kDivisibleVerticalUpright;
+  for (TESSLINE *outline1 = blob->outlines; outline1 != NULL;
        outline1 = outline1->next) {
     if (outline1->is_hole)
-      continue;  // Holes do not count as separable.
+      continue; // Holes do not count as separable.
     TPOINT mid_pt1(
-      static_cast<inT16>((outline1->topleft.x + outline1->botright.x) / 2),
-      static_cast<inT16>((outline1->topleft.y + outline1->botright.y) / 2));
+        static_cast<inT16>((outline1->topleft.x + outline1->botright.x) / 2),
+        static_cast<inT16>((outline1->topleft.y + outline1->botright.y) / 2));
     int mid_prod1 = CROSS(mid_pt1, vertical);
     int min_prod1, max_prod1;
     outline1->MinMaxCrossProduct(vertical, &min_prod1, &max_prod1);
-    for (TESSLINE* outline2 = outline1->next; outline2 != NULL;
+    for (TESSLINE *outline2 = outline1->next; outline2 != NULL;
          outline2 = outline2->next) {
       if (outline2->is_hole)
-        continue;  // Holes do not count as separable.
+        continue; // Holes do not count as separable.
       TPOINT mid_pt2(
-        static_cast<inT16>((outline2->topleft.x + outline2->botright.x) / 2),
-        static_cast<inT16>((outline2->topleft.y + outline2->botright.y) / 2));
+          static_cast<inT16>((outline2->topleft.x + outline2->botright.x) / 2),
+          static_cast<inT16>((outline2->topleft.y + outline2->botright.y) / 2));
       int mid_prod2 = CROSS(mid_pt2, vertical);
       int min_prod2, max_prod2;
       outline2->MinMaxCrossProduct(vertical, &min_prod2, &max_prod2);
@@ -979,9 +981,9 @@ bool divisible_blob(TBLOB *blob, bool italic_blob, TPOINT* location) {
  * retained in the original blob.
  **********************************************************************/
 void divide_blobs(TBLOB *blob, TBLOB *other_blob, bool italic_blob,
-                  const TPOINT& location) {
-  TPOINT vertical = italic_blob ? kDivisibleVerticalItalic
-                                : kDivisibleVerticalUpright;
+                  const TPOINT &location) {
+  TPOINT vertical =
+      italic_blob ? kDivisibleVerticalItalic : kDivisibleVerticalUpright;
   TESSLINE *outline1 = NULL;
   TESSLINE *outline2 = NULL;
 
@@ -991,8 +993,8 @@ void divide_blobs(TBLOB *blob, TBLOB *other_blob, bool italic_blob,
 
   while (outline != NULL) {
     TPOINT mid_pt(
-      static_cast<inT16>((outline->topleft.x + outline->botright.x) / 2),
-      static_cast<inT16>((outline->topleft.y + outline->botright.y) / 2));
+        static_cast<inT16>((outline->topleft.x + outline->botright.x) / 2),
+        static_cast<inT16>((outline->topleft.y + outline->botright.y) / 2));
     int mid_prod = CROSS(mid_pt, vertical);
     if (mid_prod < location_prod) {
       // Outline is in left blob.

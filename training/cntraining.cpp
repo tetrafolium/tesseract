@@ -8,34 +8,34 @@
 **        Tuesday, May 17, 1998 Changes made to make feature specific and
 **        simplify structures. First step in simplifying training process.
 **
- **  (c) Copyright Hewlett-Packard Company, 1988.
- ** Licensed under the Apache License, Version 2.0 (the "License");
- ** you may not use this file except in compliance with the License.
- ** You may obtain a copy of the License at
- ** http://www.apache.org/licenses/LICENSE-2.0
- ** Unless required by applicable law or agreed to in writing, software
- ** distributed under the License is distributed on an "AS IS" BASIS,
- ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ** See the License for the specific language governing permissions and
- ** limitations under the License.
+**  (c) Copyright Hewlett-Packard Company, 1988.
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+** http://www.apache.org/licenses/LICENSE-2.0
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
 ******************************************************************************/
 
 /*----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------*/
-#include "oldlist.h"
+#include "cluster.h"
+#include "clusttool.h"
+#include "commontraining.h"
 #include "efio.h"
 #include "emalloc.h"
 #include "featdefs.h"
-#include "tessopt.h"
 #include "ocrfeatures.h"
-#include "clusttool.h"
-#include "cluster.h"
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
+#include "oldlist.h"
+#include "tessopt.h"
 #include "unichar.h"
-#include "commontraining.h"
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PROGRAM_FEATURE_TYPE "cn"
 
@@ -44,9 +44,7 @@ DECLARE_STRING_PARAM_FLAG(D);
 /*----------------------------------------------------------------------------
           Public Function Prototypes
 ----------------------------------------------------------------------------*/
-int main (
-     int  argc,
-     char  **argv);
+int main(int argc, char **argv);
 
 /*----------------------------------------------------------------------------
           Private Function Prototypes
@@ -61,22 +59,15 @@ PARAMDESC *ConvertToPARAMDESC(
   int N);
 */
 
-void WriteProtos(
-     FILE  *File,
-     uinT16  N,
-     LIST  ProtoList,
-     BOOL8  WriteSigProtos,
-     BOOL8  WriteInsigProtos);
+void WriteProtos(FILE *File, uinT16 N, LIST ProtoList, BOOL8 WriteSigProtos,
+                 BOOL8 WriteInsigProtos);
 
 /*----------------------------------------------------------------------------
           Global Data Definitions and Declarations
 ----------------------------------------------------------------------------*/
 /* global variable to hold configuration parameters to control clustering */
 //-M 0.025   -B 0.05   -I 0.8   -C 1e-3
-CLUSTERCONFIG  CNConfig =
-{
-  elliptical, 0.025, 0.05, 0.8, 1e-3, 0
-};
+CLUSTERCONFIG CNConfig = {elliptical, 0.025, 0.05, 0.8, 1e-3, 0};
 
 /*----------------------------------------------------------------------------
               Public Code
@@ -134,12 +125,12 @@ int main(int argc, char *argv[]) {
   // Set the global Config parameters before parsing the command line.
   Config = CNConfig;
 
-  const char  *PageName;
-  FILE  *TrainingPage;
-  LIST  CharList = NIL_LIST;
+  const char *PageName;
+  FILE *TrainingPage;
+  LIST CharList = NIL_LIST;
   CLUSTERER *Clusterer = nullptr;
-  LIST    ProtoList = NIL_LIST;
-  LIST    NormProtoList = NIL_LIST;
+  LIST ProtoList = NIL_LIST;
+  LIST NormProtoList = NIL_LIST;
   LIST pCharList;
   LABELEDLIST CharSample;
   FEATURE_DEFS_STRUCT FeatureDefs;
@@ -164,11 +155,11 @@ int main(int argc, char *argv[]) {
   // freeable_protos, so they can be freed later.
   GenericVector<LIST> freeable_protos;
   iterate(pCharList) {
-    //Cluster
+    // Cluster
     CharSample = (LABELEDLIST)first_node(pCharList);
     Clusterer =
-      SetUpForClustering(FeatureDefs, CharSample, PROGRAM_FEATURE_TYPE);
-    if (Clusterer == nullptr) {  // To avoid a SIGSEGV
+        SetUpForClustering(FeatureDefs, CharSample, PROGRAM_FEATURE_TYPE);
+    if (Clusterer == nullptr) { // To avoid a SIGSEGV
       fprintf(stderr, "Error: NULL clusterer!\n");
       return 1;
     }
@@ -201,9 +192,9 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < freeable_protos.size(); ++i) {
     FreeProtoList(&freeable_protos[i]);
   }
-  printf ("\n");
+  printf("\n");
   return 0;
-}  // main
+} // main
 
 /*----------------------------------------------------------------------------
               Private Code
@@ -211,19 +202,19 @@ int main(int argc, char *argv[]) {
 
 /*----------------------------------------------------------------------------*/
 /**
-* This routine writes the specified samples into files which
-* are organized according to the font name and character name
-* of the samples.
-* @param Directory  directory to place sample files into
-* @param LabeledProtoList List of labeled protos
-* @param feature_desc Description of the features
-* @return none
-* @note Exceptions: none
-* @note History: Fri Aug 18 16:17:06 1989, DSJ, Created.
-*/
+ * This routine writes the specified samples into files which
+ * are organized according to the font name and character name
+ * of the samples.
+ * @param Directory  directory to place sample files into
+ * @param LabeledProtoList List of labeled protos
+ * @param feature_desc Description of the features
+ * @return none
+ * @note Exceptions: none
+ * @note History: Fri Aug 18 16:17:06 1989, DSJ, Created.
+ */
 void WriteNormProtos(const char *Directory, LIST LabeledProtoList,
                      const FEATURE_DESC_STRUCT *feature_desc) {
-  FILE    *File;
+  FILE *File;
   STRING Filename;
   LABELEDLIST LabeledProto;
   int N;
@@ -234,46 +225,38 @@ void WriteNormProtos(const char *Directory, LIST LabeledProtoList,
     Filename += "/";
   }
   Filename += "normproto";
-  printf ("\nWriting %s ...", Filename.string());
-  File = Efopen (Filename.string(), "wb");
+  printf("\nWriting %s ...", Filename.string());
+  File = Efopen(Filename.string(), "wb");
   fprintf(File, "%0d\n", feature_desc->NumParams);
   WriteParamDesc(File, feature_desc->NumParams, feature_desc->ParamDesc);
-  iterate(LabeledProtoList)
-  {
-    LabeledProto = (LABELEDLIST) first_node (LabeledProtoList);
+  iterate(LabeledProtoList) {
+    LabeledProto = (LABELEDLIST)first_node(LabeledProtoList);
     N = NumberOfProtos(LabeledProto->List, true, false);
     if (N < 1) {
-      printf ("\nError! Not enough protos for %s: %d protos"
-              " (%d significant protos"
-              ", %d insignificant protos)\n",
-              LabeledProto->Label, N,
-              NumberOfProtos(LabeledProto->List, 1, 0),
-              NumberOfProtos(LabeledProto->List, 0, 1));
+      printf("\nError! Not enough protos for %s: %d protos"
+             " (%d significant protos"
+             ", %d insignificant protos)\n",
+             LabeledProto->Label, N, NumberOfProtos(LabeledProto->List, 1, 0),
+             NumberOfProtos(LabeledProto->List, 0, 1));
       exit(1);
     }
     fprintf(File, "\n%s %d\n", LabeledProto->Label, N);
     WriteProtos(File, feature_desc->NumParams, LabeledProto->List, true, false);
   }
-  fclose (File);
+  fclose(File);
 
-}  // WriteNormProtos
+} // WriteNormProtos
 
 /*-------------------------------------------------------------------------*/
-void WriteProtos(
-     FILE  *File,
-     uinT16  N,
-     LIST  ProtoList,
-     BOOL8  WriteSigProtos,
-     BOOL8  WriteInsigProtos)
-{
-  PROTOTYPE  *Proto;
+void WriteProtos(FILE *File, uinT16 N, LIST ProtoList, BOOL8 WriteSigProtos,
+                 BOOL8 WriteInsigProtos) {
+  PROTOTYPE *Proto;
 
   // write prototypes
-  iterate(ProtoList)
-  {
-    Proto = (PROTOTYPE *) first_node ( ProtoList );
-    if (( Proto->Significant && WriteSigProtos )  ||
-      ( ! Proto->Significant && WriteInsigProtos ) )
-      WritePrototype( File, N, Proto );
+  iterate(ProtoList) {
+    Proto = (PROTOTYPE *)first_node(ProtoList);
+    if ((Proto->Significant && WriteSigProtos) ||
+        (!Proto->Significant && WriteInsigProtos))
+      WritePrototype(File, N, Proto);
   }
-}  // WriteProtos
+} // WriteProtos

@@ -73,15 +73,14 @@ class Tesseract;
 class Trie;
 class Wordrec;
 
-typedef int (Dict::*DictFunc)(void* void_dawg_args,
-                              UNICHAR_ID unichar_id, bool word_end) const;
-typedef double (Dict::*ProbabilityInContextFunc)(const char* lang,
-                                                 const char* context,
+typedef int (Dict::*DictFunc)(void *void_dawg_args, UNICHAR_ID unichar_id,
+                              bool word_end) const;
+typedef double (Dict::*ProbabilityInContextFunc)(const char *lang,
+                                                 const char *context,
                                                  int context_bytes,
-                                                 const char* character,
+                                                 const char *character,
                                                  int character_bytes);
-typedef float (Dict::*ParamsModelClassifyFunc)(
-    const char *lang, void *path);
+typedef float (Dict::*ParamsModelClassifyFunc)(const char *lang, void *path);
 typedef void (Wordrec::*FillLatticeFunc)(const MATRIX &ratings,
                                          const WERD_CHOICE_LIST &best_choices,
                                          const UNICHARSET &unicharset,
@@ -98,14 +97,14 @@ typedef TessCallback4<const UNICHARSET &, int, PageIterator *, Pix *>
  * include any other Tesseract headers.
  */
 class TESS_API TessBaseAPI {
- public:
+public:
   TessBaseAPI();
   virtual ~TessBaseAPI();
 
   /**
    * Returns the version identifier as a static string. Do not delete.
    */
-  static const char* Version();
+  static const char *Version();
 
   /**
    * If compiled with OpenCL AND an available OpenCL
@@ -126,7 +125,7 @@ class TESS_API TessBaseAPI {
    * Set the name of the input file. Needed for training and
    * reading a UNLV zone file, and for searchable PDF output.
    */
-  void SetInputName(const char* name);
+  void SetInputName(const char *name);
   /**
    * These functions are required for searchable PDF output.
    * We need our hands on the input file so that we can include
@@ -134,15 +133,15 @@ class TESS_API TessBaseAPI {
    * we need the original image. Finally, resolution metadata
    * is stored in the PDF so we need that as well.
    */
-  const char* GetInputName();
+  const char *GetInputName();
   // Takes ownership of the input pix.
   void SetInputImage(Pix *pix);
-  Pix* GetInputImage();
+  Pix *GetInputImage();
   int GetSourceYResolution();
-  const char* GetDatapath();
+  const char *GetDatapath();
 
   /** Set the name of the bonus output files. Needed only for debugging. */
-  void SetOutputName(const char* name);
+  void SetOutputName(const char *name);
 
   /**
    * Set the value of an internal "parameter."
@@ -157,8 +156,8 @@ class TESS_API TessBaseAPI {
    * Note: Must be called after Init(). Only works for non-init variables
    * (init variables should be passed to Init()).
    */
-  bool SetVariable(const char* name, const char* value);
-  bool SetDebugVariable(const char* name, const char* value);
+  bool SetVariable(const char *name, const char *value);
+  bool SetDebugVariable(const char *name, const char *value);
 
   /**
    * Returns true if the parameter was found among Tesseract parameters.
@@ -222,23 +221,23 @@ class TESS_API TessBaseAPI {
    * If set_only_non_debug_params is true, only params that do not contain
    * "debug" in the name will be set.
    */
-  int Init(const char* datapath, const char* language, OcrEngineMode mode,
+  int Init(const char *datapath, const char *language, OcrEngineMode mode,
            char **configs, int configs_size,
            const GenericVector<STRING> *vars_vec,
            const GenericVector<STRING> *vars_values,
            bool set_only_non_debug_params);
-  int Init(const char* datapath, const char* language, OcrEngineMode oem) {
+  int Init(const char *datapath, const char *language, OcrEngineMode oem) {
     return Init(datapath, language, oem, NULL, 0, NULL, NULL, false);
   }
-  int Init(const char* datapath, const char* language) {
+  int Init(const char *datapath, const char *language) {
     return Init(datapath, language, OEM_DEFAULT, NULL, 0, NULL, NULL, false);
   }
   // In-memory version reads the traineddata file directly from the given
   // data[data_size] array, and/or reads data via a FileReader.
-  int Init(const char* data, int data_size, const char* language,
-           OcrEngineMode mode, char** configs, int configs_size,
-           const GenericVector<STRING>* vars_vec,
-           const GenericVector<STRING>* vars_values,
+  int Init(const char *data, int data_size, const char *language,
+           OcrEngineMode mode, char **configs, int configs_size,
+           const GenericVector<STRING> *vars_vec,
+           const GenericVector<STRING> *vars_values,
            bool set_only_non_debug_params, FileReader reader);
 
   /**
@@ -249,19 +248,19 @@ class TESS_API TessBaseAPI {
    * loaded use GetLoadedLanguagesAsVector.
    * The returned string should NOT be deleted.
    */
-  const char* GetInitLanguagesAsString() const;
+  const char *GetInitLanguagesAsString() const;
 
   /**
    * Returns the loaded languages in the vector of STRINGs.
    * Includes all languages loaded by the last Init, including those loaded
    * as dependencies of other loaded languages.
    */
-  void GetLoadedLanguagesAsVector(GenericVector<STRING>* langs) const;
+  void GetLoadedLanguagesAsVector(GenericVector<STRING> *langs) const;
 
   /**
    * Returns the available languages in the vector of STRINGs.
    */
-  void GetAvailableLanguagesAsVector(GenericVector<STRING>* langs) const;
+  void GetAvailableLanguagesAsVector(GenericVector<STRING> *langs) const;
 
   /**
    * Init only the lang model component of Tesseract. The only functions
@@ -269,7 +268,7 @@ class TESS_API TessBaseAPI {
    * WARNING: temporary! This function will be removed from here and placed
    * in a separate API at some future time.
    */
-  int InitLangMod(const char* datapath, const char* language);
+  int InitLangMod(const char *datapath, const char *language);
 
   /**
    * Init only for page layout analysis. Use only for calls to SetImage and
@@ -283,9 +282,9 @@ class TESS_API TessBaseAPI {
    * and also accepts a relative or absolute path name.
    * Note: only non-init params will be set (init params are set by Init()).
    */
-  void ReadConfigFile(const char* filename);
+  void ReadConfigFile(const char *filename);
   /** Same as above, but only set debug params from the given config file. */
-  void ReadDebugConfigFile(const char* filename);
+  void ReadDebugConfigFile(const char *filename);
 
   /**
    * Set the current page segmentation mode. Defaults to PSM_SINGLE_BLOCK.
@@ -314,9 +313,9 @@ class TESS_API TessBaseAPI {
    * For advanced uses, use SetImage, (optionally) SetRectangle, Recognize,
    * and one or more of the Get*Text functions below.
    */
-  char* TesseractRect(const unsigned char* imagedata,
-                      int bytes_per_pixel, int bytes_per_line,
-                      int left, int top, int width, int height);
+  char *TesseractRect(const unsigned char *imagedata, int bytes_per_pixel,
+                      int bytes_per_line, int left, int top, int width,
+                      int height);
 
   /**
    * Call between pages or documents etc to free up memory and forget
@@ -330,7 +329,7 @@ class TESS_API TessBaseAPI {
    * get hold of the thresholded image, get the text in different formats,
    * get bounding boxes, confidences etc.
    */
-   /* @{ */
+  /* @{ */
 
   /**
    * Provide an image for Tesseract to recognize. Format is as
@@ -339,7 +338,7 @@ class TESS_API TessBaseAPI {
    * full image, so it may be followed immediately by a GetUTF8Text, and it
    * will automatically perform recognition.
    */
-  void SetImage(const unsigned char* imagedata, int width, int height,
+  void SetImage(const unsigned char *imagedata, int width, int height,
                 int bytes_per_pixel, int bytes_per_line);
 
   /**
@@ -350,7 +349,7 @@ class TESS_API TessBaseAPI {
    * Use Pix where possible. Tesseract uses Pix as its internal representation
    * and it is therefore more efficient to provide a Pix directly.
    */
-  void SetImage(Pix* pix);
+  void SetImage(Pix *pix);
 
   /**
    * Set the resolution of the source image in pixels per inch so font size
@@ -372,7 +371,7 @@ class TESS_API TessBaseAPI {
    * Note that Tesseract takes ownership of the Thresholder and will
    * delete it when it it is replaced or the API is destructed.
    */
-  void SetThresholder(ImageThresholder* thresholder) {
+  void SetThresholder(ImageThresholder *thresholder) {
     delete thresholder_;
     thresholder_ = thresholder;
     ClearResults();
@@ -383,14 +382,14 @@ class TESS_API TessBaseAPI {
    * Caller takes ownership of the Pix and must pixDestroy it.
    * May be called any time after SetImage, or after TesseractRect.
    */
-  Pix* GetThresholdedImage();
+  Pix *GetThresholdedImage();
 
   /**
    * Get the result of page layout analysis as a leptonica-style
    * Boxa, Pixa pair, in reading order.
    * Can be called before or after Recognize.
    */
-  Boxa* GetRegions(Pixa** pixa);
+  Boxa *GetRegions(Pixa **pixa);
 
   /**
    * Get the textlines as a leptonica-style
@@ -403,12 +402,12 @@ class TESS_API TessBaseAPI {
    * If paraids is not NULL, the paragraph-id of each line within its block is
    * also returned as an array of one element per line. delete [] after use.
    */
-  Boxa* GetTextlines(const bool raw_image, const int raw_padding,
-                     Pixa** pixa, int** blockids, int** paraids);
+  Boxa *GetTextlines(const bool raw_image, const int raw_padding, Pixa **pixa,
+                     int **blockids, int **paraids);
   /*
      Helper method to extract from the thresholded image. (most common usage)
   */
-  Boxa* GetTextlines(Pixa** pixa, int** blockids) {
+  Boxa *GetTextlines(Pixa **pixa, int **blockids) {
     return GetTextlines(false, 0, pixa, blockids, NULL);
   }
 
@@ -420,14 +419,14 @@ class TESS_API TessBaseAPI {
    * If blockids is not NULL, the block-id of each line is also returned as an
    * array of one element per line. delete [] after use.
    */
-  Boxa* GetStrips(Pixa** pixa, int** blockids);
+  Boxa *GetStrips(Pixa **pixa, int **blockids);
 
   /**
    * Get the words as a leptonica-style
    * Boxa, Pixa pair, in reading order.
    * Can be called before or after Recognize.
    */
-  Boxa* GetWords(Pixa** pixa);
+  Boxa *GetWords(Pixa **pixa);
 
   /**
    * Gets the individual connected (text) components (created
@@ -437,7 +436,7 @@ class TESS_API TessBaseAPI {
    * Note: the caller is responsible for calling boxaDestroy()
    * on the returned Boxa array and pixaDestroy() on cc array.
    */
-  Boxa* GetConnectedComponents(Pixa** cc);
+  Boxa *GetConnectedComponents(Pixa **cc);
 
   /**
    * Get the given level kind of components (block, textline, word etc.) as a
@@ -452,14 +451,12 @@ class TESS_API TessBaseAPI {
    * instead of the thresholded image and padded with raw_padding.
    * If text_only is true, then only text components are returned.
    */
-  Boxa* GetComponentImages(const PageIteratorLevel level,
-                           const bool text_only, const bool raw_image,
-                           const int raw_padding,
-                           Pixa** pixa, int** blockids, int** paraids);
+  Boxa *GetComponentImages(const PageIteratorLevel level, const bool text_only,
+                           const bool raw_image, const int raw_padding,
+                           Pixa **pixa, int **blockids, int **paraids);
   // Helper function to get binary images with no padding (most common usage).
-  Boxa* GetComponentImages(const PageIteratorLevel level,
-                           const bool text_only,
-                           Pixa** pixa, int** blockids) {
+  Boxa *GetComponentImages(const PageIteratorLevel level, const bool text_only,
+                           Pixa **pixa, int **blockids) {
     return GetComponentImages(level, text_only, false, 0, pixa, blockids, NULL);
   }
 
@@ -476,7 +473,7 @@ class TESS_API TessBaseAPI {
    * @deprecated Use GetThresholdedImage and write the image using pixWrite
    * instead if possible.
    */
-  void DumpPGM(const char* filename);
+  void DumpPGM(const char *filename);
 
   /**
    * Runs page layout analysis in the mode set by SetPageSegMode.
@@ -493,8 +490,8 @@ class TESS_API TessBaseAPI {
    * has not been subjected to a call of Init, SetImage, Recognize, Clear, End
    * DetectOS, or anything else that changes the internal PAGE_RES.
    */
-  PageIterator* AnalyseLayout();
-  PageIterator* AnalyseLayout(bool merge_similar_words);
+  PageIterator *AnalyseLayout();
+  PageIterator *AnalyseLayout(bool merge_similar_words);
 
   /**
    * Recognize the image from SetAndThresholdImage, generating Tesseract
@@ -502,7 +499,7 @@ class TESS_API TessBaseAPI {
    * Optional. The Get*Text functions below will call Recognize if needed.
    * After Recognize, the output is kept internally until the next SetImage.
    */
-  int Recognize(ETEXT_DESC* monitor);
+  int Recognize(ETEXT_DESC *monitor);
 
   /**
    * Methods to retrieve information after SetAndThresholdImage(),
@@ -510,7 +507,7 @@ class TESS_API TessBaseAPI {
    */
 
   /** Variant on Recognize used for testing chopper. */
-  int RecognizeForChopTest(ETEXT_DESC* monitor);
+  int RecognizeForChopTest(ETEXT_DESC *monitor);
 
   /**
    * Turns images into symbolic text.
@@ -534,11 +531,11 @@ class TESS_API TessBaseAPI {
    *
    * Returns true if successful, false on error.
    */
-  bool ProcessPages(const char* filename, const char* retry_config,
-                    int timeout_millisec, TessResultRenderer* renderer);
+  bool ProcessPages(const char *filename, const char *retry_config,
+                    int timeout_millisec, TessResultRenderer *renderer);
   // Does the real work of ProcessPages.
-  bool ProcessPagesInternal(const char* filename, const char* retry_config,
-                            int timeout_millisec, TessResultRenderer* renderer);
+  bool ProcessPagesInternal(const char *filename, const char *retry_config,
+                            int timeout_millisec, TessResultRenderer *renderer);
 
   /**
    * Turn a single image into symbolic text.
@@ -549,9 +546,9 @@ class TESS_API TessBaseAPI {
    *
    * See ProcessPages for desciptions of other parameters.
    */
-  bool ProcessPage(Pix* pix, int page_index, const char* filename,
-                   const char* retry_config, int timeout_millisec,
-                   TessResultRenderer* renderer);
+  bool ProcessPage(Pix *pix, int page_index, const char *filename,
+                   const char *retry_config, int timeout_millisec,
+                   TessResultRenderer *renderer);
 
   /**
    * Get a reading-order iterator to the results of LayoutAnalysis and/or
@@ -561,7 +558,7 @@ class TESS_API TessBaseAPI {
    * has not been subjected to a call of Init, SetImage, Recognize, Clear, End
    * DetectOS, or anything else that changes the internal PAGE_RES.
    */
-  ResultIterator* GetIterator();
+  ResultIterator *GetIterator();
 
   /**
    * Get a mutable iterator to the results of LayoutAnalysis and/or Recognize.
@@ -571,13 +568,13 @@ class TESS_API TessBaseAPI {
    * has not been subjected to a call of Init, SetImage, Recognize, Clear, End
    * DetectOS, or anything else that changes the internal PAGE_RES.
    */
-  MutableIterator* GetMutableIterator();
+  MutableIterator *GetMutableIterator();
 
   /**
    * The recognized text is returned as a char* which is coded
    * as UTF8 and must be freed with the delete [] operator.
    */
-  char* GetUTF8Text();
+  char *GetUTF8Text();
 
   /**
    * Make a HTML-formatted string with hOCR markup from the internal
@@ -588,7 +585,7 @@ class TESS_API TessBaseAPI {
    *  receive progress callbacks
    * Returned string must be freed with the delete [] operator.
    */
-  char* GetHOCRText(ETEXT_DESC* monitor, int page_number);
+  char *GetHOCRText(ETEXT_DESC *monitor, int page_number);
 
   /**
    * Make a HTML-formatted string with hOCR markup from the internal
@@ -596,14 +593,14 @@ class TESS_API TessBaseAPI {
    * page_number is 0-based but will appear in the output as 1-based.
    * Returned string must be freed with the delete [] operator.
    */
-  char* GetHOCRText(int page_number);
+  char *GetHOCRText(int page_number);
 
   /**
    * Make a TSV-formatted string from the internal data structures.
    * page_number is 0-based but will appear in the output as 1-based.
    * Returned string must be freed with the delete [] operator.
    */
-  char* GetTSVText(int page_number);
+  char *GetTSVText(int page_number);
 
   /**
    * The recognized text is returned as a char* which is coded in the same
@@ -612,14 +609,14 @@ class TESS_API TessBaseAPI {
    * page_number is a 0-based page index that will appear in the box file.
    * Returned string must be freed with the delete [] operator.
    */
-  char* GetBoxText(int page_number);
+  char *GetBoxText(int page_number);
 
   /**
    * The recognized text is returned as a char* which is coded
    * as UNLV format Latin-1 with specific reject and suspect codes.
    * Returned string must be freed with the delete [] operator.
    */
-  char* GetUNLVText();
+  char *GetUNLVText();
 
   /**
    * Detect the orientation of the input image and apparent script (alphabet).
@@ -630,15 +627,15 @@ class TESS_API TessBaseAPI {
    * script_conf is confidence level in the script
    * Returns true on success and writes values to each parameter as an output
    */
-  bool DetectOrientationScript(int* orient_deg, float* orient_conf,
-                               const char** script_name, float* script_conf);
+  bool DetectOrientationScript(int *orient_deg, float *orient_conf,
+                               const char **script_name, float *script_conf);
 
   /**
    * The recognized text is returned as a char* which is coded
    * as UTF8 and must be freed with the delete [] operator.
    * page_number is a 0-based page index that will appear in the osd file.
    */
-  char* GetOsdText(int page_number);
+  char *GetOsdText(int page_number);
 
   /** Returns the (average) confidence value between 0 and 100. */
   int MeanTextConf();
@@ -648,7 +645,7 @@ class TESS_API TessBaseAPI {
    * The number of confidences should correspond to the number of space-
    * delimited words in GetUTF8Text.
    */
-  int* AllWordConfidences();
+  int *AllWordConfidences();
 
   /**
    * Applies the given word to the adaptive classifier if possible.
@@ -660,7 +657,7 @@ class TESS_API TessBaseAPI {
    * The currently set PageSegMode is preserved.
    * Returns false if adaption was not possible for some reason.
    */
-  bool AdaptToWordStr(PageSegMode mode, const char* wordstr);
+  bool AdaptToWordStr(PageSegMode mode, const char *wordstr);
 
   /**
    * Free up recognition results and any stored image data, without actually
@@ -697,8 +694,7 @@ class TESS_API TessBaseAPI {
   // Returns true if utf8_character is defined in the UniCharset.
   bool IsValidCharacter(const char *utf8_character);
 
-
-  bool GetTextDirection(int* out_offset, float* out_slope);
+  bool GetTextDirection(int *out_offset, float *out_slope);
 
   /** Sets Dict::letter_is_okay_ function to point to the given function. */
   void SetDictFunc(DictFunc f);
@@ -715,31 +711,28 @@ class TESS_API TessBaseAPI {
    * Estimates the Orientation And Script of the image.
    * @return true if the image was processed successfully.
    */
-  bool DetectOS(OSResults*);
+  bool DetectOS(OSResults *);
 
   /** This method returns the features associated with the input image. */
-  void GetFeaturesForBlob(TBLOB* blob, INT_FEATURE_STRUCT* int_features,
-                          int* num_features, int* feature_outline_index);
+  void GetFeaturesForBlob(TBLOB *blob, INT_FEATURE_STRUCT *int_features,
+                          int *num_features, int *feature_outline_index);
 
   /**
    * This method returns the row to which a box of specified dimensions would
    * belong. If no good match is found, it returns NULL.
    */
-  static ROW* FindRowForBox(BLOCK_LIST* blocks, int left, int top,
-                            int right, int bottom);
+  static ROW *FindRowForBox(BLOCK_LIST *blocks, int left, int top, int right,
+                            int bottom);
 
   /**
    * Method to run adaptive classifier on a blob.
    * It returns at max num_max_matches results.
    */
-  void RunAdaptiveClassifier(TBLOB* blob,
-                             int num_max_matches,
-                             int* unichar_ids,
-                             float* ratings,
-                             int* num_matches_returned);
+  void RunAdaptiveClassifier(TBLOB *blob, int num_max_matches, int *unichar_ids,
+                             float *ratings, int *num_matches_returned);
 
   /** This method returns the string form of the specified unichar. */
-  const char* GetUnichar(int unichar_id);
+  const char *GetUnichar(int unichar_id);
 
   /** Return the pointer to the i-th dawg loaded into tesseract_ object. */
   const Dawg *GetDawg(int i) const;
@@ -748,8 +741,8 @@ class TESS_API TessBaseAPI {
   int NumDawgs() const;
 
   /** Returns a ROW object created from the input row specification. */
-  static ROW *MakeTessOCRRow(float baseline, float xheight,
-                             float descender, float ascender);
+  static ROW *MakeTessOCRRow(float baseline, float xheight, float descender,
+                             float ascender);
 
   /** Returns a TBLOB corresponding to the entire input image. */
   static TBLOB *MakeTBLOB(Pix *pix);
@@ -761,7 +754,7 @@ class TESS_API TessBaseAPI {
    */
   static void NormalizeTBLOB(TBLOB *tblob, ROW *row, bool numeric_mode);
 
-  Tesseract* tesseract() const { return tesseract_; }
+  Tesseract *tesseract() const { return tesseract_; }
 
   OcrEngineMode oem() const { return last_oem_requested_; }
 
@@ -773,30 +766,30 @@ class TESS_API TessBaseAPI {
    * Return text orientation of each block as determined by an earlier run
    * of layout analysis.
    */
-  void GetBlockTextOrientations(int** block_orientation,
-                                bool** vertical_writing);
+  void GetBlockTextOrientations(int **block_orientation,
+                                bool **vertical_writing);
 
   /** Find lines from the image making the BLOCK_LIST. */
-  BLOCK_LIST* FindLinesCreateBlockList();
+  BLOCK_LIST *FindLinesCreateBlockList();
 
   /**
    * Delete a block list.
    * This is to keep BLOCK_LIST pointer opaque
    * and let go of including the other headers.
    */
-  static void DeleteBlockList(BLOCK_LIST* block_list);
- /* @} */
+  static void DeleteBlockList(BLOCK_LIST *block_list);
+  /* @} */
 
- protected:
-
-  /** Common code for setting the image. Returns true if Init has been called. */
+protected:
+  /** Common code for setting the image. Returns true if Init has been called.
+   */
   TESS_LOCAL bool InternalSetImage();
 
   /**
    * Run the thresholder to make the thresholded image. If pix is not NULL,
    * the source is thresholded to pix instead of the internal IMAGE.
    */
-  TESS_LOCAL virtual bool Threshold(Pix** pix);
+  TESS_LOCAL virtual bool Threshold(Pix **pix);
 
   /**
    * Find lines from the image making the BLOCK_LIST.
@@ -812,7 +805,7 @@ class TESS_API TessBaseAPI {
    * to ignore all BiDi smarts at that point.
    * delete once you're done with it.
    */
-  TESS_LOCAL LTRResultIterator* GetLTRIterator();
+  TESS_LOCAL LTRResultIterator *GetLTRIterator();
 
   /**
    * Return the length of the output text string, as UTF8, assuming
@@ -820,7 +813,7 @@ class TESS_API TessBaseAPI {
    * and assuming a single character reject marker for each rejected character.
    * Also return the number of recognized blobs in blob_count.
    */
-  TESS_LOCAL int TextLength(int* blob_count);
+  TESS_LOCAL int TextLength(int *blob_count);
 
   /** @defgroup ocropusAddOns ocropus add-ons */
   /* @{ */
@@ -829,17 +822,14 @@ class TESS_API TessBaseAPI {
    * Adapt to recognize the current image as the given character.
    * The image must be preloaded and be just an image of a single character.
    */
-  TESS_LOCAL void AdaptToCharacter(const char *unichar_repr,
-                                   int length,
-                                   float baseline,
-                                   float xheight,
-                                   float descender,
-                                   float ascender);
+  TESS_LOCAL void AdaptToCharacter(const char *unichar_repr, int length,
+                                   float baseline, float xheight,
+                                   float descender, float ascender);
 
   /** Recognize text doing one pass only, using settings for a given pass. */
-  TESS_LOCAL PAGE_RES* RecognitionPass1(BLOCK_LIST* block_list);
-  TESS_LOCAL PAGE_RES* RecognitionPass2(BLOCK_LIST* block_list,
-                                        PAGE_RES* pass1_result);
+  TESS_LOCAL PAGE_RES *RecognitionPass1(BLOCK_LIST *block_list);
+  TESS_LOCAL PAGE_RES *RecognitionPass2(BLOCK_LIST *block_list,
+                                        PAGE_RES *pass1_result);
 
   //// paragraphs.cpp ////////////////////////////////////////////////////
   TESS_LOCAL void DetectParagraphs(bool after_text_recognition);
@@ -848,35 +838,30 @@ class TESS_API TessBaseAPI {
    * Extract the OCR results, costs (penalty points for uncertainty),
    * and the bounding boxes of the characters.
    */
-  TESS_LOCAL static int TesseractExtractResult(char** text,
-                                    int** lengths,
-                                    float** costs,
-                                    int** x0,
-                                    int** y0,
-                                    int** x1,
-                                    int** y1,
-                                    PAGE_RES* page_res);
+  TESS_LOCAL static int TesseractExtractResult(char **text, int **lengths,
+                                               float **costs, int **x0,
+                                               int **y0, int **x1, int **y1,
+                                               PAGE_RES *page_res);
 
-  TESS_LOCAL const PAGE_RES* GetPageRes() const { return page_res_; }
+  TESS_LOCAL const PAGE_RES *GetPageRes() const { return page_res_; }
   /* @} */
 
-
- protected:
-  Tesseract*        tesseract_;       ///< The underlying data object.
-  Tesseract*        osd_tesseract_;   ///< For orientation & script detection.
-  EquationDetect*   equ_detect_;      ///<The equation detector.
-  FileReader reader_;                 ///< Reads files from any filesystem.
-  ImageThresholder* thresholder_;     ///< Image thresholding module.
-  GenericVector<ParagraphModel *>* paragraph_models_;
-  BLOCK_LIST*       block_list_;      ///< The page layout.
-  PAGE_RES*         page_res_;        ///< The page-level data.
-  STRING*           input_file_;      ///< Name used by training code.
-  STRING*           output_file_;     ///< Name used by debug code.
-  STRING*           datapath_;        ///< Current location of tessdata.
-  STRING*           language_;        ///< Last initialized language.
-  OcrEngineMode last_oem_requested_;  ///< Last ocr language mode requested.
-  bool          recognition_done_;   ///< page_res_ contains recognition data.
-  TruthCallback *truth_cb_;           /// fxn for setting truth_* in WERD_RES
+protected:
+  Tesseract *tesseract_;          ///< The underlying data object.
+  Tesseract *osd_tesseract_;      ///< For orientation & script detection.
+  EquationDetect *equ_detect_;    ///< The equation detector.
+  FileReader reader_;             ///< Reads files from any filesystem.
+  ImageThresholder *thresholder_; ///< Image thresholding module.
+  GenericVector<ParagraphModel *> *paragraph_models_;
+  BLOCK_LIST *block_list_;           ///< The page layout.
+  PAGE_RES *page_res_;               ///< The page-level data.
+  STRING *input_file_;               ///< Name used by training code.
+  STRING *output_file_;              ///< Name used by debug code.
+  STRING *datapath_;                 ///< Current location of tessdata.
+  STRING *language_;                 ///< Last initialized language.
+  OcrEngineMode last_oem_requested_; ///< Last ocr language mode requested.
+  bool recognition_done_;            ///< page_res_ contains recognition data.
+  TruthCallback *truth_cb_;          /// fxn for setting truth_* in WERD_RES
 
   /**
    * @defgroup ThresholderParams Thresholder Parameters
@@ -891,20 +876,16 @@ class TESS_API TessBaseAPI {
   int image_height_;
   /* @} */
 
- private:
+private:
   // A list of image filenames gets special consideration
-  bool ProcessPagesFileList(FILE *fp,
-                            STRING *buf,
-                            const char* retry_config, int timeout_millisec,
-                            TessResultRenderer* renderer,
+  bool ProcessPagesFileList(FILE *fp, STRING *buf, const char *retry_config,
+                            int timeout_millisec, TessResultRenderer *renderer,
                             int tessedit_page_number);
   // TIFF supports multipage so gets special consideration.
-  bool ProcessPagesMultipageTiff(const unsigned char *data,
-                                 size_t size,
-                                 const char* filename,
-                                 const char* retry_config,
+  bool ProcessPagesMultipageTiff(const unsigned char *data, size_t size,
+                                 const char *filename, const char *retry_config,
                                  int timeout_millisec,
-                                 TessResultRenderer* renderer,
+                                 TessResultRenderer *renderer,
                                  int tessedit_page_number);
   // There's currently no way to pass a document title from the
   // Tesseract command line, and we have multiple places that choose
@@ -912,10 +893,10 @@ class TESS_API TessBaseAPI {
   // variable will hopefully reduce confusion if the situation changes
   // in the future.
   const char *unknown_title_ = "";
-};  // class TessBaseAPI.
+}; // class TessBaseAPI.
 
 /** Escape a char string - remove &<>"' with HTML codes. */
-STRING HOcrEscape(const char* text);
-}  // namespace tesseract.
+STRING HOcrEscape(const char *text);
+} // namespace tesseract.
 
-#endif  // TESSERACT_API_BASEAPI_H_
+#endif // TESSERACT_API_BASEAPI_H_

@@ -25,18 +25,13 @@ namespace tesseract {
 // ================== SampleIterator Implementation =================
 
 SampleIterator::SampleIterator()
-  : charset_map_(NULL),
-    shape_table_(NULL),
-    sample_set_(NULL),
-    randomize_(false),
-    owned_shape_table_(NULL) {
+    : charset_map_(NULL), shape_table_(NULL), sample_set_(NULL),
+      randomize_(false), owned_shape_table_(NULL) {
   num_shapes_ = 0;
   Begin();
 }
 
-SampleIterator::~SampleIterator() {
-  Clear();
-}
+SampleIterator::~SampleIterator() { Clear(); }
 
 void SampleIterator::Clear() {
   delete owned_shape_table_;
@@ -44,10 +39,9 @@ void SampleIterator::Clear() {
 }
 
 // See class comment for arguments.
-void SampleIterator::Init(const IndexMapBiDi* charset_map,
-                          const ShapeTable* shape_table,
-                          bool randomize,
-                          TrainingSampleSet* sample_set) {
+void SampleIterator::Init(const IndexMapBiDi *charset_map,
+                          const ShapeTable *shape_table, bool randomize,
+                          TrainingSampleSet *sample_set) {
   Clear();
   charset_map_ = charset_map;
   shape_table_ = shape_table;
@@ -74,8 +68,8 @@ void SampleIterator::Init(const IndexMapBiDi* charset_map,
   if (shape_table_ != NULL) {
     num_shapes_ = shape_table_->NumShapes();
   } else {
-    num_shapes_ = randomize ? sample_set_->num_samples()
-                            : sample_set_->num_raw_samples();
+    num_shapes_ =
+        randomize ? sample_set_->num_samples() : sample_set_->num_raw_samples();
   }
   Begin();
 }
@@ -96,13 +90,11 @@ void SampleIterator::Begin() {
   Next();
 }
 
-bool SampleIterator::AtEnd() const {
-  return shape_index_ >= num_shapes_;
-}
+bool SampleIterator::AtEnd() const { return shape_index_ >= num_shapes_; }
 
-const TrainingSample& SampleIterator::GetSample() const {
+const TrainingSample &SampleIterator::GetSample() const {
   if (shape_table_ != NULL) {
-    const UnicharAndFonts* shape_entry = GetShapeEntry();
+    const UnicharAndFonts *shape_entry = GetShapeEntry();
     int char_id = shape_entry->unichar_id;
     int font_id = shape_entry->font_ids[shape_font_index_];
     return *sample_set_->GetSample(font_id, char_id, sample_index_);
@@ -111,9 +103,9 @@ const TrainingSample& SampleIterator::GetSample() const {
   }
 }
 
-TrainingSample* SampleIterator::MutableSample() const {
+TrainingSample *SampleIterator::MutableSample() const {
   if (shape_table_ != NULL) {
-    const UnicharAndFonts* shape_entry = GetShapeEntry();
+    const UnicharAndFonts *shape_entry = GetShapeEntry();
     int char_id = shape_entry->unichar_id;
     int font_id = shape_entry->font_ids[shape_font_index_];
     return sample_set_->MutableSample(font_id, char_id, sample_index_);
@@ -126,7 +118,7 @@ TrainingSample* SampleIterator::MutableSample() const {
 // sample.
 int SampleIterator::GlobalSampleIndex() const {
   if (shape_table_ != NULL) {
-    const UnicharAndFonts* shape_entry = GetShapeEntry();
+    const UnicharAndFonts *shape_entry = GetShapeEntry();
     int char_id = shape_entry->unichar_id;
     int font_id = shape_entry->font_ids[shape_font_index_];
     return sample_set_->GlobalSampleIndex(font_id, char_id, sample_index_);
@@ -172,15 +164,14 @@ void SampleIterator::Next() {
           shape_char_index_ = 0;
           do {
             ++shape_index_;
-          } while (shape_index_ < num_shapes_ &&
-                   charset_map_ != NULL &&
+          } while (shape_index_ < num_shapes_ && charset_map_ != NULL &&
                    charset_map_->SparseToCompact(shape_index_) < 0);
           if (shape_index_ >= num_shapes_)
-            return;  // The end.
+            return; // The end.
           num_shape_chars_ = shape_table_->GetShape(shape_index_).size();
         }
       }
-      const UnicharAndFonts* shape_entry = GetShapeEntry();
+      const UnicharAndFonts *shape_entry = GetShapeEntry();
       num_shape_fonts_ = shape_entry->font_ids.size();
       int char_id = shape_entry->unichar_id;
       int font_id = shape_entry->font_ids[shape_font_index_];
@@ -201,16 +192,16 @@ int SampleIterator::CompactCharsetSize() const {
 // Returns the size of the sparse charset space.
 int SampleIterator::SparseCharsetSize() const {
   return charset_map_ != NULL
-      ? charset_map_->SparseSize()
-      : (shape_table_ != NULL ? shape_table_->NumShapes()
-                              : sample_set_->charsetsize());
+             ? charset_map_->SparseSize()
+             : (shape_table_ != NULL ? shape_table_->NumShapes()
+                                     : sample_set_->charsetsize());
 }
 
 // Apply the supplied feature_space/feature_map transform to all samples
 // accessed by this iterator.
-void SampleIterator::MapSampleFeatures(const IntFeatureMap& feature_map) {
+void SampleIterator::MapSampleFeatures(const IntFeatureMap &feature_map) {
   for (Begin(); !AtEnd(); Next()) {
-    TrainingSample* sample = MutableSample();
+    TrainingSample *sample = MutableSample();
     sample->MapFeatures(feature_map);
   }
 }
@@ -220,7 +211,7 @@ void SampleIterator::MapSampleFeatures(const IntFeatureMap& feature_map) {
 int SampleIterator::UniformSamples() {
   int num_good_samples = 0;
   for (Begin(); !AtEnd(); Next()) {
-    TrainingSample* sample = MutableSample();
+    TrainingSample *sample = MutableSample();
     sample->set_weight(1.0);
     ++num_good_samples;
   }
@@ -234,7 +225,7 @@ double SampleIterator::NormalizeSamples() {
   double total_weight = 0.0;
   int sample_count = 0;
   for (Begin(); !AtEnd(); Next()) {
-    const TrainingSample& sample = GetSample();
+    const TrainingSample &sample = GetSample();
     total_weight += sample.weight();
     ++sample_count;
   }
@@ -242,7 +233,7 @@ double SampleIterator::NormalizeSamples() {
   double min_assigned_sample_weight = 1.0;
   if (total_weight > 0.0) {
     for (Begin(); !AtEnd(); Next()) {
-      TrainingSample* sample = MutableSample();
+      TrainingSample *sample = MutableSample();
       double weight = sample->weight() / total_weight;
       if (weight < min_assigned_sample_weight)
         min_assigned_sample_weight = weight;
@@ -253,10 +244,9 @@ double SampleIterator::NormalizeSamples() {
 }
 
 // Helper returns the current UnicharAndFont shape_entry.
-const UnicharAndFonts* SampleIterator::GetShapeEntry() const {
-  const Shape& shape = shape_table_->GetShape(shape_index_);
+const UnicharAndFonts *SampleIterator::GetShapeEntry() const {
+  const Shape &shape = shape_table_->GetShape(shape_index_);
   return &shape[shape_char_index_];
 }
 
-}  // namespace tesseract.
-
+} // namespace tesseract.

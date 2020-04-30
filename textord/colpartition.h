@@ -22,13 +22,13 @@
 #define TESSERACT_TEXTORD_COLPARTITION_H_
 
 #include "bbgrid.h"
-#include "blobbox.h"       // For BlobRegionType.
+#include "blobbox.h" // For BlobRegionType.
 #include "ndminx.h"
 #include "ocrblock.h"
-#include "rect.h"           // For TBOX.
+#include "rect.h" // For TBOX.
 #include "scrollview.h"
-#include "tabfind.h"        // For WidthCallback.
-#include "tabvector.h"      // For BLOBNBOX_CLIST.
+#include "tabfind.h"   // For WidthCallback.
+#include "tabvector.h" // For BLOBNBOX_CLIST.
 
 namespace tesseract {
 
@@ -45,11 +45,11 @@ class WorkingPartSet_LIST;
 // The order of flowing/heading/pullout must be kept consistent with
 // PolyBlockType.
 enum ColumnSpanningType {
-  CST_NOISE,        // Strictly between columns.
-  CST_FLOWING,      // Strictly within a single column.
-  CST_HEADING,      // Spans multiple columns.
-  CST_PULLOUT,      // Touches multiple columns, but doesn't span them.
-  CST_COUNT         // Number of entries.
+  CST_NOISE,   // Strictly between columns.
+  CST_FLOWING, // Strictly within a single column.
+  CST_HEADING, // Spans multiple columns.
+  CST_PULLOUT, // Touches multiple columns, but doesn't span them.
+  CST_COUNT    // Number of entries.
 };
 
 ELIST2IZEH(ColPartition)
@@ -65,7 +65,7 @@ CLISTIZEH(ColPartition)
  * emerges, which represents the columns over a wide y-coordinate range.
  */
 class ColPartition : public ELIST2_LINK {
- public:
+public:
   ColPartition() {
     // This empty constructor is here only so that the class can be ELISTIZED.
     // TODO(rays) change deep_copy in elst.h line 955 to take a callback copier
@@ -73,25 +73,24 @@ class ColPartition : public ELIST2_LINK {
   }
   /**
    * @param blob_type is the blob_region_type_ of the blobs in this partition.
-   * @param vertical is the direction of logical vertical on the possibly skewed image.
+   * @param vertical is the direction of logical vertical on the possibly skewed
+   * image.
    */
-  ColPartition(BlobRegionType blob_type, const ICOORD& vertical);
+  ColPartition(BlobRegionType blob_type, const ICOORD &vertical);
   /**
    * Constructs a fake ColPartition with no BLOBNBOXes to represent a
    * horizontal or vertical line, given a type and a bounding box.
    */
-  static ColPartition* MakeLinePartition(BlobRegionType blob_type,
-                                         const ICOORD& vertical,
-                                         int left, int bottom,
-                                         int right, int top);
+  static ColPartition *MakeLinePartition(BlobRegionType blob_type,
+                                         const ICOORD &vertical, int left,
+                                         int bottom, int right, int top);
 
   // Constructs and returns a fake ColPartition with a single fake BLOBNBOX,
   // all made from a single TBOX.
   // WARNING: Despite being on C_LISTs, the BLOBNBOX owns the C_BLOB and
   // the ColPartition owns the BLOBNBOX!!!
   // Call DeleteBoxes before deleting the ColPartition.
-  static ColPartition* FakePartition(const TBOX& box,
-                                     PolyBlockType block_type,
+  static ColPartition *FakePartition(const TBOX &box, PolyBlockType block_type,
                                      BlobRegionType blob_type,
                                      BlobTextFlowType flow);
 
@@ -100,135 +99,55 @@ class ColPartition : public ELIST2_LINK {
   // than the surrounding text that may be a dropcap, two or more vertically
   // touching characters, or some graphic element.
   // If the given list is not NULL, the partition is also added to the list.
-  static ColPartition* MakeBigPartition(BLOBNBOX* box,
-                                        ColPartition_LIST* big_part_list);
+  static ColPartition *MakeBigPartition(BLOBNBOX *box,
+                                        ColPartition_LIST *big_part_list);
 
   ~ColPartition();
 
   // Simple accessors.
-  const TBOX& bounding_box() const {
-    return bounding_box_;
-  }
-  int left_margin() const {
-    return left_margin_;
-  }
-  void set_left_margin(int margin) {
-    left_margin_ = margin;
-  }
-  int right_margin() const {
-    return right_margin_;
-  }
-  void set_right_margin(int margin) {
-    right_margin_ = margin;
-  }
-  int median_top() const {
-    return median_top_;
-  }
-  int median_bottom() const {
-    return median_bottom_;
-  }
-  int median_left() const {
-    return median_left_;
-  }
-  int median_right() const {
-    return median_right_;
-  }
-  int median_size() const {
-    return median_size_;
-  }
-  void set_median_size(int size) {
-    median_size_ = size;
-  }
-  int median_width() const {
-    return median_width_;
-  }
-  void set_median_width(int width) {
-    median_width_ = width;
-  }
-  BlobRegionType blob_type() const {
-    return blob_type_;
-  }
-  void set_blob_type(BlobRegionType t) {
-    blob_type_ = t;
-  }
-  BlobTextFlowType flow() const {
-    return flow_;
-  }
-  void set_flow(BlobTextFlowType f) {
-    flow_ = f;
-  }
-  int good_blob_score() const {
-    return good_blob_score_;
-  }
-  bool good_width() const {
-    return good_width_;
-  }
-  bool good_column() const {
-    return good_column_;
-  }
-  bool left_key_tab() const {
-    return left_key_tab_;
-  }
-  int left_key() const {
-    return left_key_;
-  }
-  bool right_key_tab() const {
-    return right_key_tab_;
-  }
-  int right_key() const {
-    return right_key_;
-  }
-  PolyBlockType type() const {
-    return type_;
-  }
-  void set_type(PolyBlockType t) {
-    type_ = t;
-  }
-  BLOBNBOX_CLIST* boxes() {
-    return &boxes_;
-  }
-  int boxes_count() const {
-    return boxes_.length();
-  }
-  void set_vertical(const ICOORD& v) {
-    vertical_ = v;
-  }
-  ColPartition_CLIST* upper_partners() {
-    return &upper_partners_;
-  }
-  ColPartition_CLIST* lower_partners() {
-    return &lower_partners_;
-  }
-  void set_working_set(WorkingPartSet* working_set) {
+  const TBOX &bounding_box() const { return bounding_box_; }
+  int left_margin() const { return left_margin_; }
+  void set_left_margin(int margin) { left_margin_ = margin; }
+  int right_margin() const { return right_margin_; }
+  void set_right_margin(int margin) { right_margin_ = margin; }
+  int median_top() const { return median_top_; }
+  int median_bottom() const { return median_bottom_; }
+  int median_left() const { return median_left_; }
+  int median_right() const { return median_right_; }
+  int median_size() const { return median_size_; }
+  void set_median_size(int size) { median_size_ = size; }
+  int median_width() const { return median_width_; }
+  void set_median_width(int width) { median_width_ = width; }
+  BlobRegionType blob_type() const { return blob_type_; }
+  void set_blob_type(BlobRegionType t) { blob_type_ = t; }
+  BlobTextFlowType flow() const { return flow_; }
+  void set_flow(BlobTextFlowType f) { flow_ = f; }
+  int good_blob_score() const { return good_blob_score_; }
+  bool good_width() const { return good_width_; }
+  bool good_column() const { return good_column_; }
+  bool left_key_tab() const { return left_key_tab_; }
+  int left_key() const { return left_key_; }
+  bool right_key_tab() const { return right_key_tab_; }
+  int right_key() const { return right_key_; }
+  PolyBlockType type() const { return type_; }
+  void set_type(PolyBlockType t) { type_ = t; }
+  BLOBNBOX_CLIST *boxes() { return &boxes_; }
+  int boxes_count() const { return boxes_.length(); }
+  void set_vertical(const ICOORD &v) { vertical_ = v; }
+  ColPartition_CLIST *upper_partners() { return &upper_partners_; }
+  ColPartition_CLIST *lower_partners() { return &lower_partners_; }
+  void set_working_set(WorkingPartSet *working_set) {
     working_set_ = working_set;
   }
-  bool block_owned() const {
-    return block_owned_;
-  }
-  void set_block_owned(bool owned) {
-    block_owned_ = owned;
-  }
-  bool desperately_merged() const {
-    return desperately_merged_;
-  }
-  ColPartitionSet* column_set() const {
-    return column_set_;
-  }
-  void set_side_step(int step) {
-    side_step_ = step;
-  }
-  int bottom_spacing() const {
-    return bottom_spacing_;
-  }
-  void set_bottom_spacing(int spacing) {
-    bottom_spacing_ = spacing;
-  }
-  int top_spacing() const {
-    return top_spacing_;
-  }
-  void set_top_spacing(int spacing) {
-    top_spacing_ = spacing;
-  }
+  bool block_owned() const { return block_owned_; }
+  void set_block_owned(bool owned) { block_owned_ = owned; }
+  bool desperately_merged() const { return desperately_merged_; }
+  ColPartitionSet *column_set() const { return column_set_; }
+  void set_side_step(int step) { side_step_ = step; }
+  int bottom_spacing() const { return bottom_spacing_; }
+  void set_bottom_spacing(int spacing) { bottom_spacing_ = spacing; }
+  int top_spacing() const { return top_spacing_; }
+  void set_top_spacing(int spacing) { top_spacing_ = spacing; }
 
   void set_table_type() {
     if (type_ != PT_TABLE) {
@@ -240,57 +159,31 @@ class ColPartition : public ELIST2_LINK {
     if (type_ == PT_TABLE)
       type_ = type_before_table_;
   }
-  bool inside_table_column() {
-    return inside_table_column_;
-  }
-  void set_inside_table_column(bool val) {
-    inside_table_column_ = val;
-  }
-  ColPartition* nearest_neighbor_above() const {
+  bool inside_table_column() { return inside_table_column_; }
+  void set_inside_table_column(bool val) { inside_table_column_ = val; }
+  ColPartition *nearest_neighbor_above() const {
     return nearest_neighbor_above_;
   }
-  void set_nearest_neighbor_above(ColPartition* part) {
+  void set_nearest_neighbor_above(ColPartition *part) {
     nearest_neighbor_above_ = part;
   }
-  ColPartition* nearest_neighbor_below() const {
+  ColPartition *nearest_neighbor_below() const {
     return nearest_neighbor_below_;
   }
-  void set_nearest_neighbor_below(ColPartition* part) {
+  void set_nearest_neighbor_below(ColPartition *part) {
     nearest_neighbor_below_ = part;
   }
-  int space_above() const {
-    return space_above_;
-  }
-  void set_space_above(int space) {
-    space_above_ = space;
-  }
-  int space_below() const {
-    return space_below_;
-  }
-  void set_space_below(int space) {
-    space_below_ = space;
-  }
-  int space_to_left() const {
-    return space_to_left_;
-  }
-  void set_space_to_left(int space) {
-    space_to_left_ = space;
-  }
-  int space_to_right() const {
-    return space_to_right_;
-  }
-  void set_space_to_right(int space) {
-    space_to_right_ = space;
-  }
-  uinT8* color1() {
-    return color1_;
-  }
-  uinT8* color2() {
-    return color2_;
-  }
-  bool owns_blobs() const {
-    return owns_blobs_;
-  }
+  int space_above() const { return space_above_; }
+  void set_space_above(int space) { space_above_ = space; }
+  int space_below() const { return space_below_; }
+  void set_space_below(int space) { space_below_ = space; }
+  int space_to_left() const { return space_to_left_; }
+  void set_space_to_left(int space) { space_to_left_ = space; }
+  int space_to_right() const { return space_to_right_; }
+  void set_space_to_right(int space) { space_to_right_ = space; }
+  uinT8 *color1() { return color1_; }
+  uinT8 *color2() { return color2_; }
+  bool owns_blobs() const { return owns_blobs_; }
   void set_owns_blobs(bool owns_blobs) {
     // Do NOT change ownership flag when there are blobs in the list.
     // Immediately set the ownership flag when creating copies.
@@ -305,9 +198,7 @@ class ColPartition : public ELIST2_LINK {
     return (bounding_box_.top() + bounding_box_.bottom()) / 2;
   }
   // Returns the middle y-coord of the median top and bottom.
-  int MedianY() const {
-    return (median_top_ + median_bottom_) / 2;
-  }
+  int MedianY() const { return (median_top_ + median_bottom_) / 2; }
   // Returns the middle x-coord of the bounding box.
   int MidX() const {
     return (bounding_box_.left() + bounding_box_.right()) / 2;
@@ -325,28 +216,18 @@ class ColPartition : public ELIST2_LINK {
     return (right_key - left_key) / vertical_.y();
   }
   // Returns the column width between the left and right keys.
-  int ColumnWidth() const {
-    return KeyWidth(left_key_, right_key_);
-  }
+  int ColumnWidth() const { return KeyWidth(left_key_, right_key_); }
   // Returns the sort key of the box left edge.
-  int BoxLeftKey() const {
-    return SortKey(bounding_box_.left(), MidY());
-  }
+  int BoxLeftKey() const { return SortKey(bounding_box_.left(), MidY()); }
   // Returns the sort key of the box right edge.
-  int BoxRightKey() const {
-    return SortKey(bounding_box_.right(), MidY());
-  }
+  int BoxRightKey() const { return SortKey(bounding_box_.right(), MidY()); }
   // Returns the left edge at the given y, using the sort key.
-  int LeftAtY(int y) const {
-    return XAtY(left_key_, y);
-  }
+  int LeftAtY(int y) const { return XAtY(left_key_, y); }
   // Returns the right edge at the given y, using the sort key.
-  int RightAtY(int y) const {
-    return XAtY(right_key_, y);
-  }
+  int RightAtY(int y) const { return XAtY(right_key_, y); }
   // Returns true if the right edge of this is to the left of the right
   // edge of other.
-  bool IsLeftOf(const ColPartition& other) const {
+  bool IsLeftOf(const ColPartition &other) const {
     return bounding_box_.right() < other.bounding_box_.right();
   }
   // Returns true if the partition contains the given x coordinate at the y.
@@ -354,37 +235,33 @@ class ColPartition : public ELIST2_LINK {
     return LeftAtY(y) - 1 <= x && x <= RightAtY(y) + 1;
   }
   // Returns true if there are no blobs in the list.
-  bool IsEmpty() const {
-    return boxes_.empty();
-  }
+  bool IsEmpty() const { return boxes_.empty(); }
   // Returns true if there is a single blob in the list.
-  bool IsSingleton() const {
-    return boxes_.singleton();
-  }
+  bool IsSingleton() const { return boxes_.singleton(); }
   // Returns true if this and other overlap horizontally by bounding box.
-  bool HOverlaps(const ColPartition& other) const {
+  bool HOverlaps(const ColPartition &other) const {
     return bounding_box_.x_overlap(other.bounding_box_);
   }
   // Returns true if this and other's bounding boxes overlap vertically.
   // TODO(rays) Make HOverlaps and VOverlaps truly symmetric.
-  bool VOverlaps(const ColPartition& other) const {
+  bool VOverlaps(const ColPartition &other) const {
     return bounding_box_.y_gap(other.bounding_box_) < 0;
   }
   // Returns the vertical overlap (by median) of this and other.
   // WARNING! Only makes sense on horizontal partitions!
-  int VCoreOverlap(const ColPartition& other) const {
+  int VCoreOverlap(const ColPartition &other) const {
     return MIN(median_top_, other.median_top_) -
            MAX(median_bottom_, other.median_bottom_);
   }
   // Returns the horizontal overlap (by median) of this and other.
   // WARNING! Only makes sense on vertical partitions!
-  int HCoreOverlap(const ColPartition& other) const {
+  int HCoreOverlap(const ColPartition &other) const {
     return MIN(median_right_, other.median_right_) -
            MAX(median_left_, other.median_left_);
   }
   // Returns true if this and other overlap significantly vertically.
   // WARNING! Only makes sense on horizontal partitions!
-  bool VSignificantCoreOverlap(const ColPartition& other) const {
+  bool VSignificantCoreOverlap(const ColPartition &other) const {
     int overlap = VCoreOverlap(other);
     int height = MIN(median_top_ - median_bottom_,
                      other.median_top_ - other.median_bottom_);
@@ -392,7 +269,7 @@ class ColPartition : public ELIST2_LINK {
   }
   // Returns true if this and other can be combined without putting a
   // horizontal step in either left or right edge of the resulting block.
-  bool WithinSameMargins(const ColPartition& other) const {
+  bool WithinSameMargins(const ColPartition &other) const {
     return left_margin_ <= other.bounding_box_.left() &&
            bounding_box_.left() >= other.left_margin_ &&
            bounding_box_.right() <= other.right_margin_ &&
@@ -400,7 +277,7 @@ class ColPartition : public ELIST2_LINK {
   }
   // Returns true if the region types (aligned_text_) match.
   // Lines never match anything, as they should never be merged or chained.
-  bool TypesMatch(const ColPartition& other) const {
+  bool TypesMatch(const ColPartition &other) const {
     return TypesMatch(blob_type_, other.blob_type_);
   }
   static bool TypesMatch(BlobRegionType type1, BlobRegionType type2) {
@@ -416,21 +293,13 @@ class ColPartition : public ELIST2_LINK {
   }
 
   // Returns true if partitions is of horizontal line type
-  bool IsLineType() const {
-    return PTIsLineType(type_);
-  }
+  bool IsLineType() const { return PTIsLineType(type_); }
   // Returns true if partitions is of image type
-  bool IsImageType() const {
-    return PTIsImageType(type_);
-  }
+  bool IsImageType() const { return PTIsImageType(type_); }
   // Returns true if partitions is of text type
-  bool IsTextType() const {
-    return PTIsTextType(type_);
-  }
+  bool IsTextType() const { return PTIsTextType(type_); }
   // Returns true if partitions is of pullout(inter-column) type
-  bool IsPulloutType() const {
-    return PTIsPulloutType(type_);
-  }
+  bool IsPulloutType() const { return PTIsPulloutType(type_); }
   // Returns true if the partition is of an exclusively vertical type.
   bool IsVerticalType() const {
     return blob_type_ == BRT_VERT_TEXT || blob_type_ == BRT_VLINE;
@@ -445,29 +314,25 @@ class ColPartition : public ELIST2_LINK {
   }
   // Returns true if this partition is a vertical line
   // TODO(nbeato): Use PartitionType enum when Ray's code is submitted.
-  bool IsVerticalLine() const {
-    return IsVerticalType() && IsLineType();
-  }
+  bool IsVerticalLine() const { return IsVerticalType() && IsLineType(); }
   // Returns true if this partition is a horizontal line
   // TODO(nbeato): Use PartitionType enum when Ray's code is submitted.
-  bool IsHorizontalLine() const {
-    return IsHorizontalType() && IsLineType();
-  }
+  bool IsHorizontalLine() const { return IsHorizontalType() && IsLineType(); }
 
   // Adds the given box to the partition, updating the partition bounds.
   // The list of boxes in the partition is updated, ensuring that no box is
   // recorded twice, and the boxes are kept in increasing left position.
-  void AddBox(BLOBNBOX* box);
+  void AddBox(BLOBNBOX *box);
 
   // Removes the given box from the partition, updating the bounds.
-  void RemoveBox(BLOBNBOX* box);
+  void RemoveBox(BLOBNBOX *box);
 
   // Returns the tallest box in the partition, as measured perpendicular to the
   // presumed flow of text.
-  BLOBNBOX* BiggestBox();
+  BLOBNBOX *BiggestBox();
 
   // Returns the bounding box excluding the given box.
-  TBOX BoundsWithoutBox(BLOBNBOX* box);
+  TBOX BoundsWithoutBox(BLOBNBOX *box);
 
   // Claims the boxes in the boxes_list by marking them with a this owner
   // pointer.
@@ -505,36 +370,36 @@ class ColPartition : public ELIST2_LINK {
   bool IsLegal();
 
   // Returns true if the left and right edges are approximately equal.
-  bool MatchingColumns(const ColPartition& other) const;
+  bool MatchingColumns(const ColPartition &other) const;
 
   // Returns true if the colors match for two text partitions.
-  bool MatchingTextColor(const ColPartition& other) const;
+  bool MatchingTextColor(const ColPartition &other) const;
 
   // Returns true if the sizes match for two text partitions,
   // taking orientation into account
-  bool MatchingSizes(const ColPartition& other) const;
+  bool MatchingSizes(const ColPartition &other) const;
 
   // Returns true if there is no tabstop violation in merging this and other.
-  bool ConfirmNoTabViolation(const ColPartition& other) const;
+  bool ConfirmNoTabViolation(const ColPartition &other) const;
 
   // Returns true if other has a similar stroke width to this.
-  bool MatchingStrokeWidth(const ColPartition& other,
+  bool MatchingStrokeWidth(const ColPartition &other,
                            double fractional_tolerance,
                            double constant_tolerance) const;
   // Returns true if candidate is an acceptable diacritic base char merge
   // with this as the diacritic.
-  bool OKDiacriticMerge(const ColPartition& candidate, bool debug) const;
+  bool OKDiacriticMerge(const ColPartition &candidate, bool debug) const;
 
   // Sets the sort key using either the tab vector, or the bounding box if
   // the tab vector is NULL. If the tab_vector lies inside the bounding_box,
   // use the edge of the box as a key any way.
-  void SetLeftTab(const TabVector* tab_vector);
-  void SetRightTab(const TabVector* tab_vector);
+  void SetLeftTab(const TabVector *tab_vector);
+  void SetRightTab(const TabVector *tab_vector);
 
   // Copies the left/right tab from the src partition, but if take_box is
   // true, copies the box instead and uses that as a key.
-  void CopyLeftTab(const ColPartition& src, bool take_box);
-  void CopyRightTab(const ColPartition& src, bool take_box);
+  void CopyLeftTab(const ColPartition &src, bool take_box);
+  void CopyRightTab(const ColPartition &src, bool take_box);
 
   // Returns the left rule line x coord of the leftmost blob.
   int LeftBlobRule() const;
@@ -548,8 +413,8 @@ class ColPartition : public ELIST2_LINK {
   // Set the density value for a particular BlobSpecialTextType, should ONLY be
   // used for debugging or testing. In production code, use
   // ComputeSpecialBlobsDensity instead.
-  void SetSpecialBlobsDensity(
-      const BlobSpecialTextType type, const float density);
+  void SetSpecialBlobsDensity(const BlobSpecialTextType type,
+                              const float density);
   // Compute the SpecialTextType density of blobs, where we assume
   // that the SpecialTextType in the boxes_ has been set.
   void ComputeSpecialBlobsDensity();
@@ -557,47 +422,47 @@ class ColPartition : public ELIST2_LINK {
   // Add a partner above if upper, otherwise below.
   // Add them uniquely and keep the list sorted by box left.
   // Partnerships are added symmetrically to partner and this.
-  void AddPartner(bool upper, ColPartition* partner);
+  void AddPartner(bool upper, ColPartition *partner);
   // Removes the partner from this, but does not remove this from partner.
   // This asymmetric removal is so as not to mess up the iterator that is
   // working on partner's partner list.
-  void RemovePartner(bool upper, ColPartition* partner);
+  void RemovePartner(bool upper, ColPartition *partner);
   // Returns the partner if the given partner is a singleton, otherwise NULL.
-  ColPartition* SingletonPartner(bool upper);
+  ColPartition *SingletonPartner(bool upper);
 
   // Merge with the other partition and delete it.
-  void Absorb(ColPartition* other, WidthCallback* cb);
+  void Absorb(ColPartition *other, WidthCallback *cb);
 
   // Returns true if the overlap between this and the merged pair of
   // merge candidates is sufficiently trivial to be allowed.
   // The merged box can graze the edge of this by the ok_box_overlap
   // if that exceeds the margin to the median top and bottom.
-  bool OKMergeOverlap(const ColPartition& merge1, const ColPartition& merge2,
+  bool OKMergeOverlap(const ColPartition &merge1, const ColPartition &merge2,
                       int ok_box_overlap, bool debug);
 
   // Find the blob at which to split this to minimize the overlap with the
   // given box. Returns the first blob to go in the second partition.
-  BLOBNBOX* OverlapSplitBlob(const TBOX& box);
+  BLOBNBOX *OverlapSplitBlob(const TBOX &box);
 
   // Split this partition keeping the first half in this and returning
   // the second half.
   // Splits by putting the split_blob and the blobs that follow
   // in the second half, and the rest in the first half.
-  ColPartition* SplitAtBlob(BLOBNBOX* split_blob);
+  ColPartition *SplitAtBlob(BLOBNBOX *split_blob);
 
   // Splits this partition at the given x coordinate, returning the right
   // half and keeping the left half in this.
-  ColPartition* SplitAt(int split_x);
+  ColPartition *SplitAt(int split_x);
 
   // Recalculates all the coordinate limits of the partition.
   void ComputeLimits();
 
   // Returns the number of boxes that overlap the given box.
-  int CountOverlappingBoxes(const TBOX& box);
+  int CountOverlappingBoxes(const TBOX &box);
 
   // Computes and sets the type_, first_column_, last_column_ and column_set_.
   // resolution refers to the ppi resolution of the image.
-  void SetPartitionType(int resolution, ColPartitionSet* columns);
+  void SetPartitionType(int resolution, ColPartitionSet *columns);
 
   // Returns the PartitionType from the current BlobRegionType and a column
   // flow spanning type ColumnSpanningType, generated by
@@ -607,11 +472,11 @@ class ColPartition : public ELIST2_LINK {
 
   // Returns the first and last column touched by this partition.
   // resolution refers to the ppi resolution of the image.
-  void ColumnRange(int resolution, ColPartitionSet* columns,
-                   int* first_col, int* last_col);
+  void ColumnRange(int resolution, ColPartitionSet *columns, int *first_col,
+                   int *last_col);
 
   // Sets the internal flags good_width_ and good_column_.
-  void SetColumnGoodness(WidthCallback* cb);
+  void SetColumnGoodness(WidthCallback *cb);
 
   // Determines whether the blobs in this partition mostly represent
   // a leader (fixed pitch sequence) and sets the member blobs accordingly.
@@ -636,9 +501,9 @@ class ColPartition : public ELIST2_LINK {
 
   // Adds this ColPartition to a matching WorkingPartSet if one can be found,
   // otherwise starts a new one in the appropriate column, ending the previous.
-  void AddToWorkingSet(const ICOORD& bleft, const ICOORD& tright,
-                       int resolution, ColPartition_LIST* used_parts,
-                       WorkingPartSet_LIST* working_set);
+  void AddToWorkingSet(const ICOORD &bleft, const ICOORD &tright,
+                       int resolution, ColPartition_LIST *used_parts,
+                       WorkingPartSet_LIST *working_set);
 
   // From the given block_parts list, builds one or more BLOCKs and
   // corresponding TO_BLOCKs, such that the line spacing is uniform in each.
@@ -646,42 +511,40 @@ class ColPartition : public ELIST2_LINK {
   // The used partitions are put onto used_parts, as they may still be referred
   // to in the partition grid. bleft, tright and resolution are the bounds
   // and resolution of the original image.
-  static void LineSpacingBlocks(const ICOORD& bleft, const ICOORD& tright,
-                                int resolution,
-                                ColPartition_LIST* block_parts,
-                                ColPartition_LIST* used_parts,
-                                BLOCK_LIST* completed_blocks,
-                                TO_BLOCK_LIST* to_blocks);
+  static void LineSpacingBlocks(const ICOORD &bleft, const ICOORD &tright,
+                                int resolution, ColPartition_LIST *block_parts,
+                                ColPartition_LIST *used_parts,
+                                BLOCK_LIST *completed_blocks,
+                                TO_BLOCK_LIST *to_blocks);
   // Constructs a block from the given list of partitions.
   // Arguments are as LineSpacingBlocks above.
-  static TO_BLOCK* MakeBlock(const ICOORD& bleft, const ICOORD& tright,
-                             ColPartition_LIST* block_parts,
-                             ColPartition_LIST* used_parts);
+  static TO_BLOCK *MakeBlock(const ICOORD &bleft, const ICOORD &tright,
+                             ColPartition_LIST *block_parts,
+                             ColPartition_LIST *used_parts);
 
   // Constructs a block from the given list of vertical text partitions.
   // Currently only creates rectangular blocks.
-  static TO_BLOCK* MakeVerticalTextBlock(const ICOORD& bleft,
-                                         const ICOORD& tright,
-                                         ColPartition_LIST* block_parts,
-                                         ColPartition_LIST* used_parts);
+  static TO_BLOCK *MakeVerticalTextBlock(const ICOORD &bleft,
+                                         const ICOORD &tright,
+                                         ColPartition_LIST *block_parts,
+                                         ColPartition_LIST *used_parts);
 
   // Makes a TO_ROW matching this and moves all the blobs to it, transferring
   // ownership to to returned TO_ROW.
-  TO_ROW* MakeToRow();
-
+  TO_ROW *MakeToRow();
 
   // Returns a copy of everything except the list of boxes. The resulting
   // ColPartition is only suitable for keeping in a column candidate list.
-  ColPartition* ShallowCopy() const;
+  ColPartition *ShallowCopy() const;
   // Returns a copy of everything with a shallow copy of the blobs.
   // The blobs are still owned by their original parent, so they are
   // treated as read-only.
-  ColPartition* CopyButDontOwnBlobs();
+  ColPartition *CopyButDontOwnBlobs();
 
-  #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
   // Provides a color for BBGrid to draw the rectangle.
-  ScrollView::Color  BoxColor() const;
-  #endif  // GRAPHICS_DISABLED
+  ScrollView::Color BoxColor() const;
+#endif // GRAPHICS_DISABLED
 
   // Prints debug information on this.
   void Print() const;
@@ -696,18 +559,18 @@ class ColPartition : public ELIST2_LINK {
   // If get_desperate is true, goes to more desperate merge methods
   // to merge flowing text before breaking partnerships.
   void RefinePartners(PolyBlockType type, bool get_desperate,
-                      ColPartitionGrid* grid);
+                      ColPartitionGrid *grid);
 
   // Returns true if this column partition is in the same column as
   // part. This function will only work after the SetPartitionType function
   // has been called on both column partitions. This is useful for
   // doing a SideSearch when you want things in the same page column.
-  bool IsInSameColumnAs(const ColPartition& part) const;
+  bool IsInSameColumnAs(const ColPartition &part) const;
 
   // Sort function to sort by bounding box.
-  static int SortByBBox(const void* p1, const void* p2) {
-    const ColPartition* part1 = *static_cast<const ColPartition* const*>(p1);
-    const ColPartition* part2 = *static_cast<const ColPartition* const*>(p2);
+  static int SortByBBox(const void *p1, const void *p2) {
+    const ColPartition *part1 = *static_cast<const ColPartition *const *>(p1);
+    const ColPartition *part2 = *static_cast<const ColPartition *const *>(p2);
     int mid_y1 = part1->bounding_box_.y_middle();
     int mid_y2 = part2->bounding_box_.y_middle();
     if ((part2->bounding_box_.bottom() <= mid_y1 &&
@@ -722,14 +585,10 @@ class ColPartition : public ELIST2_LINK {
   }
 
   // Sets the column bounds. Primarily used in testing.
-  void set_first_column(int column) {
-    first_column_ = column;
-  }
-  void set_last_column(int column) {
-    last_column_ = column;
-  }
+  void set_first_column(int column) { first_column_ = column; }
+  void set_last_column(int column) { last_column_ = column; }
 
- private:
+private:
   // enum to refer to the entries in a neighbourhood of lines.
   // Used by SmoothSpacings to test for blips with OKSpacingBlip.
   enum SpacingNeighbourhood {
@@ -746,15 +605,15 @@ class ColPartition : public ELIST2_LINK {
   // If get_desperate is true, goes to more desperate merge methods
   // to merge flowing text before breaking partnerships.
   void RefinePartnersInternal(bool upper, bool get_desperate,
-                              ColPartitionGrid* grid);
+                              ColPartitionGrid *grid);
   // Restricts the partners to only desirable types. For text and BRT_HLINE this
   // means the same type_ , and for image types it means any image type.
-  void RefinePartnersByType(bool upper, ColPartition_CLIST* partners);
+  void RefinePartnersByType(bool upper, ColPartition_CLIST *partners);
   // Remove transitive partnerships: this<->a, and a<->b and this<->b.
   // Gets rid of this<->b, leaving a clean chain.
   // Also if we have this<->a and a<->this, then gets rid of this<->a, as
   // this has multiple partners.
-  void RefinePartnerShortcuts(bool upper, ColPartition_CLIST* partners);
+  void RefinePartnerShortcuts(bool upper, ColPartition_CLIST *partners);
   // If multiple text partners can be merged, then do so.
   // If desperate is true, then an increase in overlap with the merge is
   // allowed. If the overlap increases, then the desperately_merged_ flag
@@ -762,25 +621,25 @@ class ColPartition : public ELIST2_LINK {
   // by aggressive line fitting/splitting, as there are probably vertically
   // joined blobs that cross textlines.
   void RefineTextPartnersByMerge(bool upper, bool desperate,
-                                 ColPartition_CLIST* partners,
-                                 ColPartitionGrid* grid);
+                                 ColPartition_CLIST *partners,
+                                 ColPartitionGrid *grid);
   // Keep the partner with the biggest overlap.
-  void RefinePartnersByOverlap(bool upper, ColPartition_CLIST* partners);
+  void RefinePartnersByOverlap(bool upper, ColPartition_CLIST *partners);
 
   // Return true if bbox belongs better in this than other.
-  bool ThisPartitionBetter(BLOBNBOX* bbox, const ColPartition& other);
+  bool ThisPartitionBetter(BLOBNBOX *bbox, const ColPartition &other);
 
   // Smoothes the spacings in the list into groups of equal linespacing.
   // resolution is the resolution of the original image, used as a basis
   // for thresholds in change of spacing. page_height is in pixels.
   static void SmoothSpacings(int resolution, int page_height,
-                             ColPartition_LIST* parts);
+                             ColPartition_LIST *parts);
 
   // Returns true if the parts array of pointers to partitions matches the
   // condition for a spacing blip. See SmoothSpacings for what this means
   // and how it is used.
   static bool OKSpacingBlip(int resolution, int median_spacing,
-                            ColPartition** parts);
+                            ColPartition **parts);
 
   // Returns true if both the top and bottom spacings of this match the given
   // spacing to within suitable margins dictated by the image resolution.
@@ -788,13 +647,13 @@ class ColPartition : public ELIST2_LINK {
 
   // Returns true if both the top and bottom spacings of this and other
   // match to within suitable margins dictated by the image resolution.
-  bool SpacingsEqual(const ColPartition& other, int resolution) const;
+  bool SpacingsEqual(const ColPartition &other, int resolution) const;
 
   // Returns true if the sum spacing of this and other match the given
   // spacing (or twice the given spacing) to within a suitable margin dictated
   // by the image resolution.
-  bool SummedSpacingOK(const ColPartition& other,
-                       int spacing, int resolution) const;
+  bool SummedSpacingOK(const ColPartition &other, int spacing,
+                       int resolution) const;
 
   // Returns a suitable spacing margin that can be applied to bottoms of
   // text lines, based on the resolution and the stored side_step_.
@@ -806,7 +665,7 @@ class ColPartition : public ELIST2_LINK {
 
   // Returns true if the median text sizes of this and other agree to within
   // a reasonable multiplicative factor.
-  bool SizesSimilar(const ColPartition& other) const;
+  bool SizesSimilar(const ColPartition &other) const;
 
   // Computes and returns in start, end a line segment formed from a
   // forwards-iterated group of left edges of partitions that satisfy the
@@ -814,16 +673,15 @@ class ColPartition : public ELIST2_LINK {
   // leftmost left bounding box edge.
   // TODO(rays) Not good enough. Needs improving to tightly wrap text in both
   // directions, and to loosely wrap images.
-  static void LeftEdgeRun(ColPartition_IT* part_it,
-                          ICOORD* start, ICOORD* end);
+  static void LeftEdgeRun(ColPartition_IT *part_it, ICOORD *start, ICOORD *end);
   // Computes and returns in start, end a line segment formed from a
   // backwards-iterated group of right edges of partitions that satisfy the
   // condition that the leftmost right margin is to the right of the
   // rightmost right bounding box edge.
   // TODO(rays) Not good enough. Needs improving to tightly wrap text in both
   // directions, and to loosely wrap images.
-  static void RightEdgeRun(ColPartition_IT* part_it,
-                           ICOORD* start, ICOORD* end);
+  static void RightEdgeRun(ColPartition_IT *part_it, ICOORD *start,
+                           ICOORD *end);
 
   // The margins are determined by the position of the nearest vertically
   // overlapping neighbour to the side. They indicate the maximum extent
@@ -847,7 +705,7 @@ class ColPartition : public ELIST2_LINK {
   int median_width_;
   // blob_region_type_ for the blobs in this partition.
   BlobRegionType blob_type_;
-  BlobTextFlowType flow_;  // Quality of text flow.
+  BlobTextFlowType flow_; // Quality of text flow.
   // Total of GoodTextBlob results for all blobs in the partition.
   int good_blob_score_;
   // True if this partition has a common width.
@@ -877,7 +735,7 @@ class ColPartition : public ELIST2_LINK {
   // The partitions below that matched this.
   ColPartition_CLIST lower_partners_;
   // The WorkingPartSet it lives in while blocks are being made.
-  WorkingPartSet* working_set_;
+  WorkingPartSet *working_set_;
   // Flag is true when AddBox is sorting vertically, false otherwise.
   bool last_add_was_vertical_;
   // True when the partition's ownership has been taken from the grid and
@@ -896,39 +754,38 @@ class ColPartition : public ELIST2_LINK {
   int first_column_;
   int last_column_;
   // Column_set_ is the column layout applicable to this ColPartition.
-  ColPartitionSet* column_set_;
+  ColPartitionSet *column_set_;
   // Linespacing data.
-  int side_step_;       // Median y-shift to next blob on same line.
-  int top_spacing_;     // Line spacing from median_top_.
-  int bottom_spacing_;  // Line spacing from median_bottom_.
+  int side_step_;      // Median y-shift to next blob on same line.
+  int top_spacing_;    // Line spacing from median_top_.
+  int bottom_spacing_; // Line spacing from median_bottom_.
 
   // Type of this partition before considering it as a table cell. This is
   // used to revert the type if a partition is first marked as a table cell but
   // later filtering steps decide it does not belong to a table
   PolyBlockType type_before_table_;
-  bool inside_table_column_;  // Check whether the current partition has been
-                              // assigned to a table column
+  bool inside_table_column_; // Check whether the current partition has been
+                             // assigned to a table column
   // Nearest neighbor above with major x-overlap
-  ColPartition* nearest_neighbor_above_;
+  ColPartition *nearest_neighbor_above_;
   // Nearest neighbor below with major x-overlap
-  ColPartition* nearest_neighbor_below_;
-  int space_above_;      // Distance from nearest_neighbor_above
-  int space_below_;      // Distance from nearest_neighbor_below
-  int space_to_left_;    // Distance from the left edge of the column
-  int space_to_right_;   // Distance from the right edge of the column
+  ColPartition *nearest_neighbor_below_;
+  int space_above_;    // Distance from nearest_neighbor_above
+  int space_below_;    // Distance from nearest_neighbor_below
+  int space_to_left_;  // Distance from the left edge of the column
+  int space_to_right_; // Distance from the right edge of the column
   // Color foreground/background data.
   uinT8 color1_[kRGBRMSColors];
   uinT8 color2_[kRGBRMSColors];
-  bool owns_blobs_;  // Does the partition own its blobs?
+  bool owns_blobs_; // Does the partition own its blobs?
   // The density of special blobs.
   float special_blobs_densities_[BSTT_COUNT];
 };
 
 // Typedef it now in case it becomes a class later.
-typedef GridSearch<ColPartition,
-                   ColPartition_CLIST,
-                   ColPartition_C_IT> ColPartitionGridSearch;
+typedef GridSearch<ColPartition, ColPartition_CLIST, ColPartition_C_IT>
+    ColPartitionGridSearch;
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_TEXTORD_COLPARTITION_H_
+#endif // TESSERACT_TEXTORD_COLPARTITION_H_

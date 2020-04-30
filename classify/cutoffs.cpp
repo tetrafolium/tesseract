@@ -32,7 +32,7 @@
 
 #define REALLY_QUOTE_IT(x) QUOTE_IT(x)
 
-#define MAX_CUTOFF      1000
+#define MAX_CUTOFF 1000
 
 namespace tesseract {
 /**
@@ -49,7 +49,7 @@ namespace tesseract {
  * @note Exceptions: none
  * @note History: Wed Feb 20 09:38:26 1991, DSJ, Created.
  */
-void Classify::ReadNewCutoffs(TFile* fp, CLASS_CUTOFF_ARRAY Cutoffs) {
+void Classify::ReadNewCutoffs(TFile *fp, CLASS_CUTOFF_ARRAY Cutoffs) {
   char Class[UNICHAR_LEN + 1];
   CLASS_ID ClassId;
   int Cutoff;
@@ -77,4 +77,4 @@ void Classify::ReadNewCutoffs(TFile* fp, CLASS_CUTOFF_ARRAY Cutoffs) {
   }
 }
 
-}  // namespace tesseract
+} // namespace tesseract

@@ -15,8 +15,8 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   BLOBCLASS_H
-#define   BLOBCLASS_H
+#ifndef BLOBCLASS_H
+#define BLOBCLASS_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
@@ -27,12 +27,12 @@
           Macros
 ----------------------------------------------------------------------------*/
 /* macros for controlling the display of recognized characters */
-#define EnableCharDisplay()   (DisplayCharacters = TRUE)
-#define DisableCharDisplay()    (DisplayCharacters = FALSE)
+#define EnableCharDisplay() (DisplayCharacters = TRUE)
+#define DisableCharDisplay() (DisplayCharacters = FALSE)
 
 /* macros for controlling the display of the entire match list */
-#define EnableMatchDisplay()    (DisplayMatchList = TRUE)
-#define DisableMatchDisplay()   (DisplayMatchList = FALSE)
+#define EnableMatchDisplay() (DisplayMatchList = TRUE)
+#define DisableMatchDisplay() (DisplayMatchList = FALSE)
 
 /**----------------------------------------------------------------------------
           Public Function Prototypes
@@ -43,8 +43,8 @@ namespace tesseract {
 // /path/to/dir/[lang].[fontname].exp[num]
 // The [lang], [fontname] and [num] fields should not have '.' characters.
 // If the global parameter classify_font_name is set, its value is used instead.
-void ExtractFontName(const STRING& filename, STRING* fontname);
+void ExtractFontName(const STRING &filename, STRING *fontname);
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
 #endif

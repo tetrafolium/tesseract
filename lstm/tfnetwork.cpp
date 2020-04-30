@@ -30,33 +30,37 @@ using tensorflow::TensorShape;
 
 namespace tesseract {
 
-TFNetwork::TFNetwork(const STRING& name) : Network(NT_TENSORFLOW, name, 0, 0) {}
+TFNetwork::TFNetwork(const STRING &name) : Network(NT_TENSORFLOW, name, 0, 0) {}
 
 TFNetwork::~TFNetwork() {}
 
-int TFNetwork::InitFromProtoStr(const string& proto_str) {
-  if (!model_proto_.ParseFromString(proto_str)) return 0;
+int TFNetwork::InitFromProtoStr(const string &proto_str) {
+  if (!model_proto_.ParseFromString(proto_str))
+    return 0;
   return InitFromProto();
 }
 
 // Writes to the given file. Returns false in case of error.
 // Should be overridden by subclasses, but called by their Serialize.
-bool TFNetwork::Serialize(TFile* fp) const {
-  if (!Network::Serialize(fp)) return false;
+bool TFNetwork::Serialize(TFile *fp) const {
+  if (!Network::Serialize(fp))
+    return false;
   string proto_str;
   model_proto_.SerializeToString(&proto_str);
   GenericVector<char> data;
   data.resize_no_init(proto_str.size());
   memcpy(&data[0], proto_str.data(), proto_str.size());
-  if (!data.Serialize(fp)) return false;
+  if (!data.Serialize(fp))
+    return false;
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 // Should be overridden by subclasses, but NOT called by their DeSerialize.
-bool TFNetwork::DeSerialize(TFile* fp) {
+bool TFNetwork::DeSerialize(TFile *fp) {
   GenericVector<char> data;
-  if (!data.DeSerialize(fp)) return false;
+  if (!data.DeSerialize(fp))
+    return false;
   if (!model_proto_.ParseFromArray(&data[0], data.size())) {
     return false;
   }
@@ -65,14 +69,14 @@ bool TFNetwork::DeSerialize(TFile* fp) {
 
 // Runs forward propagation of activations on the input line.
 // See Network for a detailed discussion of the arguments.
-void TFNetwork::Forward(bool debug, const NetworkIO& input,
-                        const TransposedArray* input_transpose,
-                        NetworkScratch* scratch, NetworkIO* output) {
+void TFNetwork::Forward(bool debug, const NetworkIO &input,
+                        const TransposedArray *input_transpose,
+                        NetworkScratch *scratch, NetworkIO *output) {
   std::vector<std::pair<string, Tensor>> tf_inputs;
   int depth = input_shape_.depth();
   ASSERT_HOST(depth == input.NumFeatures());
   // TODO(rays) Allow batching. For now batch_size = 1.
-  const StrideMap& stride_map = input.stride_map();
+  const StrideMap &stride_map = input.stride_map();
   // TF requires a tensor of shape float[batch, height, width, depth].
   TensorShape shape{1, stride_map.Size(FD_HEIGHT), stride_map.Size(FD_WIDTH),
                     depth};
@@ -106,10 +110,11 @@ void TFNetwork::Forward(bool debug, const NetworkIO& input,
   std::vector<string> target_layers = {model_proto_.output_layer()};
   std::vector<Tensor> outputs;
   Status s = session_->Run(tf_inputs, target_layers, {}, &outputs);
-  if (!s.ok()) tprintf("session->Run failed:%s\n", s.error_message().c_str());
+  if (!s.ok())
+    tprintf("session->Run failed:%s\n", s.error_message().c_str());
   ASSERT_HOST(s.ok());
   ASSERT_HOST(outputs.size() == 1);
-  const Tensor& output_tensor = outputs[0];
+  const Tensor &output_tensor = outputs[0];
   // Check the dimensions of the output.
   ASSERT_HOST(output_tensor.shape().dims() == 3);
   int output_batch = output_tensor.shape().dim_size(0);
@@ -138,11 +143,12 @@ int TFNetwork::InitFromProto() {
   tensorflow::SessionOptions options;
   session_.reset(NewSession(options));
   Status s = session_->Create(model_proto_.graph());
-  if (s.ok()) return model_proto_.global_step();
+  if (s.ok())
+    return model_proto_.global_step();
   tprintf("Session_->Create returned '%s'\n", s.error_message().c_str());
   return 0;
 }
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // ifdef INCLUDE_TENSORFLOW
+#endif // ifdef INCLUDE_TENSORFLOW

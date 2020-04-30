@@ -20,13 +20,13 @@
 #include "config_auto.h"
 #endif
 
-#include <memory>  // std::unique_ptr
 #include "allheaders.h"
 #include "baseapi.h"
 #include "math.h"
 #include "renderer.h"
 #include "strngs.h"
 #include "tprintf.h"
+#include <memory> // std::unique_ptr
 
 /*
 
@@ -183,7 +183,7 @@ static const int kMaxBytesPerCodepoint = 20;
 TessPDFRenderer::TessPDFRenderer(const char *outputbase, const char *datadir,
                                  bool textonly)
     : TessResultRenderer(outputbase, "pdf") {
-  obj_  = 0;
+  obj_ = 0;
   datadir_ = datadir;
   textonly_ = textonly;
   offsets_.push_back(0);
@@ -222,10 +222,10 @@ long dist2(int x1, int y1, int x2, int y2) {
 // left-to-right no matter what the reading order is. We need the
 // word baseline in reading order, so we do that conversion here. Returns
 // the word's baseline origin and length.
-void GetWordBaseline(int writing_direction, int ppi, int height,
-                     int word_x1, int word_y1, int word_x2, int word_y2,
-                     int line_x1, int line_y1, int line_x2, int line_y2,
-                     double *x0, double *y0, double *length) {
+void GetWordBaseline(int writing_direction, int ppi, int height, int word_x1,
+                     int word_y1, int word_x2, int word_y2, int line_x1,
+                     int line_y1, int line_x2, int line_y2, double *x0,
+                     double *y0, double *length) {
   if (writing_direction == WRITING_DIRECTION_RIGHT_TO_LEFT) {
     Swap(&word_x1, &word_x2);
     Swap(&word_y1, &word_y2);
@@ -241,12 +241,13 @@ void GetWordBaseline(int writing_direction, int ppi, int height,
       y = line_y1;
     } else {
       double t = ((px - line_x2) * (line_x2 - line_x1) +
-                  (py - line_y2) * (line_y2 - line_y1)) / l2;
+                  (py - line_y2) * (line_y2 - line_y1)) /
+                 l2;
       x = line_x2 + t * (line_x2 - line_x1);
       y = line_y2 + t * (line_y2 - line_y1);
     }
-    word_length = sqrt(static_cast<double>(dist2(word_x1, word_y1,
-                                                 word_x2, word_y2)));
+    word_length =
+        sqrt(static_cast<double>(dist2(word_x1, word_y1, word_x2, word_y2)));
     word_length = word_length * 72.0 / ppi;
     x = x * 72 / ppi;
     y = height - (y * 72.0 / ppi);
@@ -264,25 +265,24 @@ void GetWordBaseline(int writing_direction, int ppi, int height,
 //                           RTL
 // [ x' ] = [ a b ][ x ] = [-1 0 ] [ cos sin ][ x ]
 // [ y' ]   [ c d ][ y ]   [ 0 1 ] [-sin cos ][ y ]
-void AffineMatrix(int writing_direction,
-                  int line_x1, int line_y1, int line_x2, int line_y2,
-                  double *a, double *b, double *c, double *d) {
+void AffineMatrix(int writing_direction, int line_x1, int line_y1, int line_x2,
+                  int line_y2, double *a, double *b, double *c, double *d) {
   double theta = atan2(static_cast<double>(line_y1 - line_y2),
                        static_cast<double>(line_x2 - line_x1));
   *a = cos(theta);
   *b = sin(theta);
   *c = -sin(theta);
   *d = cos(theta);
-  switch(writing_direction) {
-    case WRITING_DIRECTION_RIGHT_TO_LEFT:
-      *a = -*a;
-      *b = -*b;
-      break;
-    case WRITING_DIRECTION_TOP_TO_BOTTOM:
-      // TODO(jbreiden) Consider using the vertical PDF writing mode.
-      break;
-    default:
-      break;
+  switch (writing_direction) {
+  case WRITING_DIRECTION_RIGHT_TO_LEFT:
+    *a = -*a;
+    *b = -*b;
+    break;
+  case WRITING_DIRECTION_TOP_TO_BOTTOM:
+    // TODO(jbreiden) Consider using the vertical PDF writing mode.
+    break;
+  default:
+    break;
   }
 }
 
@@ -293,9 +293,8 @@ void AffineMatrix(int writing_direction,
 // these viewers. I chose this threshold large enough to absorb noise,
 // but small enough that lines probably won't cross each other if the
 // whole page is tilted at almost exactly the clipping threshold.
-void ClipBaseline(int ppi, int x1, int y1, int x2, int y2,
-                  int *line_x1, int *line_y1,
-                  int *line_x2, int *line_y2) {
+void ClipBaseline(int ppi, int x1, int y1, int x2, int y2, int *line_x1,
+                  int *line_y1, int *line_x2, int *line_y2) {
   *line_x1 = x1;
   *line_y1 = y1;
   *line_x2 = x2;
@@ -317,14 +316,14 @@ bool CodepointToUtf16be(int code, char utf16[kMaxBytesPerCodepoint]) {
     int a = code - 0x010000;
     int high_surrogate = (0x03FF & (a >> 10)) + 0xD800;
     int low_surrogate = (0x03FF & a) + 0xDC00;
-    snprintf(utf16, kMaxBytesPerCodepoint,
-             "%04X%04X", high_surrogate, low_surrogate);
+    snprintf(utf16, kMaxBytesPerCodepoint, "%04X%04X", high_surrogate,
+             low_surrogate);
   }
   return true;
 }
 
-char* TessPDFRenderer::GetPDFTextObjects(TessBaseAPI* api,
-                                         double width, double height) {
+char *TessPDFRenderer::GetPDFTextObjects(TessBaseAPI *api, double width,
+                                         double height) {
   STRING pdf_str("");
   double ppi = api->GetSourceYResolution();
 
@@ -361,9 +360,9 @@ char* TessPDFRenderer::GetPDFTextObjects(TessBaseAPI* api,
   ResultIterator *res_it = api->GetIterator();
   while (!res_it->Empty(RIL_BLOCK)) {
     if (res_it->IsAtBeginningOf(RIL_BLOCK)) {
-      pdf_str += "BT\n3 Tr";     // Begin text object, use invisible ink
-      old_fontsize = 0;          // Every block will declare its fontsize
-      new_block = true;          // Every block will declare its affine matrix
+      pdf_str += "BT\n3 Tr"; // Begin text object, use invisible ink
+      old_fontsize = 0;      // Every block will declare its fontsize
+      new_block = true;      // Every block will declare its affine matrix
     }
 
     if (res_it->IsAtBeginningOf(RIL_TEXTLINE)) {
@@ -383,18 +382,18 @@ char* TessPDFRenderer::GetPDFTextObjects(TessBaseAPI* api,
       tesseract::Orientation orientation;
       tesseract::TextlineOrder textline_order;
       float deskew_angle;
-      res_it->Orientation(&orientation, &writing_direction,
-                          &textline_order, &deskew_angle);
+      res_it->Orientation(&orientation, &writing_direction, &textline_order,
+                          &deskew_angle);
       if (writing_direction != WRITING_DIRECTION_TOP_TO_BOTTOM) {
         switch (res_it->WordDirection()) {
-          case DIR_LEFT_TO_RIGHT:
-            writing_direction = WRITING_DIRECTION_LEFT_TO_RIGHT;
-            break;
-          case DIR_RIGHT_TO_LEFT:
-            writing_direction = WRITING_DIRECTION_RIGHT_TO_LEFT;
-            break;
-          default:
-            writing_direction = old_writing_direction;
+        case DIR_LEFT_TO_RIGHT:
+          writing_direction = WRITING_DIRECTION_LEFT_TO_RIGHT;
+          break;
+        case DIR_RIGHT_TO_LEFT:
+          writing_direction = WRITING_DIRECTION_RIGHT_TO_LEFT;
+          break;
+        default:
+          writing_direction = old_writing_direction;
         }
       }
     }
@@ -404,29 +403,28 @@ char* TessPDFRenderer::GetPDFTextObjects(TessBaseAPI* api,
     {
       int word_x1, word_y1, word_x2, word_y2;
       res_it->Baseline(RIL_WORD, &word_x1, &word_y1, &word_x2, &word_y2);
-      GetWordBaseline(writing_direction, ppi, height,
-                      word_x1, word_y1, word_x2, word_y2,
-                      line_x1, line_y1, line_x2, line_y2,
-                      &x, &y, &word_length);
+      GetWordBaseline(writing_direction, ppi, height, word_x1, word_y1, word_x2,
+                      word_y2, line_x1, line_y1, line_x2, line_y2, &x, &y,
+                      &word_length);
     }
 
     if (writing_direction != old_writing_direction || new_block) {
-      AffineMatrix(writing_direction,
-                   line_x1, line_y1, line_x2, line_y2, &a, &b, &c, &d);
-      pdf_str.add_str_double(" ", prec(a));  // . This affine matrix
-      pdf_str.add_str_double(" ", prec(b));  // . sets the coordinate
-      pdf_str.add_str_double(" ", prec(c));  // . system for all
-      pdf_str.add_str_double(" ", prec(d));  // . text that follows.
-      pdf_str.add_str_double(" ", prec(x));  // .
-      pdf_str.add_str_double(" ", prec(y));  // .
-      pdf_str += (" Tm ");                   // Place cursor absolutely
+      AffineMatrix(writing_direction, line_x1, line_y1, line_x2, line_y2, &a,
+                   &b, &c, &d);
+      pdf_str.add_str_double(" ", prec(a)); // . This affine matrix
+      pdf_str.add_str_double(" ", prec(b)); // . sets the coordinate
+      pdf_str.add_str_double(" ", prec(c)); // . system for all
+      pdf_str.add_str_double(" ", prec(d)); // . text that follows.
+      pdf_str.add_str_double(" ", prec(x)); // .
+      pdf_str.add_str_double(" ", prec(y)); // .
+      pdf_str += (" Tm ");                  // Place cursor absolutely
       new_block = false;
     } else {
       double dx = x - old_x;
       double dy = y - old_y;
       pdf_str.add_str_double(" ", prec(dx * a + dy * b));
       pdf_str.add_str_double(" ", prec(dx * c + dy * d));
-      pdf_str += (" Td ");                   // Relative moveto
+      pdf_str += (" Td "); // Relative moveto
     }
     old_x = x;
     old_y = y;
@@ -475,16 +473,16 @@ char* TessPDFRenderer::GetPDFTextObjects(TessBaseAPI* api,
       double h_stretch =
           kCharWidth * prec(100.0 * word_length / (fontsize * pdf_word_len));
       pdf_str.add_str_double("", h_stretch);
-      pdf_str += " Tz";          // horizontal stretch
+      pdf_str += " Tz"; // horizontal stretch
       pdf_str += " [ <";
-      pdf_str += pdf_word;       // UTF-16BE representation
-      pdf_str += "> ] TJ";       // show the text
+      pdf_str += pdf_word; // UTF-16BE representation
+      pdf_str += "> ] TJ"; // show the text
     }
     if (last_word_in_line) {
       pdf_str += " \n";
     }
     if (last_word_in_block) {
-      pdf_str += "ET\n";         // end the text object
+      pdf_str += "ET\n"; // end the text object
     }
   }
   char *ret = new char[pdf_str.length() + 1];
@@ -501,7 +499,8 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "%%PDF-1.5\n"
                "%%%c%c%c%c\n",
                0xDE, 0xAD, 0xBE, 0xEB);
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   // CATALOG
@@ -513,7 +512,8 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                ">>\n"
                "endobj\n",
                2L);
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   // We are reserving object #2 for the /Pages
@@ -533,10 +533,11 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "  /Type /Font\n"
                ">>\n"
                "endobj\n",
-               4L,         // CIDFontType2 font
-               6L          // ToUnicode
-               );
-  if (n >= sizeof(buf)) return false;
+               4L, // CIDFontType2 font
+               6L  // ToUnicode
+  );
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   // CIDFONTTYPE2
@@ -557,10 +558,11 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "  /DW %d\n"
                ">>\n"
                "endobj\n",
-               5L,         // CIDToGIDMap
-               7L,         // Font descriptor
+               5L, // CIDToGIDMap
+               7L, // Font descriptor
                1000 / kCharWidth);
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   // CIDTOGIDMAP
@@ -588,35 +590,33 @@ bool TessPDFRenderer::BeginDocumentHandler() {
   AppendData(reinterpret_cast<char *>(comp), len);
   objsize += len;
   lept_free(comp);
-  const char *endstream_endobj =
-      "endstream\n"
-      "endobj\n";
+  const char *endstream_endobj = "endstream\n"
+                                 "endobj\n";
   AppendString(endstream_endobj);
   objsize += strlen(endstream_endobj);
   AppendPDFObjectDIY(objsize);
 
-  const char *stream =
-      "/CIDInit /ProcSet findresource begin\n"
-      "12 dict begin\n"
-      "begincmap\n"
-      "/CIDSystemInfo\n"
-      "<<\n"
-      "  /Registry (Adobe)\n"
-      "  /Ordering (UCS)\n"
-      "  /Supplement 0\n"
-      ">> def\n"
-      "/CMapName /Adobe-Identify-UCS def\n"
-      "/CMapType 2 def\n"
-      "1 begincodespacerange\n"
-      "<0000> <FFFF>\n"
-      "endcodespacerange\n"
-      "1 beginbfrange\n"
-      "<0000> <FFFF> <0000>\n"
-      "endbfrange\n"
-      "endcmap\n"
-      "CMapName currentdict /CMap defineresource pop\n"
-      "end\n"
-      "end\n";
+  const char *stream = "/CIDInit /ProcSet findresource begin\n"
+                       "12 dict begin\n"
+                       "begincmap\n"
+                       "/CIDSystemInfo\n"
+                       "<<\n"
+                       "  /Registry (Adobe)\n"
+                       "  /Ordering (UCS)\n"
+                       "  /Supplement 0\n"
+                       ">> def\n"
+                       "/CMapName /Adobe-Identify-UCS def\n"
+                       "/CMapType 2 def\n"
+                       "1 begincodespacerange\n"
+                       "<0000> <FFFF>\n"
+                       "endcodespacerange\n"
+                       "1 beginbfrange\n"
+                       "<0000> <FFFF> <0000>\n"
+                       "endbfrange\n"
+                       "endcmap\n"
+                       "CMapName currentdict /CMap defineresource pop\n"
+                       "end\n"
+                       "end\n";
 
   // TOUNICODE
   n = snprintf(buf, sizeof(buf),
@@ -625,8 +625,10 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "stream\n"
                "%s"
                "endstream\n"
-               "endobj\n", (unsigned long) strlen(stream), stream);
-  if (n >= sizeof(buf)) return false;
+               "endobj\n",
+               (unsigned long)strlen(stream), stream);
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   // FONT DESCRIPTOR
@@ -635,8 +637,8 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "<<\n"
                "  /Ascent %d\n"
                "  /CapHeight %d\n"
-               "  /Descent -1\n"       // Spec says must be negative
-               "  /Flags 5\n"          // FixedPitch + Symbolic
+               "  /Descent -1\n" // Spec says must be negative
+               "  /Flags 5\n"    // FixedPitch + Symbolic
                "  /FontBBox  [ 0 0 %d %d ]\n"
                "  /FontFile2 %ld 0 R\n"
                "  /FontName /GlyphLessFont\n"
@@ -645,17 +647,16 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "  /Type /FontDescriptor\n"
                ">>\n"
                "endobj\n",
-               1000,
-               1000,
-               1000 / kCharWidth,
-               1000,
-               8L      // Font data
-               );
-  if (n >= sizeof(buf)) return false;
+               1000, 1000, 1000 / kCharWidth, 1000,
+               8L // Font data
+  );
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
 
   n = snprintf(buf, sizeof(buf), "%s/pdf.ttf", datadir_);
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   FILE *fp = fopen(buf, "rb");
   if (!fp) {
     tprintf("Can not open file \"%s\"!\n", buf);
@@ -677,12 +678,13 @@ bool TessPDFRenderer::BeginDocumentHandler() {
                "  /Length %ld\n"
                "  /Length1 %ld\n"
                ">>\n"
-               "stream\n", size, size);
+               "stream\n",
+               size, size);
   if (n >= sizeof(buf)) {
     return false;
   }
   AppendString(buf);
-  objsize  = strlen(buf);
+  objsize = strlen(buf);
   AppendData(buffer.get(), size);
   objsize += size;
   AppendString(endstream_endobj);
@@ -691,9 +693,7 @@ bool TessPDFRenderer::BeginDocumentHandler() {
   return true;
 }
 
-bool TessPDFRenderer::imageToPDFObj(Pix *pix,
-                                    char *filename,
-                                    long int objnum,
+bool TessPDFRenderer::imageToPDFObj(Pix *pix, char *filename, long int objnum,
                                     char **pdf_object,
                                     long int *pdf_object_size) {
   size_t n;
@@ -727,23 +727,23 @@ bool TessPDFRenderer::imageToPDFObj(Pix *pix,
 
   const char *group4 = "";
   const char *filter;
-  switch(cid->type) {
-    case L_FLATE_ENCODE:
-      filter = "/FlateDecode";
-      break;
-    case L_JPEG_ENCODE:
-      filter = "/DCTDecode";
-      break;
-    case L_G4_ENCODE:
-      filter = "/CCITTFaxDecode";
-      group4 = "    /K -1\n";
-      break;
-    case L_JP2K_ENCODE:
-      filter = "/JPXDecode";
-      break;
-    default:
-      l_CIDataDestroy(&cid);
-      return false;
+  switch (cid->type) {
+  case L_FLATE_ENCODE:
+    filter = "/FlateDecode";
+    break;
+  case L_JPEG_ENCODE:
+    filter = "/DCTDecode";
+    break;
+  case L_G4_ENCODE:
+    filter = "/CCITTFaxDecode";
+    group4 = "    /K -1\n";
+    break;
+  case L_JP2K_ENCODE:
+    filter = "/JPXDecode";
+    break;
+  default:
+    l_CIDataDestroy(&cid);
+    return false;
   }
 
   // Maybe someday we will accept RGBA but today is not that day.
@@ -761,15 +761,15 @@ bool TessPDFRenderer::imageToPDFObj(Pix *pix,
     colorspace = b0;
   } else {
     switch (cid->spp) {
-      case 1:
-        colorspace = "  /ColorSpace /DeviceGray\n";
-        break;
-      case 3:
-        colorspace = "  /ColorSpace /DeviceRGB\n";
-        break;
-      default:
-        l_CIDataDestroy(&cid);
-        return false;
+    case 1:
+      colorspace = "  /ColorSpace /DeviceGray\n";
+      break;
+    case 3:
+      colorspace = "  /ColorSpace /DeviceRGB\n";
+      break;
+    default:
+      l_CIDataDestroy(&cid);
+      return false;
     }
   }
 
@@ -781,7 +781,7 @@ bool TessPDFRenderer::imageToPDFObj(Pix *pix,
                "<<\n"
                "  /Length %ld\n"
                "  /Subtype /Image\n",
-               objnum, (unsigned long) cid->nbytescomp);
+               objnum, (unsigned long)cid->nbytescomp);
   if (n >= sizeof(b1)) {
     l_CIDataDestroy(&cid);
     return false;
@@ -802,16 +802,15 @@ bool TessPDFRenderer::imageToPDFObj(Pix *pix,
                "  >>\n"
                ">>\n"
                "stream\n",
-               cid->w, cid->h, cid->bps, filter, predictor, cid->spp,
-               group4, cid->w, cid->bps);
+               cid->w, cid->h, cid->bps, filter, predictor, cid->spp, group4,
+               cid->w, cid->bps);
   if (n >= sizeof(b2)) {
     l_CIDataDestroy(&cid);
     return false;
   }
 
-  const char *b3 =
-      "endstream\n"
-      "endobj\n";
+  const char *b3 = "endstream\n"
+                   "endobj\n";
 
   size_t b1_len = strlen(b1);
   size_t b2_len = strlen(b2);
@@ -836,7 +835,7 @@ bool TessPDFRenderer::imageToPDFObj(Pix *pix,
   return true;
 }
 
-bool TessPDFRenderer::AddImageHandler(TessBaseAPI* api) {
+bool TessPDFRenderer::AddImageHandler(TessBaseAPI *api) {
   size_t n;
   char buf[kBasicBufSize];
   char buf2[kBasicBufSize];
@@ -868,12 +867,13 @@ bool TessPDFRenderer::AddImageHandler(TessBaseAPI* api) {
                ">>\n"
                "endobj\n",
                obj_,
-               2L,  // Pages object
+               2L, // Pages object
                width, height,
-               obj_ + 1,  // Contents object
-               xobject,   // Image object
-               3L);       // Type0 Font
-  if (n >= sizeof(buf)) return false;
+               obj_ + 1, // Contents object
+               xobject,  // Image object
+               3L);      // Type0 Font
+  if (n >= sizeof(buf))
+    return false;
   pages_.push_back(obj_);
   AppendPDFObject(buf);
 
@@ -889,7 +889,8 @@ bool TessPDFRenderer::AddImageHandler(TessBaseAPI* api) {
                "<<\n"
                "  /Length %ld /Filter /FlateDecode\n"
                ">>\n"
-               "stream\n", obj_, comp_pdftext_len);
+               "stream\n",
+               obj_, comp_pdftext_len);
   if (n >= sizeof(buf)) {
     lept_free(comp_pdftext);
     return false;
@@ -899,9 +900,8 @@ bool TessPDFRenderer::AddImageHandler(TessBaseAPI* api) {
   AppendData(reinterpret_cast<char *>(comp_pdftext), comp_pdftext_len);
   objsize += comp_pdftext_len;
   lept_free(comp_pdftext);
-  const char *b2 =
-      "endstream\n"
-      "endobj\n";
+  const char *b2 = "endstream\n"
+                   "endobj\n";
   AppendString(b2);
   objsize += strlen(b2);
   AppendPDFObjectDIY(objsize);
@@ -918,7 +918,6 @@ bool TessPDFRenderer::AddImageHandler(TessBaseAPI* api) {
   return true;
 }
 
-
 bool TessPDFRenderer::EndDocumentHandler() {
   size_t n;
   char buf[kBasicBufSize];
@@ -931,19 +930,21 @@ bool TessPDFRenderer::EndDocumentHandler() {
 
   // PAGES
   const long int kPagesObjectNumber = 2;
-  offsets_[kPagesObjectNumber] = offsets_.back();  // manipulation #1
+  offsets_[kPagesObjectNumber] = offsets_.back(); // manipulation #1
   n = snprintf(buf, sizeof(buf),
                "%ld 0 obj\n"
                "<<\n"
                "  /Type /Pages\n"
-               "  /Kids [ ", kPagesObjectNumber);
-  if (n >= sizeof(buf)) return false;
+               "  /Kids [ ",
+               kPagesObjectNumber);
+  if (n >= sizeof(buf))
+    return false;
   AppendString(buf);
-  size_t pages_objsize  = strlen(buf);
+  size_t pages_objsize = strlen(buf);
   for (size_t i = 0; i < pages_.unsigned_size(); i++) {
-    n = snprintf(buf, sizeof(buf),
-                 "%ld 0 R ", pages_[i]);
-    if (n >= sizeof(buf)) return false;
+    n = snprintf(buf, sizeof(buf), "%ld 0 R ", pages_[i]);
+    if (n >= sizeof(buf))
+      return false;
     AppendString(buf);
     pages_objsize += strlen(buf);
   }
@@ -951,14 +952,16 @@ bool TessPDFRenderer::EndDocumentHandler() {
                "]\n"
                "  /Count %d\n"
                ">>\n"
-               "endobj\n", pages_.size());
-  if (n >= sizeof(buf)) return false;
+               "endobj\n",
+               pages_.size());
+  if (n >= sizeof(buf))
+    return false;
   AppendString(buf);
   pages_objsize += strlen(buf);
-  offsets_.back() += pages_objsize;    // manipulation #2
+  offsets_.back() += pages_objsize; // manipulation #2
 
   // INFO
-  STRING utf16_title = "FEFF";  // byte_order_marker
+  STRING utf16_title = "FEFF"; // byte_order_marker
   std::vector<char32> unicodes = UNICHAR::UTF8ToUTF32(title());
   char utf16[kMaxBytesPerCodepoint];
   for (char32 code : unicodes) {
@@ -967,7 +970,7 @@ bool TessPDFRenderer::EndDocumentHandler() {
     }
   }
 
-  char* datestr = l_getFormattedDate();
+  char *datestr = l_getFormattedDate();
   n = snprintf(buf, sizeof(buf),
                "%ld 0 obj\n"
                "<<\n"
@@ -978,17 +981,21 @@ bool TessPDFRenderer::EndDocumentHandler() {
                "endobj\n",
                obj_, TESSERACT_VERSION_STR, datestr, utf16_title.c_str());
   lept_free(datestr);
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   AppendPDFObject(buf);
   n = snprintf(buf, sizeof(buf),
                "xref\n"
                "0 %ld\n"
-               "0000000000 65535 f \n", obj_);
-  if (n >= sizeof(buf)) return false;
+               "0000000000 65535 f \n",
+               obj_);
+  if (n >= sizeof(buf))
+    return false;
   AppendString(buf);
   for (int i = 1; i < obj_; i++) {
     n = snprintf(buf, sizeof(buf), "%010ld 00000 n \n", offsets_[i]);
-    if (n >= sizeof(buf)) return false;
+    if (n >= sizeof(buf))
+      return false;
     AppendString(buf);
   }
   n = snprintf(buf, sizeof(buf),
@@ -1002,11 +1009,12 @@ bool TessPDFRenderer::EndDocumentHandler() {
                "%ld\n"
                "%%%%EOF\n",
                obj_,
-               1L,               // catalog
-               obj_ - 1,         // info
+               1L,       // catalog
+               obj_ - 1, // info
                offsets_.back());
-  if (n >= sizeof(buf)) return false;
+  if (n >= sizeof(buf))
+    return false;
   AppendString(buf);
   return true;
 }
-}  // namespace tesseract
+} // namespace tesseract

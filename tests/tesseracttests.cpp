@@ -16,9 +16,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(TesseractTest, FirstDummyTestForTesseract) {
-    ASSERT_TRUE(1);
-}
+TEST(TesseractTest, FirstDummyTestForTesseract) { ASSERT_TRUE(1); }
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

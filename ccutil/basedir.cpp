@@ -16,9 +16,9 @@
  *
  **********************************************************************/
 
-#include          "basedir.h"
+#include "basedir.h"
 
-#include          <stdlib.h>
+#include <stdlib.h>
 
 // Assuming that code_path is the name of some file in a desired directory,
 // returns the given code_path stripped back to the last slash, leaving
@@ -26,10 +26,10 @@
 // the input was the name of something in the current directory.
 // Useful for getting to the directory of argv[0], but does not search
 // any paths.
-TESS_API void truncate_path(const char *code_path, STRING* trunc_path) {
+TESS_API void truncate_path(const char *code_path, STRING *trunc_path) {
   int trunc_index = -1;
   if (code_path != NULL) {
-    const char* last_slash = strrchr(code_path, '/');
+    const char *last_slash = strrchr(code_path, '/');
     if (last_slash != NULL && last_slash + 1 - code_path > trunc_index)
       trunc_index = last_slash + 1 - code_path;
     last_slash = strrchr(code_path, '\\');

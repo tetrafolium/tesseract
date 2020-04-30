@@ -14,20 +14,20 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////
 
-#include "intsimdmatrix.h"
-#include <memory>
 #include "genericvector.h"
 #include "include_gunit.h"
+#include "intsimdmatrix.h"
 #include "intsimdmatrixavx2.h"
 #include "intsimdmatrixsse.h"
 #include "simddetect.h"
 #include "tprintf.h"
+#include <memory>
 
 namespace tesseract {
 namespace {
 
 class IntSimdMatrixTest : public ::testing::Test {
- protected:
+protected:
   // Makes a random weights matrix of the given size.
   GENERIC_2D_ARRAY<int8_t> InitRandom(int no, int ni) {
     GENERIC_2D_ARRAY<int8_t> a(no, ni, 0);
@@ -39,7 +39,7 @@ class IntSimdMatrixTest : public ::testing::Test {
     return a;
   }
   // Makes a random input vector of the given size, with rounding up.
-  std::vector<int8_t> RandomVector(int size, const IntSimdMatrix& matrix) {
+  std::vector<int8_t> RandomVector(int size, const IntSimdMatrix &matrix) {
     int rounded_size = matrix.RoundInputs(size);
     std::vector<int8_t> v(rounded_size, 0);
     for (int i = 0; i < size; ++i) {
@@ -56,7 +56,7 @@ class IntSimdMatrixTest : public ::testing::Test {
     return v;
   }
   // Tests a range of sizes and compares the results against the base_ version.
-  void ExpectEqualResults(IntSimdMatrix* matrix) {
+  void ExpectEqualResults(IntSimdMatrix *matrix) {
     for (int num_out = 1; num_out < 130; ++num_out) {
       for (int num_in = 1; num_in < 130; ++num_in) {
         GENERIC_2D_ARRAY<int8_t> w = InitRandom(num_out, num_in + 1);
@@ -101,5 +101,5 @@ TEST_F(IntSimdMatrixTest, AVX2) {
   ExpectEqualResults(matrix.get());
 }
 
-}  // namespace
-}  // namespace tesseract
+} // namespace
+} // namespace tesseract

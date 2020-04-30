@@ -18,9 +18,9 @@
 #ifndef TESSERACT_LSTM_STRIDEMAP_H_
 #define TESSERACT_LSTM_STRIDEMAP_H_
 
+#include "tprintf.h"
 #include <string.h>
 #include <vector>
-#include "tprintf.h"
 
 namespace tesseract {
 
@@ -32,23 +32,23 @@ namespace tesseract {
 // batch, height, width with the StrideMap, and therefore represents the runtime
 // shape. The build-time shape is defined by StaticShape.
 enum FlexDimensions {
-  FD_BATCH,    // Index of multiple images.
-  FD_HEIGHT,   // y-coordinate in image.
-  FD_WIDTH,    // x-coordinate in image.
-  FD_DIMSIZE,  // Number of flexible non-depth dimensions.
+  FD_BATCH,   // Index of multiple images.
+  FD_HEIGHT,  // y-coordinate in image.
+  FD_WIDTH,   // x-coordinate in image.
+  FD_DIMSIZE, // Number of flexible non-depth dimensions.
 };
 
 // Encapsulation of information relating to the mapping from [batch][y][x] to
 // the first index into the 2-d array underlying a NetworkIO.
 class StrideMap {
- public:
+public:
   // Class holding the non-depth indices.
   class Index {
-   public:
-    explicit Index(const StrideMap& stride_map) : stride_map_(&stride_map) {
+  public:
+    explicit Index(const StrideMap &stride_map) : stride_map_(&stride_map) {
       InitToFirst();
     }
-    Index(const StrideMap& stride_map, int batch, int y, int x)
+    Index(const StrideMap &stride_map, int batch, int y, int x)
         : stride_map_(&stride_map) {
       indices_[FD_BATCH] = batch;
       indices_[FD_HEIGHT] = y;
@@ -83,7 +83,7 @@ class StrideMap {
     // with InitToLast()) is complete.
     bool Decrement();
 
-   private:
+  private:
     // Initializes the indices to the last valid location in the given batch
     // index.
     void InitToLastOfBatch(int batch);
@@ -91,7 +91,7 @@ class StrideMap {
     void SetTFromIndices();
 
     // Map into which *this is an index.
-    const StrideMap* stride_map_;
+    const StrideMap *stride_map_;
     // Index to the first dimension of the underlying array.
     int t_;
     // Indices into the individual dimensions.
@@ -105,7 +105,7 @@ class StrideMap {
   // Default copy constructor and operator= are OK to use here!
 
   // Sets up the stride for the given array of height, width pairs.
-  void SetStride(const std::vector<std::pair<int, int>>& h_w_pairs);
+  void SetStride(const std::vector<std::pair<int, int>> &h_w_pairs);
   // Scales width and height dimensions by the given factors.
   void ScaleXY(int x_factor, int y_factor);
   // Reduces width to 1, across the batch, whatever the input size.
@@ -117,7 +117,7 @@ class StrideMap {
   // Returns the total width required.
   int Width() const { return t_increments_[FD_BATCH] * shape_[FD_BATCH]; }
 
- private:
+private:
   // Computes t_increments_ from shape_.
   void ComputeTIncrements();
 
@@ -132,6 +132,6 @@ class StrideMap {
   std::vector<int> widths_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_LSTM_STRIDEMAP_H_
+#endif // TESSERACT_LSTM_STRIDEMAP_H_

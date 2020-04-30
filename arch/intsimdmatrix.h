@@ -19,10 +19,10 @@
 #ifndef TESSERACT_ARCH_INTSIMDMATRIX_H_
 #define TESSERACT_ARCH_INTSIMDMATRIX_H_
 
-#include <stdint.h>
-#include <vector>
 #include "genericvector.h"
 #include "matrix.h"
+#include <stdint.h>
+#include <vector>
 
 namespace tesseract {
 
@@ -58,23 +58,21 @@ namespace tesseract {
 // virtual methods are needed, as the constructor sets up everything that
 // is required to allow the base class implementation to do all the work.
 class IntSimdMatrix {
- public:
+public:
   // Constructor should set the data members to indicate the sizes.
   // NOTE: Base constructor public only for test purposes.
   IntSimdMatrix()
-      : num_outputs_per_register_(1),
-        max_output_registers_(1),
-        num_inputs_per_register_(1),
-        num_inputs_per_group_(1),
+      : num_outputs_per_register_(1), max_output_registers_(1),
+        num_inputs_per_register_(1), num_inputs_per_group_(1),
         num_input_groups_(1) {}
 
   // Factory makes and returns an IntSimdMatrix (sub)class of the best
   // available type for the current architecture.
-  static IntSimdMatrix* GetFastestMultiplier();
+  static IntSimdMatrix *GetFastestMultiplier();
 
   // Computes a reshaped copy of the weight matrix w. If there are no
   // partial_funcs_, it does nothing.
-  void Init(const GENERIC_2D_ARRAY<int8_t>& w);
+  void Init(const GENERIC_2D_ARRAY<int8_t> &w);
 
   // Rounds the size up to a multiple of the input register size (in int8_t).
   int RoundInputs(int size) const {
@@ -94,20 +92,20 @@ class IntSimdMatrix {
   // RoundInputs above.
   // The input will be over-read to the extent of the padding. There are no
   // alignment requirements.
-  void MatrixDotVector(const GENERIC_2D_ARRAY<int8_t>& w,
-                       const GenericVector<double>& scales, const int8_t* u,
-                       double* v) const;
+  void MatrixDotVector(const GENERIC_2D_ARRAY<int8_t> &w,
+                       const GenericVector<double> &scales, const int8_t *u,
+                       double *v) const;
 
- protected:
+protected:
   // Function to compute part of a matrix.vector multiplication. The weights
   // are in a very specific order (see above) in w, which is multiplied by
   // u of length num_in, to produce output v after scaling the integer results
   // by the corresponding member of scales.
   // The amount of w and scales consumed is fixed and not available to the
   // caller. The number of outputs written to v will be at most num_out.
-  typedef void (*PartialFunc)(const int8_t* w, const double* scales,
-                              const int8_t* u, int num_in, int num_out,
-                              double* v);
+  typedef void (*PartialFunc)(const int8_t *w, const double *scales,
+                              const int8_t *u, int num_in, int num_out,
+                              double *v);
 
   // Rounds the input up to a multiple of the given factor.
   static int Roundup(int input, int factor) {
@@ -130,6 +128,6 @@ class IntSimdMatrix {
   std::vector<PartialFunc> partial_funcs_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_ARCH_INTSIMDMATRIX_H_
+#endif // TESSERACT_ARCH_INTSIMDMATRIX_H_

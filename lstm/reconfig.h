@@ -19,7 +19,6 @@
 #ifndef TESSERACT_LSTM_RECONFIG_H_
 #define TESSERACT_LSTM_RECONFIG_H_
 
-
 #include "genericvector.h"
 #include "matrix.h"
 #include "network.h"
@@ -31,13 +30,13 @@ namespace tesseract {
 // Note that fractional parts are truncated for efficiency, so make sure the
 // input stride is a multiple of the y_scale factor!
 class Reconfig : public Network {
- public:
-  Reconfig(const STRING& name, int ni, int x_scale, int y_scale);
+public:
+  Reconfig(const STRING &name, int ni, int x_scale, int y_scale);
   virtual ~Reconfig();
 
   // Returns the shape output from the network given an input shape (which may
   // be partially unknown ie zero).
-  virtual StaticShape OutputShape(const StaticShape& input_shape) const;
+  virtual StaticShape OutputShape(const StaticShape &input_shape) const;
 
   virtual STRING spec() const {
     STRING spec;
@@ -55,23 +54,22 @@ class Reconfig : public Network {
   virtual int XScaleFactor() const;
 
   // Writes to the given file. Returns false in case of error.
-  virtual bool Serialize(TFile* fp) const;
+  virtual bool Serialize(TFile *fp) const;
   // Reads from the given file. Returns false in case of error.
-  virtual bool DeSerialize(TFile* fp);
+  virtual bool DeSerialize(TFile *fp);
 
   // Runs forward propagation of activations on the input line.
   // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
   // Runs backward propagation of errors on the deltas line.
   // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
- protected:
+protected:
   // Non-serialized data used to store parameters between forward and back.
   StrideMap back_map_;
   // Serialized data.
@@ -79,7 +77,6 @@ class Reconfig : public Network {
   inT32 y_scale_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-
-#endif  // TESSERACT_LSTM_SUBSAMPLE_H_
+#endif // TESSERACT_LSTM_SUBSAMPLE_H_

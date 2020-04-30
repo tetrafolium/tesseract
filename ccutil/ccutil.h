@@ -21,8 +21,8 @@
 
 #include "ambigs.h"
 #include "errcode.h"
-#include "strngs.h"
 #include "params.h"
+#include "strngs.h"
 #include "unicharset.h"
 
 #ifndef _WIN32
@@ -33,13 +33,14 @@
 namespace tesseract {
 
 class CCUtilMutex {
- public:
+public:
   CCUtilMutex();
 
   void Lock();
 
   void Unlock();
- private:
+
+private:
 #ifdef _WIN32
   HANDLE mutex_;
 #else
@@ -47,41 +48,39 @@ class CCUtilMutex {
 #endif
 };
 
-
 class CCUtil {
- public:
+public:
   CCUtil();
   virtual ~CCUtil();
 
- public:
+public:
   // Read the arguments and set up the data path.
-  void main_setup(
-                  const char *argv0,        // program name
-                  const char *basename      // name of image
-                 );
+  void main_setup(const char *argv0,   // program name
+                  const char *basename // name of image
+  );
   ParamsVectors *params() { return &params_; }
 
-  STRING datadir;        // dir for data files
-  STRING imagebasename;  // name of image
+  STRING datadir;       // dir for data files
+  STRING imagebasename; // name of image
   STRING lang;
   STRING language_data_path_prefix;
   UNICHARSET unicharset;
   UnicharAmbigs unichar_ambigs;
-  STRING imagefile;  // image file name
-  STRING directory;  // main directory
+  STRING imagefile; // image file name
+  STRING directory; // main directory
 
- private:
+private:
   ParamsVectors params_;
 
- public:
+public:
   // Member parameters.
   // These have to be declared and initialized after params_ member, since
   // params_ should be initialized before parameters are added to it.
   STRING_VAR_H(m_data_sub_dir, "tessdata/", "Directory for data files");
-  #ifdef _WIN32
+#ifdef _WIN32
   STRING_VAR_H(tessedit_module_name, WINDLLNAME,
                "Module colocated with tessdata dir");
-  #endif
+#endif
   INT_VAR_H(ambigs_debug_level, 0, "Debug level for unichar ambiguities");
   BOOL_VAR_H(use_definite_ambigs_for_classifier, 0,
              "Use definite ambiguities when running character classifier");
@@ -89,7 +88,7 @@ class CCUtil {
              "Use ambigs for deciding whether to adapt to a character");
 };
 
-extern CCUtilMutex tprintfMutex;  // should remain global
-}  // namespace tesseract
+extern CCUtilMutex tprintfMutex; // should remain global
+} // namespace tesseract
 
-#endif  // TESSERACT_CCUTIL_CCUTIL_H_
+#endif // TESSERACT_CCUTIL_CCUTIL_H_

@@ -28,7 +28,7 @@
 
 namespace tesseract {
 
-static const char * const XHeightConsistencyEnumName[] = {
+static const char *const XHeightConsistencyEnumName[] = {
     "XH_GOOD",
     "XH_SUBNORMAL",
     "XH_INCONSISTENT",
@@ -36,7 +36,7 @@ static const char * const XHeightConsistencyEnumName[] = {
 
 // Struct for keeping track of the consistency of the path.
 struct LMConsistencyInfo {
-  enum ChartypeEnum { CT_NONE, CT_ALPHA, CT_DIGIT, CT_OTHER};
+  enum ChartypeEnum { CT_NONE, CT_ALPHA, CT_DIGIT, CT_OTHER };
 
   // How much do characters have to be shifted away from normal parameters
   // before we say they're not normal?
@@ -50,7 +50,7 @@ struct LMConsistencyInfo {
   static const int kSUB = 0, kNORM = 1, kSUP = 2;
   static const int kNumPos = 3;
 
-  explicit LMConsistencyInfo(const LMConsistencyInfo* parent_info) {
+  explicit LMConsistencyInfo(const LMConsistencyInfo *parent_info) {
     if (parent_info == NULL) {
       // Initialize from scratch.
       num_alphas = 0;
@@ -71,9 +71,9 @@ struct LMConsistencyInfo {
         xht_count[i] = 0;
         xht_count_punc[i] = 0;
         xht_lo[i] = 0;
-        xht_hi[i] = 256;  // kBlnCellHeight
+        xht_hi[i] = 256; // kBlnCellHeight
       }
-      xht_sp = -1;  // This invalid value indicates that there was no parent.
+      xht_sp = -1; // This invalid value indicates that there was no parent.
       xpos_entropy = 0;
       xht_decision = XH_GOOD;
     } else {
@@ -81,24 +81,20 @@ struct LMConsistencyInfo {
       *this = *parent_info;
     }
   }
-  inline int NumInconsistentPunc() const {
-    return invalid_punc ? num_punc : 0;
-  }
+  inline int NumInconsistentPunc() const { return invalid_punc ? num_punc : 0; }
   inline int NumInconsistentCase() const {
     return (num_non_first_upper > num_lower) ? num_lower : num_non_first_upper;
   }
   inline int NumInconsistentChartype() const {
     return (NumInconsistentPunc() + num_other +
-        ((num_alphas > num_digits) ? num_digits : num_alphas));
+            ((num_alphas > num_digits) ? num_digits : num_alphas));
   }
   inline bool Consistent() const {
     return (NumInconsistentPunc() == 0 && NumInconsistentCase() == 0 &&
             NumInconsistentChartype() == 0 && !inconsistent_script &&
             !inconsistent_font && !InconsistentXHeight());
   }
-  inline int  NumInconsistentSpaces() const {
-    return num_inconsistent_spaces;
-  }
+  inline int NumInconsistentSpaces() const { return num_inconsistent_spaces; }
   inline int InconsistentXHeight() const {
     return xht_decision == XH_INCONSISTENT;
   }
@@ -137,6 +133,6 @@ struct LMConsistencyInfo {
   XHeightConsistencyEnum xht_decision;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_WORDREC_LM_CONSISTENCY_H_
+#endif // TESSERACT_WORDREC_LM_CONSISTENCY_H_

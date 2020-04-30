@@ -17,11 +17,11 @@
  *
  **********************************************************************/
 
-#ifndef           WERDIT_H
-#define           WERDIT_H
+#ifndef WERDIT_H
+#define WERDIT_H
 
-#include          "pageres.h"
+#include "pageres.h"
 
-PAGE_RES_IT* make_pseudo_word(PAGE_RES* page_res, const TBOX& selection_box);
+PAGE_RES_IT *make_pseudo_word(PAGE_RES *page_res, const TBOX &selection_box);
 
 #endif

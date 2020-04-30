@@ -36,7 +36,7 @@ class IndexMap;
 // Down-sampling quantization of the INT_FEATURE_STRUCT feature space and
 // conversion to a single scalar index value, used as a binary feature space.
 class IntFeatureSpace {
- public:
+public:
   IntFeatureSpace();
   // Default copy constructors and assignment OK!
 
@@ -45,12 +45,12 @@ class IntFeatureSpace {
 
   // Serializes the feature space definition to the given file.
   // Returns false on error.
-  bool Serialize(FILE* fp) const;
+  bool Serialize(FILE *fp) const;
 
   // DeSerializes the feature space definition from the given file.
   // If swap is true, the data is big/little-endian swapped.
   // Returns false on error.
-  bool DeSerialize(bool swap, FILE* fp);
+  bool DeSerialize(bool swap, FILE *fp);
 
   // Returns the total size of the feature space.
   int Size() const {
@@ -62,24 +62,24 @@ class IntFeatureSpace {
 
   // Returns a 1-dimensional index corresponding to the given feature value.
   // Range is [0, Size()-1]. Inverse of PositionFromIndex member.
-  int Index(const INT_FEATURE_STRUCT& f) const {
+  int Index(const INT_FEATURE_STRUCT &f) const {
     return (XBucket(f.X) * y_buckets_ + YBucket(f.Y)) * theta_buckets_ +
-        ThetaBucket(f.Theta);
+           ThetaBucket(f.Theta);
   }
   // Bulk calls to Index. Maps the given array of features to a vector of
   // inT32 indices in the same order as the input.
-  void IndexFeatures(const INT_FEATURE_STRUCT* features, int num_features,
-                     GenericVector<int>* mapped_features) const;
+  void IndexFeatures(const INT_FEATURE_STRUCT *features, int num_features,
+                     GenericVector<int> *mapped_features) const;
   // Bulk calls to Index. Maps the given array of features to a vector of
   // sorted inT32 indices.
-  void IndexAndSortFeatures(const INT_FEATURE_STRUCT* features,
+  void IndexAndSortFeatures(const INT_FEATURE_STRUCT *features,
                             int num_features,
-                            GenericVector<int>* sorted_features) const;
+                            GenericVector<int> *sorted_features) const;
   // Returns a feature space index for the given x,y position in a display
   // window, or -1 if the feature is a miss.
   int XYToFeatureIndex(int x, int y) const;
 
- protected:
+protected:
   // Converters to generate indices for individual feature dimensions.
   int XBucket(int x) const {
     int bucket = x * x_buckets_ / kIntFeatureExtent;
@@ -104,6 +104,6 @@ class IntFeatureSpace {
   uinT8 theta_buckets_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_CLASSIFY_INTFEATURESPACE_H_
+#endif // TESSERACT_CLASSIFY_INTFEATURESPACE_H_

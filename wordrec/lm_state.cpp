@@ -26,12 +26,13 @@ ELISTIZE(ViterbiStateEntry)
 
 void ViterbiStateEntry::Print(const char *msg) const {
   tprintf("%s ViterbiStateEntry", msg);
-  if (updated) tprintf("(NEW)");
+  if (updated)
+    tprintf("(NEW)");
   if (this->debug_str != NULL) {
     tprintf(" str=%s", this->debug_str->string());
   }
-  tprintf(" with ratings_sum=%.4f length=%d cost=%.6f",
-          this->ratings_sum, this->length, this->cost);
+  tprintf(" with ratings_sum=%.4f length=%d cost=%.6f", this->ratings_sum,
+          this->length, this->cost);
   if (this->top_choice_flags) {
     tprintf(" top_choice_flags=0x%x", this->top_choice_flags);
   }
@@ -43,12 +44,12 @@ void ViterbiStateEntry::Print(const char *msg) const {
             this->consistency_info.inconsistent_script,
             this->consistency_info.inconsistent_font);
   }
-  if (this->dawg_info) tprintf(" permuter=%d", this->dawg_info->permuter);
+  if (this->dawg_info)
+    tprintf(" permuter=%d", this->dawg_info->permuter);
   if (this->ngram_info) {
     tprintf(" ngram_cl_cost=%g context=%s ngram pruned=%d",
             this->ngram_info->ngram_and_classifier_cost,
-            this->ngram_info->context.string(),
-            this->ngram_info->pruned);
+            this->ngram_info->context.string(), this->ngram_info->pruned);
   }
   if (this->associate_stats.shape_cost > 0.0f) {
     tprintf(" shape_cost=%g", this->associate_stats.shape_cost);
@@ -68,8 +69,8 @@ void LanguageModelState::Clear() {
 }
 
 void LanguageModelState::Print(const char *msg) {
-  tprintf("%s VSEs (max_cost=%g prn_len=%d tot_len=%d):\n",
-          msg, viterbi_state_entries_prunable_max_cost,
+  tprintf("%s VSEs (max_cost=%g prn_len=%d tot_len=%d):\n", msg,
+          viterbi_state_entries_prunable_max_cost,
           viterbi_state_entries_prunable_length, viterbi_state_entries_length);
   ViterbiStateEntry_IT vit(&viterbi_state_entries);
   for (vit.mark_cycle_pt(); !vit.cycled_list(); vit.forward()) {
@@ -77,5 +78,4 @@ void LanguageModelState::Print(const char *msg) {
   }
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

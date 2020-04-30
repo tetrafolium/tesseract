@@ -24,30 +24,30 @@
 #include <stdlib.h>
 
 namespace tesseract {
-double DotProductSSE(const double* u, const double* v, int n) {
+double DotProductSSE(const double *u, const double *v, int n) {
   fprintf(stderr, "DotProductSSE can't be used on Android\n");
   abort();
 }
-int32_t IntDotProductSSE(const int8_t* u, const int8_t* v, int n) {
+int32_t IntDotProductSSE(const int8_t *u, const int8_t *v, int n) {
   fprintf(stderr, "IntDotProductSSE can't be used on Android\n");
   abort();
 }
-}  // namespace tesseract
+} // namespace tesseract
 
-#else  // !defined(__SSE4_1__)
+#else // !defined(__SSE4_1__)
 // Non-Android code here
 
+#include "dotproductsse.h"
+#include "host.h"
 #include <emmintrin.h>
 #include <smmintrin.h>
 #include <stdint.h>
-#include "dotproductsse.h"
-#include "host.h"
 
 namespace tesseract {
 
 // Computes and returns the dot product of the n-vectors u and v.
 // Uses Intel SSE intrinsics to access the SIMD instruction set.
-double DotProductSSE(const double* u, const double* v, int n) {
+double DotProductSSE(const double *u, const double *v, int n) {
   int max_offset = n - 2;
   int offset = 0;
   // Accumulate a set of 2 sums in sum, by loading pairs of 2 values from u and
@@ -99,7 +99,7 @@ double DotProductSSE(const double* u, const double* v, int n) {
 
 // Computes and returns the dot product of the n-vectors u and v.
 // Uses Intel SSE intrinsics to access the SIMD instruction set.
-int32_t IntDotProductSSE(const int8_t* u, const int8_t* v, int n) {
+int32_t IntDotProductSSE(const int8_t *u, const int8_t *v, int n) {
   int max_offset = n - 8;
   int offset = 0;
   // Accumulate a set of 4 32-bit sums in sum, by loading 8 pairs of 8-bit
@@ -107,8 +107,8 @@ int32_t IntDotProductSSE(const int8_t* u, const int8_t* v, int n) {
   __m128i sum = _mm_setzero_si128();
   if (offset <= max_offset) {
     offset = 8;
-    __m128i packed1 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(u));
-    __m128i packed2 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(v));
+    __m128i packed1 = _mm_loadl_epi64(reinterpret_cast<const __m128i *>(u));
+    __m128i packed2 = _mm_loadl_epi64(reinterpret_cast<const __m128i *>(v));
     sum = _mm_cvtepi8_epi16(packed1);
     packed2 = _mm_cvtepi8_epi16(packed2);
     // The magic _mm_add_epi16 is perfect here. It multiplies 8 pairs of 16 bit
@@ -116,8 +116,8 @@ int32_t IntDotProductSSE(const int8_t* u, const int8_t* v, int n) {
     // to make 4 32 bit results that still fit in a 128 bit register.
     sum = _mm_madd_epi16(sum, packed2);
     while (offset <= max_offset) {
-      packed1 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(u + offset));
-      packed2 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(v + offset));
+      packed1 = _mm_loadl_epi64(reinterpret_cast<const __m128i *>(u + offset));
+      packed2 = _mm_loadl_epi64(reinterpret_cast<const __m128i *>(v + offset));
       offset += 8;
       packed1 = _mm_cvtepi8_epi16(packed1);
       packed2 = _mm_cvtepi8_epi16(packed2);
@@ -136,6 +136,6 @@ int32_t IntDotProductSSE(const int8_t* u, const int8_t* v, int n) {
   return result;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // ANDROID_BUILD
+#endif // ANDROID_BUILD

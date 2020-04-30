@@ -14,4 +14,4 @@
 
 #include "gtest/gtest.h"
 
-#endif  // TESSERACT_UNITTEST_INCLUDE_GUNIT_H_
+#endif // TESSERACT_UNITTEST_INCLUDE_GUNIT_H_

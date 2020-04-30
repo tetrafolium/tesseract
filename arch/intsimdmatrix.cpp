@@ -26,8 +26,8 @@ namespace tesseract {
 // Factory makes and returns an IntSimdMatrix (sub)class of the best
 // available type for the current architecture.
 /* static */
-IntSimdMatrix* IntSimdMatrix::GetFastestMultiplier() {
-  IntSimdMatrix* multiplier = nullptr;
+IntSimdMatrix *IntSimdMatrix::GetFastestMultiplier() {
+  IntSimdMatrix *multiplier = nullptr;
   if (SIMDDetect::IsAVX2Available()) {
     multiplier = new IntSimdMatrixAVX2();
   } else if (SIMDDetect::IsSSEAvailable()) {
@@ -41,8 +41,9 @@ IntSimdMatrix* IntSimdMatrix::GetFastestMultiplier() {
 
 // Computes a reshaped copy of the weight matrix w. If there are no
 // partial_funcs_, it does nothing.
-void IntSimdMatrix::Init(const GENERIC_2D_ARRAY<int8_t>& w) {
-  if (partial_funcs_.empty()) return;
+void IntSimdMatrix::Init(const GENERIC_2D_ARRAY<int8_t> &w) {
+  if (partial_funcs_.empty())
+    return;
   int num_out = w.dim1();
   int num_in = w.dim2() - 1;
   // The rounded-up sizes of the reshaped weight matrix, excluding biases.
@@ -79,7 +80,8 @@ void IntSimdMatrix::Init(const GENERIC_2D_ARRAY<int8_t>& w) {
       // Append the bias weights for the register set.
       for (int j = 0; j < num_outputs_per_register_set; ++j) {
         int8_t weight = 0;
-        if (output + j < num_out) weight = w(output + j, num_in);
+        if (output + j < num_out)
+          weight = w(output + j, num_in);
         shaped_w_[shaped_index++] = weight;
       }
       output += num_outputs_per_register_set;
@@ -91,23 +93,24 @@ void IntSimdMatrix::Init(const GENERIC_2D_ARRAY<int8_t>& w) {
 // u is of size W.dim2() - 1 and the output v is of size W.dim1().
 // u is imagined to have an extra element at the end with value 1, to
 // implement the bias, but it doesn't actually have it.
-void IntSimdMatrix::MatrixDotVector(const GENERIC_2D_ARRAY<int8_t>& w,
-                                    const GenericVector<double>& scales,
-                                    const int8_t* u, double* v) const {
+void IntSimdMatrix::MatrixDotVector(const GENERIC_2D_ARRAY<int8_t> &w,
+                                    const GenericVector<double> &scales,
+                                    const int8_t *u, double *v) const {
   int num_out = w.dim1();
   int num_in = w.dim2() - 1;
   if (partial_funcs_.empty()) {
     // Base implementation.
     for (int i = 0; i < num_out; ++i) {
-      const int8_t* wi = w[i];
+      const int8_t *wi = w[i];
       int total = 0;
-      for (int j = 0; j < num_in; ++j) total += wi[j] * u[j];
+      for (int j = 0; j < num_in; ++j)
+        total += wi[j] * u[j];
       // Add in the bias and correct for integer values.
       v[i] = (static_cast<double>(total) / MAX_INT8 + wi[num_in]) * scales[i];
     }
   } else {
-    const int8_t* w_data = shaped_w_.data();
-    const double* scales_data = &scales[0];
+    const int8_t *w_data = shaped_w_.data();
+    const double *scales_data = &scales[0];
     // Each call to a partial_func_ produces group_size outputs, except the
     // last one, which can produce less.
     int group_size = num_outputs_per_register_ * max_output_registers_;
@@ -130,4 +133,4 @@ void IntSimdMatrix::MatrixDotVector(const GENERIC_2D_ARRAY<int8_t>& w,
   }
 }
 
-}  // namespace tesseract
+} // namespace tesseract

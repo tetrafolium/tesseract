@@ -16,12 +16,11 @@
  ** limitations under the License.
  ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "stopper.h"
 #include "ambigs.h"
 #include "ccutil.h"
 #include "const.h"
@@ -34,11 +33,12 @@
 #include "params.h"
 #include "ratngs.h"
 #include "scanutils.h"
+#include "stopper.h"
 #include "unichar.h"
 
 #ifdef _MSC_VER
-#pragma warning(disable:4244)  // Conversion warnings
-#pragma warning(disable:4800)  // int/bool warnings
+#pragma warning(disable : 4244) // Conversion warnings
+#pragma warning(disable : 4800) // int/bool warnings
 #endif
 
 /*----------------------------------------------------------------------------
@@ -47,14 +47,16 @@
 
 namespace tesseract {
 
-bool Dict::AcceptableChoice(const WERD_CHOICE& best_choice,
+bool Dict::AcceptableChoice(const WERD_CHOICE &best_choice,
                             XHeightConsistencyEnum xheight_consistency) {
   float CertaintyThreshold = stopper_nondict_certainty_base;
   int WordSize;
 
-  if (stopper_no_acceptable_choices) return false;
+  if (stopper_no_acceptable_choices)
+    return false;
 
-  if (best_choice.length() == 0) return false;
+  if (best_choice.length() == 0)
+    return false;
 
   bool no_dang_ambigs = !best_choice.dangerous_ambig_found();
   bool is_valid_word = valid_word_permuter(best_choice.permuter(), false);
@@ -63,21 +65,26 @@ bool Dict::AcceptableChoice(const WERD_CHOICE& best_choice,
   if (stopper_debug_level >= 1) {
     const char *xht = "UNKNOWN";
     switch (xheight_consistency) {
-      case XH_GOOD:  xht = "NORMAL"; break;
-      case XH_SUBNORMAL:  xht = "SUBNORMAL"; break;
-      case XH_INCONSISTENT:  xht = "INCONSISTENT"; break;
-      default: xht = "UNKNOWN";
+    case XH_GOOD:
+      xht = "NORMAL";
+      break;
+    case XH_SUBNORMAL:
+      xht = "SUBNORMAL";
+      break;
+    case XH_INCONSISTENT:
+      xht = "INCONSISTENT";
+      break;
+    default:
+      xht = "UNKNOWN";
     }
     tprintf("\nStopper:  %s (word=%c, case=%c, xht_ok=%s=[%g,%g])\n",
-            best_choice.unichar_string().string(),
-            (is_valid_word ? 'y' : 'n'),
-            (is_case_ok ? 'y' : 'n'),
-            xht,
-            best_choice.min_x_height(),
+            best_choice.unichar_string().string(), (is_valid_word ? 'y' : 'n'),
+            (is_case_ok ? 'y' : 'n'), xht, best_choice.min_x_height(),
             best_choice.max_x_height());
   }
   // Do not accept invalid words in PASS1.
-  if (reject_offset_ <= 0.0f && !is_valid_word) return false;
+  if (reject_offset_ <= 0.0f && !is_valid_word)
+    return false;
   if (is_valid_word && is_case_ok) {
     WordSize = LengthOfShortestAlphaRun(best_choice);
     WordSize -= stopper_smallword_size;
@@ -90,8 +97,7 @@ bool Dict::AcceptableChoice(const WERD_CHOICE& best_choice,
     tprintf("Stopper:  Rating = %4.1f, Certainty = %4.1f, Threshold = %4.1f\n",
             best_choice.rating(), best_choice.certainty(), CertaintyThreshold);
 
-  if (no_dang_ambigs &&
-      best_choice.certainty() > CertaintyThreshold &&
+  if (no_dang_ambigs && best_choice.certainty() > CertaintyThreshold &&
       xheight_consistency < XH_INCONSISTENT &&
       UniformCertainties(best_choice)) {
     return true;
@@ -99,8 +105,7 @@ bool Dict::AcceptableChoice(const WERD_CHOICE& best_choice,
     if (stopper_debug_level >= 1) {
       tprintf("AcceptableChoice() returned false"
               " (no_dang_ambig:%d cert:%.4g thresh:%g uniform:%d)\n",
-              no_dang_ambigs, best_choice.certainty(),
-              CertaintyThreshold,
+              no_dang_ambigs, best_choice.certainty(), CertaintyThreshold,
               UniformCertainties(best_choice));
     }
     return false;
@@ -108,7 +113,8 @@ bool Dict::AcceptableChoice(const WERD_CHOICE& best_choice,
 }
 
 bool Dict::AcceptableResult(WERD_RES *word) const {
-  if (word->best_choice == NULL) return false;
+  if (word->best_choice == NULL)
+    return false;
   float CertaintyThreshold = stopper_nondict_certainty_base - reject_offset_;
   int WordSize;
 
@@ -148,10 +154,8 @@ bool Dict::AcceptableResult(WERD_RES *word) const {
   }
 }
 
-bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
-                            DANGERR *fixpt,
-                            bool fix_replaceable,
-                            MATRIX *ratings) {
+bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice, DANGERR *fixpt,
+                            bool fix_replaceable, MATRIX *ratings) {
   if (stopper_debug_level > 2) {
     tprintf("\nRunning NoDangerousAmbig() for %s\n",
             best_choice->debug_string().string());
@@ -179,8 +183,9 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
   // if replacements are made the length of best_choice might change.
   for (int pass = 0; pass < (fix_replaceable ? 2 : 1); ++pass) {
     bool replace = (fix_replaceable && pass == 0);
-    const UnicharAmbigsVector &table = replace ?
-      getUnicharAmbigs().replace_ambigs() : getUnicharAmbigs().dang_ambigs();
+    const UnicharAmbigsVector &table = replace
+                                           ? getUnicharAmbigs().replace_ambigs()
+                                           : getUnicharAmbigs().dang_ambigs();
     if (!replace) {
       // Initialize ambig_blob_choices with lists containing a single
       // unichar id for the correspoding position in best_choice.
@@ -190,8 +195,8 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
         BLOB_CHOICE_LIST *lst = new BLOB_CHOICE_LIST();
         BLOB_CHOICE_IT lst_it(lst);
         // TODO(rays/antonova) Put real xheights and y shifts here.
-        lst_it.add_to_end(new BLOB_CHOICE(best_choice->unichar_id(i),
-                                          0.0, 0.0, -1, 0, 1, 0, BCC_AMBIG));
+        lst_it.add_to_end(new BLOB_CHOICE(best_choice->unichar_id(i), 0.0, 0.0,
+                                          -1, 0, 1, 0, BCC_AMBIG));
         ambig_blob_choices.push_back(lst);
       }
     }
@@ -199,8 +204,8 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
     int wrong_ngram_index;
     int next_index;
     int blob_index = 0;
-    for (i = 0; i < best_choice->length(); blob_index += best_choice->state(i),
-         ++i) {
+    for (i = 0; i < best_choice->length();
+         blob_index += best_choice->state(i), ++i) {
       UNICHAR_ID curr_unichar_id = best_choice->unichar_id(i);
       if (stopper_debug_level > 2) {
         tprintf("Looking for %s ngrams starting with %s:\n",
@@ -211,16 +216,15 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
       wrong_ngram_index = 0;
       wrong_ngram[wrong_ngram_index] = curr_unichar_id;
       if (curr_unichar_id == INVALID_UNICHAR_ID ||
-          curr_unichar_id >= table.size() ||
-          table[curr_unichar_id] == NULL) {
-        continue;  // there is no ambig spec for this unichar id
+          curr_unichar_id >= table.size() || table[curr_unichar_id] == NULL) {
+        continue; // there is no ambig spec for this unichar id
       }
       AmbigSpec_IT spec_it(table[curr_unichar_id]);
       for (spec_it.mark_cycle_pt(); !spec_it.cycled_list();) {
         const AmbigSpec *ambig_spec = spec_it.data();
-        wrong_ngram[wrong_ngram_index+1] = INVALID_UNICHAR_ID;
-        int compare = UnicharIdArrayUtils::compare(wrong_ngram,
-                                                   ambig_spec->wrong_ngram);
+        wrong_ngram[wrong_ngram_index + 1] = INVALID_UNICHAR_ID;
+        int compare =
+            UnicharIdArrayUtils::compare(wrong_ngram, ambig_spec->wrong_ngram);
         if (stopper_debug_level > 2) {
           tprintf("candidate ngram: ");
           UnicharIdArrayUtils::print(wrong_ngram, getUnicharset());
@@ -239,29 +243,27 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
             if (stopper_debug_level > 1) {
               tprintf("fixpt+=(%d %d %d %d %s)\n", blob_index,
                       blob_index + num_wrong_blobs, false,
-                      getUnicharset().get_isngram(
-                          ambig_spec->correct_ngram_id),
+                      getUnicharset().get_isngram(ambig_spec->correct_ngram_id),
                       getUnicharset().id_to_unichar(leftmost_id));
             }
           }
 
           if (replace) {
             if (stopper_debug_level > 2) {
-              tprintf("replace ambiguity with %s : ",
-                      getUnicharset().id_to_unichar(
-                          ambig_spec->correct_ngram_id));
-              UnicharIdArrayUtils::print(
-                  ambig_spec->correct_fragments, getUnicharset());
+              tprintf(
+                  "replace ambiguity with %s : ",
+                  getUnicharset().id_to_unichar(ambig_spec->correct_ngram_id));
+              UnicharIdArrayUtils::print(ambig_spec->correct_fragments,
+                                         getUnicharset());
             }
             ReplaceAmbig(i, ambig_spec->wrong_ngram_size,
-                         ambig_spec->correct_ngram_id,
-                         best_choice, ratings);
+                         ambig_spec->correct_ngram_id, best_choice, ratings);
           } else if (i > 0 || ambig_spec->type != CASE_AMBIG) {
             // We found dang ambig - update ambig_blob_choices.
             if (stopper_debug_level > 2) {
               tprintf("found ambiguity: ");
-              UnicharIdArrayUtils::print(
-                  ambig_spec->correct_fragments, getUnicharset());
+              UnicharIdArrayUtils::print(ambig_spec->correct_fragments,
+                                         getUnicharset());
             }
             ambigs_found = true;
             for (int tmp_index = 0; tmp_index <= wrong_ngram_index;
@@ -273,30 +275,31 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
               // word not consisting of only the original letters a better
               // choice and stops searching for alternatives once such a
               // choice is found.
-              BLOB_CHOICE_IT bc_it(ambig_blob_choices[i+tmp_index]);
-              bc_it.add_to_end(new BLOB_CHOICE(
-                  ambig_spec->correct_fragments[tmp_index], -1.0, 0.0,
-                  -1, 0, 1, 0, BCC_AMBIG));
+              BLOB_CHOICE_IT bc_it(ambig_blob_choices[i + tmp_index]);
+              bc_it.add_to_end(
+                  new BLOB_CHOICE(ambig_spec->correct_fragments[tmp_index],
+                                  -1.0, 0.0, -1, 0, 1, 0, BCC_AMBIG));
             }
           }
           spec_it.forward();
         } else if (compare == -1) {
-          if (wrong_ngram_index+1 < ambig_spec->wrong_ngram_size &&
-              ((next_index = wrong_ngram_index+1+i) < best_choice->length())) {
+          if (wrong_ngram_index + 1 < ambig_spec->wrong_ngram_size &&
+              ((next_index = wrong_ngram_index + 1 + i) <
+               best_choice->length())) {
             // Add the next unichar id to wrong_ngram and keep looking for
             // more ambigs starting with curr_unichar_id in AMBIG_SPEC_LIST.
             wrong_ngram[++wrong_ngram_index] =
-              best_choice->unichar_id(next_index);
+                best_choice->unichar_id(next_index);
             num_wrong_blobs += best_choice->state(next_index);
           } else {
-            break;  // no more matching ambigs in this AMBIG_SPEC_LIST
+            break; // no more matching ambigs in this AMBIG_SPEC_LIST
           }
         } else {
           spec_it.forward();
         }
-      }  // end searching AmbigSpec_LIST
-    }  // end searching best_choice
-  }  // end searching replace and dangerous ambigs
+      } // end searching AmbigSpec_LIST
+    }   // end searching best_choice
+  }     // end searching replace and dangerous ambigs
 
   // If any ambiguities were found permute the constructed ambig_blob_choices
   // to see if an alternative dictionary word can be found.
@@ -312,8 +315,8 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
     ambigs_found = (alt_word->rating() < 0.0);
     if (ambigs_found) {
       if (stopper_debug_level >= 1) {
-        tprintf ("Stopper: Possible ambiguous word = %s\n",
-                 alt_word->debug_string().string());
+        tprintf("Stopper: Possible ambiguous word = %s\n",
+                alt_word->debug_string().string());
       }
       if (fixpt != NULL) {
         // Note: Currently character choices combined from fragments can only
@@ -330,7 +333,8 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
             // we have to extract the leftmost unichar from the ngram.
             const char *str = uchset.id_to_unichar(leftmost_id);
             int step = uchset.step(str);
-            if (step) leftmost_id = uchset.unichar_to_id(str, step);
+            if (step)
+              leftmost_id = uchset.unichar_to_id(str, step);
           }
           int end_i = orig_i + alt_word->state(i);
           if (alt_word->state(i) > 1 ||
@@ -366,9 +370,7 @@ bool Dict::NoDangerousAmbig(WERD_CHOICE *best_choice,
 
 void Dict::EndDangerousAmbigs() {}
 
-void Dict::SettupStopperPass1() {
-  reject_offset_ = 0.0;
-}
+void Dict::SettupStopperPass1() { reject_offset_ = 0.0; }
 
 void Dict::SettupStopperPass2() {
   reject_offset_ = stopper_phase2_certainty_rejection_offset;
@@ -384,13 +386,13 @@ void Dict::ReplaceAmbig(int wrong_ngram_begin_index, int wrong_ngram_size,
   // replaced choices.
   float new_rating = 0.0f;
   float new_certainty = 0.0f;
-  BLOB_CHOICE* old_choice = NULL;
+  BLOB_CHOICE *old_choice = NULL;
   for (i = 0; i < wrong_ngram_begin_index + wrong_ngram_size; ++i) {
     if (i >= wrong_ngram_begin_index) {
       int num_blobs = werd_choice->state(i);
       int col = begin_blob_index + num_blobs_to_replace;
       int row = col + num_blobs - 1;
-      BLOB_CHOICE_LIST* choices = ratings->get(col, row);
+      BLOB_CHOICE_LIST *choices = ratings->get(col, row);
       ASSERT_HOST(choices != NULL);
       old_choice = FindMatchingChoice(werd_choice->unichar_id(i), choices);
       ASSERT_HOST(old_choice != NULL);
@@ -410,8 +412,8 @@ void Dict::ReplaceAmbig(int wrong_ngram_begin_index, int wrong_ngram_size,
   }
   if (ratings->get(coord.col, coord.row) == NULL)
     ratings->put(coord.col, coord.row, new BLOB_CHOICE_LIST);
-  BLOB_CHOICE_LIST* new_choices = ratings->get(coord.col, coord.row);
-  BLOB_CHOICE* choice = FindMatchingChoice(correct_ngram_id, new_choices);
+  BLOB_CHOICE_LIST *new_choices = ratings->get(coord.col, coord.row);
+  BLOB_CHOICE *choice = FindMatchingChoice(correct_ngram_id, new_choices);
   if (choice != NULL) {
     // Already there. Upgrade if new rating better.
     if (new_rating < choice->rating())
@@ -427,7 +429,7 @@ void Dict::ReplaceAmbig(int wrong_ngram_begin_index, int wrong_ngram_size,
     choice->set_certainty(new_certainty);
     choice->set_classifier(BCC_AMBIG);
     choice->set_matrix_cell(coord.col, coord.row);
-    BLOB_CHOICE_IT it (new_choices);
+    BLOB_CHOICE_IT it(new_choices);
     it.add_to_end(choice);
   }
   // Remove current unichar from werd_choice. On the last iteration
@@ -442,9 +444,9 @@ void Dict::ReplaceAmbig(int wrong_ngram_begin_index, int wrong_ngram_size,
     }
   }
   if (stopper_debug_level >= 1) {
-      werd_choice->print("ReplaceAmbig() ");
-      tprintf("Modified blob_choices: ");
-      print_ratings_list("\n", new_choices, getUnicharset());
+    werd_choice->print("ReplaceAmbig() ");
+    tprintf("Modified blob_choices: ");
+    print_ratings_list("\n", new_choices, getUnicharset());
   }
 }
 
@@ -455,7 +457,8 @@ int Dict::LengthOfShortestAlphaRun(const WERD_CHOICE &WordChoice) const {
     if (getUnicharset().get_isalpha(WordChoice.unichar_id(w))) {
       curr_len++;
     } else if (curr_len > 0) {
-      if (curr_len < shortest) shortest = curr_len;
+      if (curr_len < shortest)
+        shortest = curr_len;
       curr_len = 0;
     }
   }
@@ -467,7 +470,7 @@ int Dict::LengthOfShortestAlphaRun(const WERD_CHOICE &WordChoice) const {
   return shortest;
 }
 
-int Dict::UniformCertainties(const WERD_CHOICE& word) {
+int Dict::UniformCertainties(const WERD_CHOICE &word) {
   float Certainty;
   float WorstCertainty = MAX_FLOAT32;
   float CertaintyThreshold;
@@ -495,9 +498,9 @@ int Dict::UniformCertainties(const WERD_CHOICE& word) {
   TotalCertaintySquared -= WorstCertainty * WorstCertainty;
 
   Mean = TotalCertainty / word_length;
-  Variance = ((word_length * TotalCertaintySquared -
-    TotalCertainty * TotalCertainty) /
-    (word_length * (word_length - 1)));
+  Variance =
+      ((word_length * TotalCertaintySquared - TotalCertainty * TotalCertainty) /
+       (word_length * (word_length - 1)));
   if (Variance < 0.0)
     Variance = 0.0;
   StdDev = sqrt(Variance);

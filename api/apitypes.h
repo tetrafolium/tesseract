@@ -31,4 +31,4 @@
 // than the lower-level one, and lower-level code should be sure to include
 // only the lower-level file.
 
-#endif  // TESSERACT_API_APITYPES_H_
+#endif // TESSERACT_API_APITYPES_H_

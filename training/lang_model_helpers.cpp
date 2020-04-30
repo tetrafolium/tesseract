@@ -17,14 +17,14 @@
 #if defined(_WIN32)
 #include <direct.h>
 #endif
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <cstdlib>
 #include "dawg.h"
 #include "fileio.h"
 #include "tessdatamanager.h"
 #include "trie.h"
 #include "unicharcompress.h"
+#include <cstdlib>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace tesseract {
 
@@ -33,10 +33,11 @@ namespace tesseract {
 // Default writer will overwrite any existing file, but a supplied writer
 // can do its own thing. If lang is empty, returns true but does nothing.
 // NOTE that suffix should contain any required . for the filename.
-bool WriteFile(const string& output_dir, const string& lang,
-               const string& suffix, const GenericVector<char>& data,
+bool WriteFile(const string &output_dir, const string &lang,
+               const string &suffix, const GenericVector<char> &data,
                FileWriter writer) {
-  if (lang.empty()) return true;
+  if (lang.empty())
+    return true;
   string dirname = output_dir + "/" + lang;
   // Attempt to make the directory, but ignore errors, as it may not be a
   // standard filesystem, and the writer will complain if not successful.
@@ -54,27 +55,30 @@ bool WriteFile(const string& output_dir, const string& lang,
 
 // Helper reads a file with optional reader and returns a STRING.
 // On failure emits a warning message and returns and empty STRING.
-STRING ReadFile(const string& filename, FileReader reader) {
-  if (filename.empty()) return STRING();
+STRING ReadFile(const string &filename, FileReader reader) {
+  if (filename.empty())
+    return STRING();
   GenericVector<char> data;
   bool read_result;
   if (reader == nullptr)
     read_result = LoadDataFromFile(filename.c_str(), &data);
   else
     read_result = (*reader)(filename.c_str(), &data);
-  if (read_result) return STRING(&data[0], data.size());
+  if (read_result)
+    return STRING(&data[0], data.size());
   tprintf("Failed to read data from: %s\n", filename.c_str());
   return STRING();
 }
 
 // Helper writes the unicharset to file and to the traineddata.
-bool WriteUnicharset(const UNICHARSET& unicharset, const string& output_dir,
-                     const string& lang, FileWriter writer,
-                     TessdataManager* traineddata) {
+bool WriteUnicharset(const UNICHARSET &unicharset, const string &output_dir,
+                     const string &lang, FileWriter writer,
+                     TessdataManager *traineddata) {
   GenericVector<char> unicharset_data;
   TFile fp;
   fp.OpenWrite(&unicharset_data);
-  if (!unicharset.save_to_file(&fp)) return false;
+  if (!unicharset.save_to_file(&fp))
+    return false;
   traineddata->OverwriteEntry(TESSDATA_LSTM_UNICHARSET, &unicharset_data[0],
                               unicharset_data.size());
   return WriteFile(output_dir, lang, ".unicharset", unicharset_data, writer);
@@ -82,10 +86,10 @@ bool WriteUnicharset(const UNICHARSET& unicharset, const string& output_dir,
 
 // Helper creates the recoder and writes it to the traineddata, and a human-
 // readable form to file.
-bool WriteRecoder(const UNICHARSET& unicharset, bool pass_through,
-                  const string& output_dir, const string& lang,
-                  FileWriter writer, STRING* radical_table_data,
-                  TessdataManager* traineddata) {
+bool WriteRecoder(const UNICHARSET &unicharset, bool pass_through,
+                  const string &output_dir, const string &lang,
+                  FileWriter writer, STRING *radical_table_data,
+                  TessdataManager *traineddata) {
   UnicharCompress recoder;
   // Where the unicharset is carefully setup already to contain a good
   // compact encoding, use a pass-through recoder that does nothing.
@@ -109,7 +113,8 @@ bool WriteRecoder(const UNICHARSET& unicharset, bool pass_through,
   TFile fp;
   GenericVector<char> recoder_data;
   fp.OpenWrite(&recoder_data);
-  if (!recoder.Serialize(&fp)) return false;
+  if (!recoder.Serialize(&fp))
+    return false;
   traineddata->OverwriteEntry(TESSDATA_LSTM_RECODER, &recoder_data[0],
                               recoder_data.size());
   STRING encoding = recoder.GetEncodingAsString(unicharset);
@@ -123,20 +128,22 @@ bool WriteRecoder(const UNICHARSET& unicharset, bool pass_through,
 
 // Helper builds a dawg from the given words, using the unicharset as coding,
 // and reverse_policy for LTR/RTL, and overwrites file_type in the traineddata.
-static bool WriteDawg(const GenericVector<STRING>& words,
-                      const UNICHARSET& unicharset,
+static bool WriteDawg(const GenericVector<STRING> &words,
+                      const UNICHARSET &unicharset,
                       Trie::RTLReversePolicy reverse_policy,
-                      TessdataType file_type, TessdataManager* traineddata) {
+                      TessdataType file_type, TessdataManager *traineddata) {
   // The first 3 arguments are not used in this case.
   Trie trie(DAWG_TYPE_WORD, "", SYSTEM_DAWG_PERM, unicharset.size(), 0);
   trie.add_word_list(words, unicharset, reverse_policy);
   tprintf("Reducing Trie to SquishedDawg\n");
   std::unique_ptr<SquishedDawg> dawg(trie.trie_to_dawg());
-  if (dawg == nullptr || dawg->NumEdges() == 0) return false;
+  if (dawg == nullptr || dawg->NumEdges() == 0)
+    return false;
   TFile fp;
   GenericVector<char> dawg_data;
   fp.OpenWrite(&dawg_data);
-  if (!dawg->write_squished_dawg(&fp)) return false;
+  if (!dawg->write_squished_dawg(&fp))
+    return false;
   traineddata->OverwriteEntry(file_type, &dawg_data[0], dawg_data.size());
   return true;
 }
@@ -144,11 +151,11 @@ static bool WriteDawg(const GenericVector<STRING>& words,
 // Builds and writes the dawgs, given a set of words, punctuation
 // patterns, number patterns, to the traineddata. Encoding uses the given
 // unicharset, and the punc dawgs is reversed if lang_is_rtl.
-static bool WriteDawgs(const GenericVector<STRING>& words,
-                       const GenericVector<STRING>& puncs,
-                       const GenericVector<STRING>& numbers, bool lang_is_rtl,
-                       const UNICHARSET& unicharset,
-                       TessdataManager* traineddata) {
+static bool WriteDawgs(const GenericVector<STRING> &words,
+                       const GenericVector<STRING> &puncs,
+                       const GenericVector<STRING> &numbers, bool lang_is_rtl,
+                       const UNICHARSET &unicharset,
+                       TessdataManager *traineddata) {
   if (puncs.empty()) {
     tprintf("Must have non-empty puncs list to use language models!!\n");
     return false;
@@ -182,12 +189,12 @@ static bool WriteDawgs(const GenericVector<STRING>& words,
 
 // The main function for combine_lang_model.cpp.
 // Returns EXIT_SUCCESS or EXIT_FAILURE for error.
-int CombineLangModel(const UNICHARSET& unicharset, const string& script_dir,
-                     const string& version_str, const string& output_dir,
-                     const string& lang, bool pass_through_recoder,
-                     const GenericVector<STRING>& words,
-                     const GenericVector<STRING>& puncs,
-                     const GenericVector<STRING>& numbers, bool lang_is_rtl,
+int CombineLangModel(const UNICHARSET &unicharset, const string &script_dir,
+                     const string &version_str, const string &output_dir,
+                     const string &lang, bool pass_through_recoder,
+                     const GenericVector<STRING> &words,
+                     const GenericVector<STRING> &puncs,
+                     const GenericVector<STRING> &numbers, bool lang_is_rtl,
                      FileReader reader, FileWriter writer) {
   // Build the traineddata file.
   TessdataManager traineddata;
@@ -237,4 +244,4 @@ int CombineLangModel(const UNICHARSET& unicharset, const string& script_dir,
   return EXIT_SUCCESS;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

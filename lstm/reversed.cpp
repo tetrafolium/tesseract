@@ -24,15 +24,14 @@
 
 namespace tesseract {
 
-Reversed::Reversed(const STRING& name, NetworkType type) : Plumbing(name) {
+Reversed::Reversed(const STRING &name, NetworkType type) : Plumbing(name) {
   type_ = type;
 }
-Reversed::~Reversed() {
-}
+Reversed::~Reversed() {}
 
 // Returns the shape output from the network given an input shape (which may
 // be partially unknown ie zero).
-StaticShape Reversed::OutputShape(const StaticShape& input_shape) const {
+StaticShape Reversed::OutputShape(const StaticShape &input_shape) const {
   if (type_ == NT_XYTRANSPOSE) {
     StaticShape x_shape(input_shape);
     x_shape.set_width(input_shape.height());
@@ -46,16 +45,16 @@ StaticShape Reversed::OutputShape(const StaticShape& input_shape) const {
 }
 
 // Takes ownership of the given network to make it the reversed one.
-void Reversed::SetNetwork(Network* network) {
+void Reversed::SetNetwork(Network *network) {
   stack_.clear();
   AddToStack(network);
 }
 
 // Runs forward propagation of activations on the input line.
 // See NetworkCpp for a detailed discussion of the arguments.
-void Reversed::Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output) {
+void Reversed::Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output) {
   NetworkScratch::IO rev_input(input, scratch);
   ReverseData(input, rev_input);
   NetworkScratch::IO rev_output(input, scratch);
@@ -65,9 +64,8 @@ void Reversed::Forward(bool debug, const NetworkIO& input,
 
 // Runs backward propagation of errors on the deltas line.
 // See NetworkCpp for a detailed discussion of the arguments.
-bool Reversed::Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas) {
+bool Reversed::Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas) {
   NetworkScratch::IO rev_input(fwd_deltas, scratch);
   ReverseData(fwd_deltas, rev_input);
   NetworkScratch::IO rev_output(fwd_deltas, scratch);
@@ -79,7 +77,7 @@ bool Reversed::Backward(bool debug, const NetworkIO& fwd_deltas,
 }
 
 // Copies src to *dest with the reversal according to type_.
-void Reversed::ReverseData(const NetworkIO& src, NetworkIO* dest) const {
+void Reversed::ReverseData(const NetworkIO &src, NetworkIO *dest) const {
   if (type_ == NT_XREVERSED)
     dest->CopyWithXReversal(src);
   else if (type_ == NT_YREVERSED)
@@ -88,4 +86,4 @@ void Reversed::ReverseData(const NetworkIO& src, NetworkIO* dest) const {
     dest->CopyWithXYTranspose(src);
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

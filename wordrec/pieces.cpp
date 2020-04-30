@@ -53,27 +53,27 @@ using tesseract::ScoredFont;
  * the collection of small pieces un modified.
  **********************************************************************/
 namespace tesseract {
-BLOB_CHOICE_LIST *Wordrec::classify_piece(const GenericVector<SEAM*>& seams,
-                                          inT16 start,
-                                          inT16 end,
-                                          const char* description,
-                                          TWERD *word,
+BLOB_CHOICE_LIST *Wordrec::classify_piece(const GenericVector<SEAM *> &seams,
+                                          inT16 start, inT16 end,
+                                          const char *description, TWERD *word,
                                           BlamerBundle *blamer_bundle) {
-  if (end > start) SEAM::JoinPieces(seams, word->blobs, start, end);
-  BLOB_CHOICE_LIST *choices = classify_blob(word->blobs[start], description,
-                                            White, blamer_bundle);
+  if (end > start)
+    SEAM::JoinPieces(seams, word->blobs, start, end);
+  BLOB_CHOICE_LIST *choices =
+      classify_blob(word->blobs[start], description, White, blamer_bundle);
   // Set the matrix_cell_ entries in all the BLOB_CHOICES.
   BLOB_CHOICE_IT bc_it(choices);
   for (bc_it.mark_cycle_pt(); !bc_it.cycled_list(); bc_it.forward()) {
     bc_it.data()->set_matrix_cell(start, end);
   }
 
-  if (end > start) SEAM::BreakPieces(seams, word->blobs, start, end);
+  if (end > start)
+    SEAM::BreakPieces(seams, word->blobs, start, end);
 
   return (choices);
 }
 
-template<class BLOB_CHOICE>
+template <class BLOB_CHOICE>
 int SortByUnicharID(const void *void1, const void *void2) {
   const BLOB_CHOICE *p1 = *static_cast<const BLOB_CHOICE *const *>(void1);
   const BLOB_CHOICE *p2 = *static_cast<const BLOB_CHOICE *const *>(void2);
@@ -81,7 +81,7 @@ int SortByUnicharID(const void *void1, const void *void2) {
   return p1->unichar_id() - p2->unichar_id();
 }
 
-template<class BLOB_CHOICE>
+template <class BLOB_CHOICE>
 int SortByRating(const void *void1, const void *void2) {
   const BLOB_CHOICE *p1 = *static_cast<const BLOB_CHOICE *const *>(void1);
   const BLOB_CHOICE *p2 = *static_cast<const BLOB_CHOICE *const *>(void2);
@@ -90,7 +90,6 @@ int SortByRating(const void *void1, const void *void2) {
     return 1;
   return -1;
 }
-
 
 /**********************************************************************
  * fill_filtered_fragment_list
@@ -103,8 +102,7 @@ int SortByRating(const void *void1, const void *void2) {
  * filtered_choices.
  **********************************************************************/
 void Wordrec::fill_filtered_fragment_list(BLOB_CHOICE_LIST *choices,
-                                          int fragment_pos,
-                                          int num_frag_parts,
+                                          int fragment_pos, int num_frag_parts,
                                           BLOB_CHOICE_LIST *filtered_choices) {
   BLOB_CHOICE_IT filtered_choices_it(filtered_choices);
   BLOB_CHOICE_IT choices_it(choices);
@@ -127,7 +125,6 @@ void Wordrec::fill_filtered_fragment_list(BLOB_CHOICE_LIST *choices,
 
   filtered_choices->sort(SortByUnicharID<BLOB_CHOICE>);
 }
-
 
 /**********************************************************************
  * merge_and_put_fragment_lists
@@ -167,8 +164,7 @@ void Wordrec::merge_and_put_fragment_lists(inT16 row, inT16 column,
     // value greater than or equal to max_unichar_id
     for (int i = 0; i < num_frag_parts; i++) {
       UNICHAR_ID unichar_id = choice_lists_it[i].data()->unichar_id();
-      while (!choice_lists_it[i].cycled_list() &&
-             unichar_id < max_unichar_id) {
+      while (!choice_lists_it[i].cycled_list() && unichar_id < max_unichar_id) {
         choice_lists_it[i].forward();
         unichar_id = choice_lists_it[i].data()->unichar_id();
       }
@@ -219,17 +215,21 @@ void Wordrec::merge_and_put_fragment_lists(inT16 row, inT16 column,
                        choice_lists_it[i].data()->max_xheight(),
                        &merged_min_xheight, &merged_max_xheight);
         float yshift = choice_lists_it[i].data()->yshift();
-        if (yshift > positive_yshift) positive_yshift = yshift;
-        if (yshift < negative_yshift) negative_yshift = yshift;
+        if (yshift > positive_yshift)
+          positive_yshift = yshift;
+        if (yshift < negative_yshift)
+          negative_yshift = yshift;
         // Use the min font rating over the parts.
         // TODO(rays) font lists are unsorted. Need to be faster?
-        const GenericVector<ScoredFont>& frag_fonts =
+        const GenericVector<ScoredFont> &frag_fonts =
             choice_lists_it[i].data()->fonts();
         for (int f = 0; f < frag_fonts.size(); ++f) {
           int merged_f = 0;
-          for (merged_f = 0; merged_f < merged_fonts.size() &&
+          for (merged_f = 0;
+               merged_f < merged_fonts.size() &&
                merged_fonts[merged_f].fontinfo_id != frag_fonts[f].fontinfo_id;
-               ++merged_f) {}
+               ++merged_f) {
+          }
           if (merged_f == merged_fonts.size()) {
             merged_fonts.push_back(frag_fonts[f]);
           } else if (merged_fonts[merged_f].score > frag_fonts[f].score) {
@@ -239,31 +239,25 @@ void Wordrec::merge_and_put_fragment_lists(inT16 row, inT16 column,
       }
 
       float merged_yshift = positive_yshift != 0
-          ? (negative_yshift != 0 ? 0 : positive_yshift)
-          : negative_yshift;
-      BLOB_CHOICE* choice = new BLOB_CHOICE(merged_unichar_id,
-                                            merged_rating,
-                                            merged_certainty,
-                                            merged_script_id,
-                                            merged_min_xheight,
-                                            merged_max_xheight,
-                                            merged_yshift,
-                                            classifier);
+                                ? (negative_yshift != 0 ? 0 : positive_yshift)
+                                : negative_yshift;
+      BLOB_CHOICE *choice = new BLOB_CHOICE(
+          merged_unichar_id, merged_rating, merged_certainty, merged_script_id,
+          merged_min_xheight, merged_max_xheight, merged_yshift, classifier);
       choice->set_fonts(merged_fonts);
       merged_choice_it.add_to_end(choice);
     }
   }
 
   if (classify_debug_level)
-    print_ratings_list("Merged Fragments", merged_choice,
-                       unicharset);
+    print_ratings_list("Merged Fragments", merged_choice, unicharset);
 
   if (merged_choice->empty())
     delete merged_choice;
   else
     ratings->put(row, column, merged_choice);
 
-  delete [] choice_lists_it;
+  delete[] choice_lists_it;
 }
 
 /**********************************************************************
@@ -303,7 +297,6 @@ void Wordrec::get_fragment_lists(inT16 current_frag, inT16 current_row,
   }
 }
 
-
 /**********************************************************************
  * merge_fragments
  *
@@ -315,8 +308,8 @@ void Wordrec::merge_fragments(MATRIX *ratings, inT16 num_blobs) {
   for (inT16 start = 0; start < num_blobs; start++) {
     for (int frag_parts = 2; frag_parts <= CHAR_FRAGMENT::kMaxChunks;
          frag_parts++) {
-      get_fragment_lists(0, start, start, frag_parts, num_blobs,
-                         ratings, choice_lists);
+      get_fragment_lists(0, start, start, frag_parts, num_blobs, ratings,
+                         choice_lists);
     }
   }
 
@@ -339,5 +332,4 @@ void Wordrec::merge_fragments(MATRIX *ratings, inT16 num_blobs) {
   }
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

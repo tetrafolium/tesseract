@@ -44,16 +44,16 @@ namespace tesseract {
 // Returns false if something failed.
 bool NetworkBuilder::InitNetwork(int num_outputs, STRING network_spec,
                                  int append_index, int net_flags,
-                                 float weight_range, TRand* randomizer,
-                                 Network** network) {
+                                 float weight_range, TRand *randomizer,
+                                 Network **network) {
   NetworkBuilder builder(num_outputs);
-  Series* bottom_series = NULL;
+  Series *bottom_series = NULL;
   StaticShape input_shape;
   if (append_index >= 0) {
     // Split the current network after the given append_index.
     ASSERT_HOST(*network != NULL && (*network)->type() == NT_SERIES);
-    Series* series = static_cast<Series*>(*network);
-    Series* top_series = NULL;
+    Series *series = static_cast<Series *>(*network);
+    Series *top_series = NULL;
     series->SplitAt(append_index, &bottom_series, &top_series);
     if (bottom_series == NULL || top_series == NULL) {
       tprintf("Yikes! Splitting current network failed!!\n");
@@ -62,9 +62,10 @@ bool NetworkBuilder::InitNetwork(int num_outputs, STRING network_spec,
     input_shape = bottom_series->OutputShape(input_shape);
     delete top_series;
   }
-  char* str_ptr = &network_spec[0];
+  char *str_ptr = &network_spec[0];
   *network = builder.BuildFromString(input_shape, &str_ptr);
-  if (*network == NULL) return false;
+  if (*network == NULL)
+    return false;
   (*network)->SetNetworkFlags(net_flags);
   (*network)->InitWeights(weight_range, randomizer);
   (*network)->SetupNeedsBackprop(false);
@@ -77,14 +78,15 @@ bool NetworkBuilder::InitNetwork(int num_outputs, STRING network_spec,
 }
 
 // Helper skips whitespace.
-static void SkipWhitespace(char** str) {
-  while (**str == ' ' || **str == '\t' || **str == '\n') ++*str;
+static void SkipWhitespace(char **str) {
+  while (**str == ' ' || **str == '\t' || **str == '\n')
+    ++*str;
 }
 
 // Parses the given string and returns a network according to the network
 // description language in networkbuilder.h
-Network* NetworkBuilder::BuildFromString(const StaticShape& input_shape,
-                                         char** str) {
+Network *NetworkBuilder::BuildFromString(const StaticShape &input_shape,
+                                         char **str) {
   SkipWhitespace(str);
   char code_ch = **str;
   if (code_ch == '[') {
@@ -95,32 +97,32 @@ Network* NetworkBuilder::BuildFromString(const StaticShape& input_shape,
     return ParseInput(str);
   }
   switch (code_ch) {
-    case '(':
-      return ParseParallel(input_shape, str);
-    case 'R':
-      return ParseR(input_shape, str);
-    case 'S':
-      return ParseS(input_shape, str);
-    case 'C':
-      return ParseC(input_shape, str);
-    case 'M':
-      return ParseM(input_shape, str);
-    case 'L':
-      return ParseLSTM(input_shape, str);
-    case 'F':
-      return ParseFullyConnected(input_shape, str);
-    case 'O':
-      return ParseOutput(input_shape, str);
-    default:
-      tprintf("Invalid network spec:%s\n", *str);
-      return nullptr;
+  case '(':
+    return ParseParallel(input_shape, str);
+  case 'R':
+    return ParseR(input_shape, str);
+  case 'S':
+    return ParseS(input_shape, str);
+  case 'C':
+    return ParseC(input_shape, str);
+  case 'M':
+    return ParseM(input_shape, str);
+  case 'L':
+    return ParseLSTM(input_shape, str);
+  case 'F':
+    return ParseFullyConnected(input_shape, str);
+  case 'O':
+    return ParseOutput(input_shape, str);
+  default:
+    tprintf("Invalid network spec:%s\n", *str);
+    return nullptr;
   }
   return nullptr;
 }
 
 // Parses an input specification and returns the result, which may include a
 // series.
-Network* NetworkBuilder::ParseInput(char** str) {
+Network *NetworkBuilder::ParseInput(char **str) {
   // There must be an input at this point.
   int length = 0;
   int batch, height, width, depth;
@@ -134,25 +136,26 @@ Network* NetworkBuilder::ParseInput(char** str) {
     return nullptr;
   }
   *str += length;
-  Input* input = new Input("Input", shape);
+  Input *input = new Input("Input", shape);
   // We want to allow [<input>rest of net... or <input>[rest of net... so we
   // have to check explicitly for '[' here.
   SkipWhitespace(str);
-  if (**str == '[') return ParseSeries(shape, input, str);
+  if (**str == '[')
+    return ParseSeries(shape, input, str);
   return input;
 }
 
 // Parses a sequential series of networks, defined by [<net><net>...].
-Network* NetworkBuilder::ParseSeries(const StaticShape& input_shape,
-                                     Input* input_layer, char** str) {
+Network *NetworkBuilder::ParseSeries(const StaticShape &input_shape,
+                                     Input *input_layer, char **str) {
   StaticShape shape = input_shape;
-  Series* series = new Series("Series");
+  Series *series = new Series("Series");
   ++*str;
   if (input_layer != nullptr) {
     series->AddToStack(input_layer);
     shape = input_layer->OutputShape(shape);
   }
-  Network* network = NULL;
+  Network *network = NULL;
   while (**str != '\0' && **str != ']' &&
          (network = BuildFromString(shape, str)) != NULL) {
     shape = network->OutputShape(shape);
@@ -168,11 +171,11 @@ Network* NetworkBuilder::ParseSeries(const StaticShape& input_shape,
 }
 
 // Parses a parallel set of networks, defined by (<net><net>...).
-Network* NetworkBuilder::ParseParallel(const StaticShape& input_shape,
-                                       char** str) {
-  Parallel* parallel = new Parallel("Parallel", NT_PARALLEL);
+Network *NetworkBuilder::ParseParallel(const StaticShape &input_shape,
+                                       char **str) {
+  Parallel *parallel = new Parallel("Parallel", NT_PARALLEL);
   ++*str;
-  Network* network = NULL;
+  Network *network = NULL;
   while (**str != '\0' && **str != ')' &&
          (network = BuildFromString(input_shape, str)) != NULL) {
     parallel->AddToStack(network);
@@ -187,15 +190,16 @@ Network* NetworkBuilder::ParseParallel(const StaticShape& input_shape,
 }
 
 // Parses a network that begins with 'R'.
-Network* NetworkBuilder::ParseR(const StaticShape& input_shape, char** str) {
+Network *NetworkBuilder::ParseR(const StaticShape &input_shape, char **str) {
   char dir = (*str)[1];
   if (dir == 'x' || dir == 'y') {
     STRING name = "Reverse";
     name += dir;
     *str += 2;
-    Network* network = BuildFromString(input_shape, str);
-    if (network == nullptr) return nullptr;
-    Reversed* rev =
+    Network *network = BuildFromString(input_shape, str);
+    if (network == nullptr)
+      return nullptr;
+    Reversed *rev =
         new Reversed(name, dir == 'y' ? NT_YREVERSED : NT_XREVERSED);
     rev->SetNetwork(network);
     return rev;
@@ -205,11 +209,11 @@ Network* NetworkBuilder::ParseR(const StaticShape& input_shape, char** str) {
     tprintf("Invalid R spec!:%s\n", *str);
     return nullptr;
   }
-  Parallel* parallel = new Parallel("Replicated", NT_REPLICATED);
-  char* str_copy = *str;
+  Parallel *parallel = new Parallel("Replicated", NT_REPLICATED);
+  char *str_copy = *str;
   for (int i = 0; i < replicas; ++i) {
     str_copy = *str;
-    Network* network = BuildFromString(input_shape, &str_copy);
+    Network *network = BuildFromString(input_shape, &str_copy);
     if (network == NULL) {
       tprintf("Invalid replicated network!\n");
       delete parallel;
@@ -222,7 +226,7 @@ Network* NetworkBuilder::ParseR(const StaticShape& input_shape, char** str) {
 }
 
 // Parses a network that begins with 'S'.
-Network* NetworkBuilder::ParseS(const StaticShape& input_shape, char** str) {
+Network *NetworkBuilder::ParseS(const StaticShape &input_shape, char **str) {
   int y = strtol(*str + 1, str, 10);
   if (**str == ',') {
     int x = strtol(*str + 1, str, 10);
@@ -243,27 +247,27 @@ Network* NetworkBuilder::ParseS(const StaticShape& input_shape, char** str) {
 // Helper returns the fully-connected type for the character code.
 static NetworkType NonLinearity(char func) {
   switch (func) {
-    case 's':
-      return NT_LOGISTIC;
-    case 't':
-      return NT_TANH;
-    case 'r':
-      return NT_RELU;
-    case 'l':
-      return NT_LINEAR;
-    case 'm':
-      return NT_SOFTMAX;
-    case 'p':
-      return NT_POSCLIP;
-    case 'n':
-      return NT_SYMCLIP;
-    default:
-      return NT_NONE;
+  case 's':
+    return NT_LOGISTIC;
+  case 't':
+    return NT_TANH;
+  case 'r':
+    return NT_RELU;
+  case 'l':
+    return NT_LINEAR;
+  case 'm':
+    return NT_SOFTMAX;
+  case 'p':
+    return NT_POSCLIP;
+  case 'n':
+    return NT_SYMCLIP;
+  default:
+    return NT_NONE;
   }
 }
 
 // Parses a network that begins with 'C'.
-Network* NetworkBuilder::ParseC(const StaticShape& input_shape, char** str) {
+Network *NetworkBuilder::ParseC(const StaticShape &input_shape, char **str) {
   NetworkType type = NonLinearity((*str)[1]);
   if (type == NT_NONE) {
     tprintf("Invalid nonlinearity on C-spec!: %s\n", *str);
@@ -281,8 +285,8 @@ Network* NetworkBuilder::ParseC(const StaticShape& input_shape, char** str) {
     // be slid over all batch,y,x.
     return new FullyConnected("Conv1x1", input_shape.depth(), d, type);
   }
-  Series* series = new Series("ConvSeries");
-  Convolve* convolve =
+  Series *series = new Series("ConvSeries");
+  Convolve *convolve =
       new Convolve("Convolve", input_shape.depth(), x / 2, y / 2);
   series->AddToStack(convolve);
   StaticShape fc_input = convolve->OutputShape(input_shape);
@@ -291,7 +295,7 @@ Network* NetworkBuilder::ParseC(const StaticShape& input_shape, char** str) {
 }
 
 // Parses a network that begins with 'M'.
-Network* NetworkBuilder::ParseM(const StaticShape& input_shape, char** str) {
+Network *NetworkBuilder::ParseM(const StaticShape &input_shape, char **str) {
   int y = 0, x = 0;
   if ((*str)[1] != 'p' || (y = strtol(*str + 2, str, 10)) <= 0 ||
       **str != ',' || (x = strtol(*str + 1, str, 10)) <= 0) {
@@ -302,10 +306,10 @@ Network* NetworkBuilder::ParseM(const StaticShape& input_shape, char** str) {
 }
 
 // Parses an LSTM network, either individual, bi- or quad-directional.
-Network* NetworkBuilder::ParseLSTM(const StaticShape& input_shape, char** str) {
+Network *NetworkBuilder::ParseLSTM(const StaticShape &input_shape, char **str) {
   bool two_d = false;
   NetworkType type = NT_LSTM;
-  char* spec_start = *str;
+  char *spec_start = *str;
   int chars_consumed = 1;
   int num_outputs = 0;
   char key = (*str)[chars_consumed], dir = 'f', dim = 'x';
@@ -343,22 +347,23 @@ Network* NetworkBuilder::ParseLSTM(const StaticShape& input_shape, char** str) {
     tprintf("Invalid number of states in L Spec!:%s\n", *str);
     return nullptr;
   }
-  Network* lstm = nullptr;
+  Network *lstm = nullptr;
   if (two_d) {
     lstm = BuildLSTMXYQuad(input_shape.depth(), num_states);
   } else {
-    if (num_outputs == 0) num_outputs = num_states;
+    if (num_outputs == 0)
+      num_outputs = num_states;
     STRING name(spec_start, *str - spec_start);
     lstm = new LSTM(name, input_shape.depth(), num_states, num_outputs, false,
                     type);
     if (dir != 'f') {
-      Reversed* rev = new Reversed("RevLSTM", NT_XREVERSED);
+      Reversed *rev = new Reversed("RevLSTM", NT_XREVERSED);
       rev->SetNetwork(lstm);
       lstm = rev;
     }
     if (dir == 'b') {
       name += "LTR";
-      Parallel* parallel = new Parallel("BidiLSTM", NT_PAR_RL_LSTM);
+      Parallel *parallel = new Parallel("BidiLSTM", NT_PAR_RL_LSTM);
       parallel->AddToStack(new LSTM(name, input_shape.depth(), num_states,
                                     num_outputs, false, type));
       parallel->AddToStack(lstm);
@@ -366,7 +371,7 @@ Network* NetworkBuilder::ParseLSTM(const StaticShape& input_shape, char** str) {
     }
   }
   if (dim == 'y') {
-    Reversed* rev = new Reversed("XYTransLSTM", NT_XYTRANSPOSE);
+    Reversed *rev = new Reversed("XYTransLSTM", NT_XYTRANSPOSE);
     rev->SetNetwork(lstm);
     lstm = rev;
   }
@@ -374,18 +379,18 @@ Network* NetworkBuilder::ParseLSTM(const StaticShape& input_shape, char** str) {
 }
 
 // Builds a set of 4 lstms with x and y reversal, running in true parallel.
-Network* NetworkBuilder::BuildLSTMXYQuad(int num_inputs, int num_states) {
-  Parallel* parallel = new Parallel("2DLSTMQuad", NT_PAR_2D_LSTM);
+Network *NetworkBuilder::BuildLSTMXYQuad(int num_inputs, int num_states) {
+  Parallel *parallel = new Parallel("2DLSTMQuad", NT_PAR_2D_LSTM);
   parallel->AddToStack(new LSTM("L2DLTRDown", num_inputs, num_states,
                                 num_states, true, NT_LSTM));
-  Reversed* rev = new Reversed("L2DLTRXRev", NT_XREVERSED);
+  Reversed *rev = new Reversed("L2DLTRXRev", NT_XREVERSED);
   rev->SetNetwork(new LSTM("L2DRTLDown", num_inputs, num_states, num_states,
                            true, NT_LSTM));
   parallel->AddToStack(rev);
   rev = new Reversed("L2DRTLYRev", NT_YREVERSED);
   rev->SetNetwork(
       new LSTM("L2DRTLUp", num_inputs, num_states, num_states, true, NT_LSTM));
-  Reversed* rev2 = new Reversed("L2DXRevU", NT_XREVERSED);
+  Reversed *rev2 = new Reversed("L2DXRevU", NT_XREVERSED);
   rev2->SetNetwork(rev);
   parallel->AddToStack(rev2);
   rev = new Reversed("L2DXRevY", NT_YREVERSED);
@@ -396,8 +401,8 @@ Network* NetworkBuilder::BuildLSTMXYQuad(int num_inputs, int num_states) {
 }
 
 // Helper builds a truly (0-d) fully connected layer of the given type.
-static Network* BuildFullyConnected(const StaticShape& input_shape,
-                                    NetworkType type, const STRING& name,
+static Network *BuildFullyConnected(const StaticShape &input_shape,
+                                    NetworkType type, const STRING &name,
                                     int depth) {
   if (input_shape.height() == 0 || input_shape.width() == 0) {
     tprintf("Fully connected requires positive height and width, had %d,%d\n",
@@ -406,9 +411,9 @@ static Network* BuildFullyConnected(const StaticShape& input_shape,
   }
   int input_size = input_shape.height() * input_shape.width();
   int input_depth = input_size * input_shape.depth();
-  Network* fc = new FullyConnected(name, input_depth, depth, type);
+  Network *fc = new FullyConnected(name, input_depth, depth, type);
   if (input_size > 1) {
-    Series* series = new Series("FCSeries");
+    Series *series = new Series("FCSeries");
     series->AddToStack(new Reconfig("FCReconfig", input_shape.depth(),
                                     input_shape.width(), input_shape.height()));
     series->AddToStack(fc);
@@ -418,9 +423,9 @@ static Network* BuildFullyConnected(const StaticShape& input_shape,
 }
 
 // Parses a Fully connected network.
-Network* NetworkBuilder::ParseFullyConnected(const StaticShape& input_shape,
-                                             char** str) {
-  char* spec_start = *str;
+Network *NetworkBuilder::ParseFullyConnected(const StaticShape &input_shape,
+                                             char **str) {
+  char *spec_start = *str;
   NetworkType type = NonLinearity((*str)[1]);
   if (type == NT_NONE) {
     tprintf("Invalid nonlinearity on F-spec!: %s\n", *str);
@@ -436,8 +441,8 @@ Network* NetworkBuilder::ParseFullyConnected(const StaticShape& input_shape,
 }
 
 // Parses an Output spec.
-Network* NetworkBuilder::ParseOutput(const StaticShape& input_shape,
-                                     char** str) {
+Network *NetworkBuilder::ParseOutput(const StaticShape &input_shape,
+                                     char **str) {
   char dims_ch = (*str)[1];
   if (dims_ch != '0' && dims_ch != '1' && dims_ch != '2') {
     tprintf("Invalid dims (2|1|0) in output spec!:%s\n", *str);
@@ -473,9 +478,9 @@ Network* NetworkBuilder::ParseOutput(const StaticShape& input_shape,
   }
   int input_size = input_shape.height();
   int input_depth = input_size * input_shape.depth();
-  Network* fc = new FullyConnected("Output", input_depth, depth, type);
+  Network *fc = new FullyConnected("Output", input_depth, depth, type);
   if (input_size > 1) {
-    Series* series = new Series("FCSeries");
+    Series *series = new Series("FCSeries");
     series->AddToStack(new Reconfig("FCReconfig", input_shape.depth(), 1,
                                     input_shape.height()));
     series->AddToStack(fc);
@@ -484,5 +489,4 @@ Network* NetworkBuilder::ParseOutput(const StaticShape& input_shape,
   return fc;
 }
 
-}  // namespace tesseract.
-
+} // namespace tesseract.

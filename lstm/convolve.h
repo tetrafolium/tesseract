@@ -31,10 +31,10 @@ namespace tesseract {
 // affect the size of its input. Achieves this by bringing in random values in
 // out-of-input areas.
 class Convolve : public Network {
- public:
+public:
   // The area of convolution is 2*half_x + 1 by 2*half_y + 1, forcing it to
   // always be odd, so the center is the current pixel.
-  Convolve(const STRING& name, int ni, int half_x, int half_y);
+  Convolve(const STRING &name, int ni, int half_x, int half_y);
   virtual ~Convolve();
 
   virtual STRING spec() const {
@@ -45,29 +45,27 @@ class Convolve : public Network {
   }
 
   // Writes to the given file. Returns false in case of error.
-  virtual bool Serialize(TFile* fp) const;
+  virtual bool Serialize(TFile *fp) const;
   // Reads from the given file. Returns false in case of error.
-  virtual bool DeSerialize(TFile* fp);
+  virtual bool DeSerialize(TFile *fp);
 
   // Runs forward propagation of activations on the input line.
   // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
   // Runs backward propagation of errors on the deltas line.
   // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
- protected:
+protected:
   // Serialized data.
   inT32 half_x_;
   inT32 half_y_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-
-#endif  // TESSERACT_LSTM_SUBSAMPLE_H_
+#endif // TESSERACT_LSTM_SUBSAMPLE_H_

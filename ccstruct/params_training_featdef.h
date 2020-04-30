@@ -38,69 +38,68 @@ static const int kMaxMediumWordUnichars = 6;
 // kParamsTrainingFeatureTypeName
 enum kParamsTrainingFeatureType {
   // Digits
-  PTRAIN_DIGITS_SHORT,             // 0
-  PTRAIN_DIGITS_MED,               // 1
-  PTRAIN_DIGITS_LONG,              // 2
+  PTRAIN_DIGITS_SHORT, // 0
+  PTRAIN_DIGITS_MED,   // 1
+  PTRAIN_DIGITS_LONG,  // 2
   // Number or pattern (NUMBER_PERM, USER_PATTERN_PERM)
-  PTRAIN_NUM_SHORT,                // 3
-  PTRAIN_NUM_MED,                  // 4
-  PTRAIN_NUM_LONG,                 // 5
+  PTRAIN_NUM_SHORT, // 3
+  PTRAIN_NUM_MED,   // 4
+  PTRAIN_NUM_LONG,  // 5
   // Document word (DOC_DAWG_PERM)
-  PTRAIN_DOC_SHORT,                // 6
-  PTRAIN_DOC_MED,                  // 7
-  PTRAIN_DOC_LONG,                 // 8
+  PTRAIN_DOC_SHORT, // 6
+  PTRAIN_DOC_MED,   // 7
+  PTRAIN_DOC_LONG,  // 8
   // Word (SYSTEM_DAWG_PERM, USER_DAWG_PERM, COMPOUND_PERM)
-  PTRAIN_DICT_SHORT,               // 9
-  PTRAIN_DICT_MED,                 // 10
-  PTRAIN_DICT_LONG,                // 11
+  PTRAIN_DICT_SHORT, // 9
+  PTRAIN_DICT_MED,   // 10
+  PTRAIN_DICT_LONG,  // 11
   // Frequent word (FREQ_DAWG_PERM)
-  PTRAIN_FREQ_SHORT,               // 12
-  PTRAIN_FREQ_MED,                 // 13
-  PTRAIN_FREQ_LONG,                // 14
-  PTRAIN_SHAPE_COST_PER_CHAR,      // 15
-  PTRAIN_NGRAM_COST_PER_CHAR,      // 16
-  PTRAIN_NUM_BAD_PUNC,             // 17
-  PTRAIN_NUM_BAD_CASE,             // 18
-  PTRAIN_XHEIGHT_CONSISTENCY,      // 19
-  PTRAIN_NUM_BAD_CHAR_TYPE,        // 20
-  PTRAIN_NUM_BAD_SPACING,          // 21
-  PTRAIN_NUM_BAD_FONT,             // 22
-  PTRAIN_RATING_PER_CHAR,          // 23
+  PTRAIN_FREQ_SHORT,          // 12
+  PTRAIN_FREQ_MED,            // 13
+  PTRAIN_FREQ_LONG,           // 14
+  PTRAIN_SHAPE_COST_PER_CHAR, // 15
+  PTRAIN_NGRAM_COST_PER_CHAR, // 16
+  PTRAIN_NUM_BAD_PUNC,        // 17
+  PTRAIN_NUM_BAD_CASE,        // 18
+  PTRAIN_XHEIGHT_CONSISTENCY, // 19
+  PTRAIN_NUM_BAD_CHAR_TYPE,   // 20
+  PTRAIN_NUM_BAD_SPACING,     // 21
+  PTRAIN_NUM_BAD_FONT,        // 22
+  PTRAIN_RATING_PER_CHAR,     // 23
 
   PTRAIN_NUM_FEATURE_TYPES
 };
 
-static const char * const kParamsTrainingFeatureTypeName[] = {
-    "PTRAIN_DIGITS_SHORT",             // 0
-    "PTRAIN_DIGITS_MED",               // 1
-    "PTRAIN_DIGITS_LONG",              // 2
-    "PTRAIN_NUM_SHORT",                // 3
-    "PTRAIN_NUM_MED",                  // 4
-    "PTRAIN_NUM_LONG",                 // 5
-    "PTRAIN_DOC_SHORT",                // 6
-    "PTRAIN_DOC_MED",                  // 7
-    "PTRAIN_DOC_LONG",                 // 8
-    "PTRAIN_DICT_SHORT",               // 9
-    "PTRAIN_DICT_MED",                 // 10
-    "PTRAIN_DICT_LONG",                // 11
-    "PTRAIN_FREQ_SHORT",               // 12
-    "PTRAIN_FREQ_MED",                 // 13
-    "PTRAIN_FREQ_LONG",                // 14
-    "PTRAIN_SHAPE_COST_PER_CHAR",      // 15
-    "PTRAIN_NGRAM_COST_PER_CHAR",      // 16
-    "PTRAIN_NUM_BAD_PUNC",             // 17
-    "PTRAIN_NUM_BAD_CASE",             // 18
-    "PTRAIN_XHEIGHT_CONSISTENCY",      // 19
-    "PTRAIN_NUM_BAD_CHAR_TYPE",        // 20
-    "PTRAIN_NUM_BAD_SPACING",          // 21
-    "PTRAIN_NUM_BAD_FONT",             // 22
-    "PTRAIN_RATING_PER_CHAR",          // 23
+static const char *const kParamsTrainingFeatureTypeName[] = {
+    "PTRAIN_DIGITS_SHORT",        // 0
+    "PTRAIN_DIGITS_MED",          // 1
+    "PTRAIN_DIGITS_LONG",         // 2
+    "PTRAIN_NUM_SHORT",           // 3
+    "PTRAIN_NUM_MED",             // 4
+    "PTRAIN_NUM_LONG",            // 5
+    "PTRAIN_DOC_SHORT",           // 6
+    "PTRAIN_DOC_MED",             // 7
+    "PTRAIN_DOC_LONG",            // 8
+    "PTRAIN_DICT_SHORT",          // 9
+    "PTRAIN_DICT_MED",            // 10
+    "PTRAIN_DICT_LONG",           // 11
+    "PTRAIN_FREQ_SHORT",          // 12
+    "PTRAIN_FREQ_MED",            // 13
+    "PTRAIN_FREQ_LONG",           // 14
+    "PTRAIN_SHAPE_COST_PER_CHAR", // 15
+    "PTRAIN_NGRAM_COST_PER_CHAR", // 16
+    "PTRAIN_NUM_BAD_PUNC",        // 17
+    "PTRAIN_NUM_BAD_CASE",        // 18
+    "PTRAIN_XHEIGHT_CONSISTENCY", // 19
+    "PTRAIN_NUM_BAD_CHAR_TYPE",   // 20
+    "PTRAIN_NUM_BAD_SPACING",     // 21
+    "PTRAIN_NUM_BAD_FONT",        // 22
+    "PTRAIN_RATING_PER_CHAR",     // 23
 };
 
 // Returns the index of the given feature (by name),
 // or -1 meaning the feature is unknown.
 int ParamsTrainingFeatureByName(const char *name);
-
 
 // Entry with features extracted from a single OCR hypothesis for a word.
 struct ParamsTrainingHypothesis {
@@ -108,14 +107,13 @@ struct ParamsTrainingHypothesis {
     memset(features, 0, sizeof(float) * PTRAIN_NUM_FEATURE_TYPES);
   }
   ParamsTrainingHypothesis(const ParamsTrainingHypothesis &other) {
-    memcpy(features, other.features,
-           sizeof(float) * PTRAIN_NUM_FEATURE_TYPES);
+    memcpy(features, other.features, sizeof(float) * PTRAIN_NUM_FEATURE_TYPES);
     str = other.str;
     cost = other.cost;
   }
   float features[PTRAIN_NUM_FEATURE_TYPES];
-  STRING str;  // string corresponding to word hypothesis (for debugging)
-  float cost;  // path cost computed by segsearch
+  STRING str; // string corresponding to word hypothesis (for debugging)
+  float cost; // path cost computed by segsearch
 };
 
 // A list of hypotheses explored during one run of segmentation search.
@@ -125,7 +123,7 @@ typedef GenericVector<ParamsTrainingHypothesis> ParamsTrainingHypothesisList;
 // of the runs of segmentation search on a word (e.g. a list of hypotheses
 // explored on PASS1, PASS2, fix xheight pass, etc).
 class ParamsTrainingBundle {
- public:
+public:
   ParamsTrainingBundle() {}
   // Starts a new hypothesis list.
   // Should be called at the beginning of a new run of the segmentation search.
@@ -134,9 +132,10 @@ class ParamsTrainingBundle {
   }
   // Adds a new ParamsTrainingHypothesis to the current hypothesis list
   // and returns the reference to the newly added entry.
-  ParamsTrainingHypothesis &AddHypothesis(
-      const ParamsTrainingHypothesis &other) {
-    if (hyp_list_vec.empty()) StartHypothesisList();
+  ParamsTrainingHypothesis &
+  AddHypothesis(const ParamsTrainingHypothesis &other) {
+    if (hyp_list_vec.empty())
+      StartHypothesisList();
     hyp_list_vec.back().push_back(ParamsTrainingHypothesis(other));
     return hyp_list_vec.back().back();
   }
@@ -144,6 +143,6 @@ class ParamsTrainingBundle {
   GenericVector<ParamsTrainingHypothesisList> hyp_list_vec;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_WORDREC_PARAMS_TRAINING_FEATDEF_H_
+#endif // TESSERACT_WORDREC_PARAMS_TRAINING_FEATDEF_H_

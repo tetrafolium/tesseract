@@ -17,13 +17,13 @@
  *
  **********************************************************************/
 
-#include          "bits16.h"
+#include "bits16.h"
 
 /**********************************************************************
  * Constructor. Something to get it past the compiler as almost all inlined.
  *
  **********************************************************************/
-BITS16::BITS16(                // constructor
-               uinT16 init) {  // initial val
+BITS16::BITS16(    // constructor
+    uinT16 init) { // initial val
   val = init;
 }

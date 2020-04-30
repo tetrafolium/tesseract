@@ -30,8 +30,8 @@
 #include "config_auto.h"
 #endif
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #ifdef _WIN32
@@ -79,21 +79,18 @@ DECLARE_STRING_PARAM_FLAG(test_ch);
 /*----------------------------------------------------------------------------
           Public Function Prototypes
 ----------------------------------------------------------------------------*/
-int main (
-     int  argc,
-     char  **argv);
-
+int main(int argc, char **argv);
 
 /*----------------------------------------------------------------------------
             Public Code
 -----------------------------------------------------------------------------*/
 #ifndef GRAPHICS_DISABLED
-static void DisplayProtoList(const char* ch, LIST protolist) {
-  void* window = c_create_window("Char samples", 50, 200,
-                                 520, 520, -130.0, 130.0, -130.0, 130.0);
+static void DisplayProtoList(const char *ch, LIST protolist) {
+  void *window = c_create_window("Char samples", 50, 200, 520, 520, -130.0,
+                                 130.0, -130.0, 130.0);
   LIST proto = protolist;
   iterate(proto) {
-    PROTOTYPE* prototype = reinterpret_cast<PROTOTYPE *>(first_node(proto));
+    PROTOTYPE *prototype = reinterpret_cast<PROTOTYPE *>(first_node(proto));
     if (prototype->Significant)
       c_line_color_index(window, Green);
     else if (prototype->NumSamples == 0)
@@ -110,27 +107,24 @@ static void DisplayProtoList(const char* ch, LIST protolist) {
     c_move(window, (x - dx) * 256, (y - dy) * 256);
     c_draw(window, (x + dx) * 256, (y + dy) * 256);
     if (prototype->Significant)
-      tprintf("Green proto at (%g,%g)+(%g,%g) %d samples\n",
-              x, y, dx, dy, prototype->NumSamples);
+      tprintf("Green proto at (%g,%g)+(%g,%g) %d samples\n", x, y, dx, dy,
+              prototype->NumSamples);
     else if (prototype->NumSamples > 0 && !prototype->Merged)
-      tprintf("Red proto at (%g,%g)+(%g,%g) %d samples\n",
-              x, y, dx, dy, prototype->NumSamples);
+      tprintf("Red proto at (%g,%g)+(%g,%g) %d samples\n", x, y, dx, dy,
+              prototype->NumSamples);
   }
   c_make_current(window);
 }
-#endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
 
 // Helper to run clustering on a single config.
 // Mostly copied from the old mftraining, but with renamed variables.
-static LIST ClusterOneConfig(int shape_id, const char* class_label,
-                             LIST mf_classes,
-                             const ShapeTable& shape_table,
-                             MasterTrainer* trainer) {
+static LIST ClusterOneConfig(int shape_id, const char *class_label,
+                             LIST mf_classes, const ShapeTable &shape_table,
+                             MasterTrainer *trainer) {
   int num_samples;
-  CLUSTERER  *clusterer = trainer->SetupForClustering(shape_table,
-                                                      feature_defs,
-                                                      shape_id,
-                                                      &num_samples);
+  CLUSTERER *clusterer = trainer->SetupForClustering(shape_table, feature_defs,
+                                                     shape_id, &num_samples);
   Config.MagicSamples = num_samples;
   LIST proto_list = ClusterSamples(clusterer, &Config);
   CleanUpUnusedData(proto_list);
@@ -138,14 +132,13 @@ static LIST ClusterOneConfig(int shape_id, const char* class_label,
   // Merge protos where reasonable to make more of them significant by
   // representing almost all samples of the class/font.
   MergeInsignificantProtos(proto_list, class_label, clusterer, &Config);
-  #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
   if (strcmp(FLAGS_test_ch.c_str(), class_label) == 0)
     DisplayProtoList(FLAGS_test_ch.c_str(), proto_list);
-  #endif  // GRAPHICS_DISABLED
+#endif // GRAPHICS_DISABLED
   // Delete the protos that will not be used in the inttemp output file.
-  proto_list = RemoveInsignificantProtos(proto_list, true,
-                                         false,
-                                         clusterer->SampleSize);
+  proto_list =
+      RemoveInsignificantProtos(proto_list, true, false, clusterer->SampleSize);
   FreeClusterer(clusterer);
   MERGE_CLASS merge_class = FindClass(mf_classes, class_label);
   if (merge_class == nullptr) {
@@ -156,7 +149,7 @@ static LIST ClusterOneConfig(int shape_id, const char* class_label,
   merge_class->Class->font_set.push_back(shape_id);
   LIST proto_it = proto_list;
   iterate(proto_it) {
-    PROTOTYPE* prototype = reinterpret_cast<PROTOTYPE*>(first_node(proto_it));
+    PROTOTYPE *prototype = reinterpret_cast<PROTOTYPE *>(first_node(proto_it));
     // See if proto can be approximated by existing proto.
     int p_id = FindClosestExistingProto(merge_class->Class,
                                         merge_class->NumMerged, prototype);
@@ -171,8 +164,7 @@ static LIST ClusterOneConfig(int shape_id, const char* class_label,
       // Merge with the similar proto.
       ComputeMergedProto(ProtoIn(merge_class->Class, p_id), &dummy_proto,
                          static_cast<FLOAT32>(merge_class->NumMerged[p_id]),
-                         1.0,
-                         ProtoIn(merge_class->Class, p_id));
+                         1.0, ProtoIn(merge_class->Class, p_id));
       merge_class->NumMerged[p_id]++;
     }
     AddProtoToConfig(p_id, merge_class->Class->Configurations[config_id]);
@@ -186,14 +178,14 @@ static LIST ClusterOneConfig(int shape_id, const char* class_label,
 // that will be trained. In keeping with the original design, each shape
 // with the same list of unichars becomes a different class and the configs
 // represent the different combinations of fonts.
-static void SetupConfigMap(ShapeTable* shape_table, IndexMapBiDi* config_map) {
+static void SetupConfigMap(ShapeTable *shape_table, IndexMapBiDi *config_map) {
   int num_configs = shape_table->NumShapes();
   config_map->Init(num_configs, true);
   config_map->Setup();
   for (int c1 = 0; c1 < num_configs; ++c1) {
     // Only process ids that are not already merged.
     if (config_map->SparseToCompact(c1) == c1) {
-      Shape* shape1 = shape_table->MutableShape(c1);
+      Shape *shape1 = shape_table->MutableShape(c1);
       // Find all the subsequent shapes that are equal.
       for (int c2 = c1 + 1; c2 < num_configs; ++c2) {
         if (shape_table->MutableShape(c2)->IsEqualUnichars(shape1)) {
@@ -235,17 +227,16 @@ static void SetupConfigMap(ShapeTable* shape_table, IndexMapBiDi* config_map) {
  * @note History:  Fri Aug 18 08:56:17 1989, DSJ, Created.
  * @note History: Mon May 18 1998, Christy Russson, Revistion started.
  */
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
   ParseArguments(&argc, &argv);
 
-  ShapeTable* shape_table = nullptr;
+  ShapeTable *shape_table = nullptr;
   STRING file_prefix;
   // Load the training data.
-  MasterTrainer* trainer = tesseract::LoadTrainingData(argc, argv,
-                                                       false,
-                                                       &shape_table,
-                                                       &file_prefix);
-  if (trainer == nullptr) return 1;  // Failed.
+  MasterTrainer *trainer = tesseract::LoadTrainingData(
+      argc, argv, false, &shape_table, &file_prefix);
+  if (trainer == nullptr)
+    return 1; // Failed.
 
   // Setup an index mapping from the shapes in the shape table to the classes
   // that will be trained. In keeping with the original design, each shape
@@ -260,7 +251,7 @@ int main (int argc, char **argv) {
   // Otherwise shape_set will hold a fake unicharset with an entry for each
   // shape in the shape table, and we will output that instead.
   UNICHARSET shape_set;
-  const UNICHARSET* unicharset = &trainer->unicharset();
+  const UNICHARSET *unicharset = &trainer->unicharset();
   // If we ran shapeclustering (and it worked) then at least one shape will
   // have multiple unichars, so we have to build a fake unicharset.
   if (shape_table->AnyMultipleUnichars()) {
@@ -287,24 +278,23 @@ int main (int argc, char **argv) {
       // Get the real unichar_id from the shape table/unicharset.
       shape_table->GetFirstUnicharAndFont(s, &unichar_id, &font_id);
     }
-    const char* class_label = unicharset->id_to_unichar(unichar_id);
-    mf_classes = ClusterOneConfig(s, class_label, mf_classes, *shape_table,
-                                  trainer);
+    const char *class_label = unicharset->id_to_unichar(unichar_id);
+    mf_classes =
+        ClusterOneConfig(s, class_label, mf_classes, *shape_table, trainer);
   }
   STRING inttemp_file = file_prefix;
   inttemp_file += "inttemp";
   STRING pffmtable_file = file_prefix;
   pffmtable_file += "pffmtable";
-  CLASS_STRUCT* float_classes = SetUpForFloat2Int(*unicharset, mf_classes);
+  CLASS_STRUCT *float_classes = SetUpForFloat2Int(*unicharset, mf_classes);
   // Now write the inttemp and pffmtable.
-  trainer->WriteInttempAndPFFMTable(trainer->unicharset(), *unicharset,
-                                    *shape_table, float_classes,
-                                    inttemp_file.string(),
-                                    pffmtable_file.string());
+  trainer->WriteInttempAndPFFMTable(
+      trainer->unicharset(), *unicharset, *shape_table, float_classes,
+      inttemp_file.string(), pffmtable_file.string());
   for (int c = 0; c < unicharset->size(); ++c) {
     FreeClassFields(&float_classes[c]);
   }
-  delete [] float_classes;
+  delete[] float_classes;
   FreeLabeledClassList(mf_classes);
   delete trainer;
   delete shape_table;
@@ -312,7 +302,8 @@ int main (int argc, char **argv) {
   if (!FLAGS_test_ch.empty()) {
     // If we are displaying debug window(s), wait for the user to look at them.
     printf("Hit return to exit...\n");
-    while (getchar() != '\n');
+    while (getchar() != '\n')
+      ;
   }
   return 0;
-}  /* main */
+} /* main */

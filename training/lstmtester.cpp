@@ -27,7 +27,7 @@ LSTMTester::LSTMTester(inT64 max_memory)
 // Loads a set of lstmf files that were created using the lstm.train config to
 // tesseract into memory ready for testing. Returns false if nothing was
 // loaded. The arg is a filename of a file that lists the filenames.
-bool LSTMTester::LoadAllEvalData(const STRING& filenames_file) {
+bool LSTMTester::LoadAllEvalData(const STRING &filenames_file) {
   GenericVector<STRING> filenames;
   if (!LoadFileLinesToStrings(filenames_file, &filenames)) {
     tprintf("Failed to load list of eval filenames from %s\n",
@@ -40,7 +40,7 @@ bool LSTMTester::LoadAllEvalData(const STRING& filenames_file) {
 // Loads a set of lstmf files that were created using the lstm.train config to
 // tesseract into memory ready for testing. Returns false if nothing was
 // loaded.
-bool LSTMTester::LoadAllEvalData(const GenericVector<STRING>& filenames) {
+bool LSTMTester::LoadAllEvalData(const GenericVector<STRING> &filenames) {
   test_data_.Clear();
   bool result = test_data_.LoadDocuments(filenames, CS_SEQUENTIAL, nullptr);
   total_pages_ = test_data_.TotalPages();
@@ -49,8 +49,8 @@ bool LSTMTester::LoadAllEvalData(const GenericVector<STRING>& filenames) {
 
 // Runs an evaluation asynchronously on the stored data and returns a string
 // describing the results of the previous test.
-STRING LSTMTester::RunEvalAsync(int iteration, const double* training_errors,
-                                const TessdataManager& model_mgr,
+STRING LSTMTester::RunEvalAsync(int iteration, const double *training_errors,
+                                const TessdataManager &model_mgr,
                                 int training_stage) {
   STRING result;
   if (total_pages_ == 0) {
@@ -79,8 +79,8 @@ STRING LSTMTester::RunEvalAsync(int iteration, const double* training_errors,
 
 // Runs an evaluation synchronously on the stored data and returns a string
 // describing the results.
-STRING LSTMTester::RunEvalSync(int iteration, const double* training_errors,
-                               const TessdataManager& model_mgr,
+STRING LSTMTester::RunEvalSync(int iteration, const double *training_errors,
+                               const TessdataManager &model_mgr,
                                int training_stage, int verbosity) {
   LSTMTrainer trainer;
   trainer.InitCharSet(model_mgr);
@@ -94,7 +94,7 @@ STRING LSTMTester::RunEvalSync(int iteration, const double* training_errors,
   double word_error = 0.0;
   int error_count = 0;
   while (error_count < total_pages_) {
-    const ImageData* trainingdata = test_data_.GetPageBySerial(eval_iteration);
+    const ImageData *trainingdata = test_data_.GetPageBySerial(eval_iteration);
     trainer.SetIteration(++eval_iteration);
     NetworkIO fwd_outputs, targets;
     Trainability result =
@@ -130,8 +130,8 @@ STRING LSTMTester::RunEvalSync(int iteration, const double* training_errors,
 // LockIfNotRunning must have returned true before calling ThreadFunc, and
 // it will call UnlockRunning to release the lock after RunEvalSync completes.
 /* static */
-void* LSTMTester::ThreadFunc(void* lstmtester_void) {
-  LSTMTester* lstmtester = static_cast<LSTMTester*>(lstmtester_void);
+void *LSTMTester::ThreadFunc(void *lstmtester_void) {
+  LSTMTester *lstmtester = static_cast<LSTMTester *>(lstmtester_void);
   lstmtester->test_result_ = lstmtester->RunEvalSync(
       lstmtester->test_iteration_, lstmtester->test_training_errors_,
       lstmtester->test_model_mgr_, lstmtester->test_training_stage_,
@@ -144,7 +144,8 @@ void* LSTMTester::ThreadFunc(void* lstmtester_void) {
 // if there is nothing running.
 bool LSTMTester::LockIfNotRunning() {
   SVAutoLock lock(&running_mutex_);
-  if (async_running_) return false;
+  if (async_running_)
+    return false;
   async_running_ = true;
   return true;
 }
@@ -155,4 +156,4 @@ void LSTMTester::UnlockRunning() {
   async_running_ = false;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

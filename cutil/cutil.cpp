@@ -39,8 +39,8 @@ Import original HP distribution
  **/
 
 #include "cutil.h"
-#include "tprintf.h"
 #include "callcpp.h"
+#include "tprintf.h"
 
 #include <stdlib.h>
 
@@ -58,8 +58,8 @@ long long_rand(long limit) {
   static long seed;
 
   long num;
-  num = (long) rand () << 16;
-  num |= rand () & 0xffff;
+  num = (long)rand() << 16;
+  num |= rand() & 0xffff;
   seed ^= num;
   long result = num % limit;
   while (result < 0) {
@@ -67,10 +67,9 @@ long long_rand(long limit) {
   }
   return result;
 #else
-  return (long)((double)limit * rand()/(RAND_MAX + 1.0));
+  return (long)((double)limit * rand() / (RAND_MAX + 1.0));
 #endif
 }
-
 
 /**********************************************************************
  * open_file
@@ -81,9 +80,9 @@ long long_rand(long limit) {
  **********************************************************************/
 FILE *open_file(const char *filename, const char *mode) {
   FILE *thisfile = NULL;
-  if ((thisfile = fopen (filename, mode)) == NULL) {
-    tprintf ("Could not open file, %s\n", filename);
-    exit (1);
+  if ((thisfile = fopen(filename, mode)) == NULL) {
+    tprintf("Could not open file, %s\n", filename);
+    exit(1);
   }
   return (thisfile);
 }

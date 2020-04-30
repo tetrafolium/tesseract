@@ -19,9 +19,9 @@
           Include Files and Type Defines
 ----------------------------------------------------------------------------*/
 #include "ocrfeatures.h"
-#include "emalloc.h"
 #include "callcpp.h"
 #include "danerror.h"
+#include "emalloc.h"
 #include "scanutils.h"
 
 #include <assert.h>
@@ -48,7 +48,7 @@ BOOL8 AddFeature(FEATURE_SET FeatureSet, FEATURE Feature) {
 
   FeatureSet->Features[FeatureSet->NumFeatures++] = Feature;
   return TRUE;
-}                                /* AddFeature */
+} /* AddFeature */
 
 /**
  * Release the memory consumed by the specified feature.
@@ -74,7 +74,7 @@ void FreeFeatureSet(FEATURE_SET FeatureSet) {
       FreeFeature(FeatureSet->Features[i]);
     free(FeatureSet);
   }
-}                                /* FreeFeatureSet */
+} /* FreeFeatureSet */
 
 /**
  * Allocate and return a new feature of the specified
@@ -83,7 +83,7 @@ void FreeFeatureSet(FEATURE_SET FeatureSet) {
  * @return New #FEATURE.
  * @note History: Mon May 21 14:06:42 1990, DSJ, Created.
  */
-FEATURE NewFeature(const FEATURE_DESC_STRUCT* FeatureDesc) {
+FEATURE NewFeature(const FEATURE_DESC_STRUCT *FeatureDesc) {
   FEATURE Feature;
 
   Feature = (FEATURE)malloc(sizeof(FEATURE_STRUCT) +
@@ -91,7 +91,7 @@ FEATURE NewFeature(const FEATURE_DESC_STRUCT* FeatureDesc) {
   Feature->Type = FeatureDesc;
   return (Feature);
 
-}                                /* NewFeature */
+} /* NewFeature */
 
 /**
  * Allocate and return a new feature set large enough to
@@ -103,13 +103,13 @@ FEATURE NewFeature(const FEATURE_DESC_STRUCT* FeatureDesc) {
 FEATURE_SET NewFeatureSet(int NumFeatures) {
   FEATURE_SET FeatureSet;
 
-  FeatureSet = (FEATURE_SET) Emalloc (sizeof (FEATURE_SET_STRUCT) +
-    (NumFeatures - 1) * sizeof (FEATURE));
+  FeatureSet = (FEATURE_SET)Emalloc(sizeof(FEATURE_SET_STRUCT) +
+                                    (NumFeatures - 1) * sizeof(FEATURE));
   FeatureSet->MaxNumFeatures = NumFeatures;
   FeatureSet->NumFeatures = 0;
   return (FeatureSet);
 
-}                                /* NewFeatureSet */
+} /* NewFeatureSet */
 
 /**
  * Create a new feature of the specified type and read in
@@ -125,20 +125,20 @@ FEATURE_SET NewFeatureSet(int NumFeatures) {
  * format
  * @note History: Wed May 23 08:53:16 1990, DSJ, Created.
  */
-FEATURE ReadFeature(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
+FEATURE ReadFeature(FILE *File, const FEATURE_DESC_STRUCT *FeatureDesc) {
   FEATURE Feature;
   int i;
 
-  Feature = NewFeature (FeatureDesc);
+  Feature = NewFeature(FeatureDesc);
   for (i = 0; i < Feature->Type->NumParams; i++) {
     if (tfscanf(File, "%f", &(Feature->Params[i])) != 1)
-      DoError (ILLEGAL_FEATURE_PARAM, "Illegal feature parameter spec");
+      DoError(ILLEGAL_FEATURE_PARAM, "Illegal feature parameter spec");
 #ifndef _WIN32
-    assert (!isnan(Feature->Params[i]));
+    assert(!isnan(Feature->Params[i]));
 #endif
   }
   return (Feature);
-}                                /* ReadFeature */
+} /* ReadFeature */
 
 /**
  * Create a new feature set of the specified type and read in
@@ -151,7 +151,7 @@ FEATURE ReadFeature(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
  * @return New feature set read from File.
  * @note History: Wed May 23 09:17:31 1990, DSJ, Created.
  */
-FEATURE_SET ReadFeatureSet(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
+FEATURE_SET ReadFeatureSet(FILE *File, const FEATURE_DESC_STRUCT *FeatureDesc) {
   FEATURE_SET FeatureSet;
   int NumFeatures;
   int i;
@@ -161,10 +161,10 @@ FEATURE_SET ReadFeatureSet(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
 
   FeatureSet = NewFeatureSet(NumFeatures);
   for (i = 0; i < NumFeatures; i++)
-    AddFeature(FeatureSet, ReadFeature (File, FeatureDesc));
+    AddFeature(FeatureSet, ReadFeature(File, FeatureDesc));
 
   return (FeatureSet);
-}                                /* ReadFeatureSet */
+} /* ReadFeatureSet */
 
 /**
  * Appends a textual representation of Feature to str.
@@ -178,7 +178,7 @@ FEATURE_SET ReadFeatureSet(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
  * @return none
  * @note History: Wed May 23 09:28:18 1990, DSJ, Created.
  */
-void WriteFeature(FEATURE Feature, STRING* str) {
+void WriteFeature(FEATURE Feature, STRING *str) {
   for (int i = 0; i < Feature->Type->NumParams; i++) {
 #ifndef WIN32
     assert(!isnan(Feature->Params[i]));
@@ -186,7 +186,7 @@ void WriteFeature(FEATURE Feature, STRING* str) {
     str->add_str_double(" ", Feature->Params[i]);
   }
   *str += "\n";
-}                                /* WriteFeature */
+} /* WriteFeature */
 
 /**
  * Write a textual representation of FeatureSet to File.
@@ -198,7 +198,7 @@ void WriteFeature(FEATURE Feature, STRING* str) {
  * @return none
  * @note History: Wed May 23 10:06:03 1990, DSJ, Created.
  */
-void WriteFeatureSet(FEATURE_SET FeatureSet, STRING* str) {
+void WriteFeatureSet(FEATURE_SET FeatureSet, STRING *str) {
   if (FeatureSet) {
     str->add_str_int("", FeatureSet->NumFeatures);
     *str += "\n";
@@ -206,7 +206,7 @@ void WriteFeatureSet(FEATURE_SET FeatureSet, STRING* str) {
       WriteFeature(FeatureSet->Features[i], str);
     }
   }
-}                                /* WriteFeatureSet */
+} /* WriteFeatureSet */
 
 /**
  * Write a textual representation of FeatureDesc to File
@@ -223,22 +223,22 @@ void WriteFeatureSet(FEATURE_SET FeatureSet, STRING* str) {
  * @return none
  * @note History: Fri May 25 15:27:18 1990, DSJ, Created.
  */
-void WriteOldParamDesc(FILE* File, const FEATURE_DESC_STRUCT* FeatureDesc) {
+void WriteOldParamDesc(FILE *File, const FEATURE_DESC_STRUCT *FeatureDesc) {
   int i;
 
-  fprintf (File, "%d\n", FeatureDesc->NumParams);
+  fprintf(File, "%d\n", FeatureDesc->NumParams);
   for (i = 0; i < FeatureDesc->NumParams; i++) {
     if (FeatureDesc->ParamDesc[i].Circular)
-      fprintf (File, "circular ");
+      fprintf(File, "circular ");
     else
-      fprintf (File, "linear   ");
+      fprintf(File, "linear   ");
 
     if (FeatureDesc->ParamDesc[i].NonEssential)
-      fprintf (File, "non-essential  ");
+      fprintf(File, "non-essential  ");
     else
-      fprintf (File, "essential      ");
+      fprintf(File, "essential      ");
 
-    fprintf (File, "%f  %f\n",
-      FeatureDesc->ParamDesc[i].Min, FeatureDesc->ParamDesc[i].Max);
+    fprintf(File, "%f  %f\n", FeatureDesc->ParamDesc[i].Min,
+            FeatureDesc->ParamDesc[i].Max);
   }
-}                                /* WriteOldParamDesc */
+} /* WriteOldParamDesc */

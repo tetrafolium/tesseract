@@ -43,14 +43,14 @@ namespace tesseract {
 // /path/to/dir/[lang].[fontname].exp[num]
 // The [lang], [fontname] and [num] fields should not have '.' characters.
 // If the global parameter classify_font_name is set, its value is used instead.
-void ExtractFontName(const STRING& filename, STRING* fontname) {
+void ExtractFontName(const STRING &filename, STRING *fontname) {
   *fontname = classify_font_name;
   if (*fontname == kUnknownFontName) {
     // filename is expected to be of the form [lang].[fontname].exp[num]
     // The [lang], [fontname] and [num] fields should not have '.' characters.
     const char *basename = strrchr(filename.string(), '/');
     const char *firstdot = strchr(basename ? basename : filename.string(), '.');
-    const char *lastdot  = strrchr(filename.string(), '.');
+    const char *lastdot = strrchr(filename.string(), '.');
     if (firstdot != lastdot && firstdot != NULL && lastdot != NULL) {
       ++firstdot;
       *fontname = firstdot;
@@ -66,10 +66,10 @@ void ExtractFontName(const STRING& filename, STRING* fontname) {
 // cn_denorm: Character normalization transformation to apply to the blob.
 // fx_info:   Character normalization parameters computed with cn_denorm.
 // blob_text: Ground truth text for the blob.
-void Classify::LearnBlob(const STRING& fontname, TBLOB* blob,
-                         const DENORM& cn_denorm,
-                         const INT_FX_RESULT_STRUCT& fx_info,
-                         const char* blob_text) {
+void Classify::LearnBlob(const STRING &fontname, TBLOB *blob,
+                         const DENORM &cn_denorm,
+                         const INT_FX_RESULT_STRUCT &fx_info,
+                         const char *blob_text) {
   CHAR_DESC CharDesc = NewCharDescription(feature_defs_);
   CharDesc->FeatureSets[0] = ExtractMicros(blob, cn_denorm);
   CharDesc->FeatureSets[1] = ExtractCharNormFeatures(fx_info);
@@ -90,13 +90,13 @@ void Classify::LearnBlob(const STRING& fontname, TBLOB* blob,
     tprintf("Blob learned was invalid!\n");
   }
   FreeCharDescription(CharDesc);
-}                                // LearnBlob
+} // LearnBlob
 
 // Writes stored training data to a .tr file based on the given filename.
 // Returns false on error.
-bool Classify::WriteTRFile(const STRING& filename) {
+bool Classify::WriteTRFile(const STRING &filename) {
   STRING tr_filename = filename + ".tr";
-  FILE* fp = Efopen(tr_filename.string(), "wb");
+  FILE *fp = Efopen(tr_filename.string(), "wb");
   size_t len = tr_file_data_.length();
   bool result =
       fwrite(&tr_file_data_[0], sizeof(tr_file_data_[0]), len, fp) == len;
@@ -105,4 +105,4 @@ bool Classify::WriteTRFile(const STRING& filename) {
   return result;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

@@ -23,9 +23,9 @@
 #endif
 #else
 #include <unistd.h>
-#endif  // _WIN32
+#endif // _WIN32
 #ifdef _MSC_VER
-#pragma warning(disable:4244)  // Conversion warnings
+#pragma warning(disable : 4244) // Conversion warnings
 #endif
 
 // Include automatically generated configuration file if running autoconf.
@@ -60,19 +60,19 @@ const int kMaxCircleErosions = 8;
 // The returned pix must be pixDestroyed after use. NULL may be returned
 // if the image doesn't meet the trivial conditions that it uses to determine
 // success.
-static Pix* RemoveEnclosingCircle(Pix* pixs) {
-  Pix* pixsi = pixInvert(NULL, pixs);
-  Pix* pixc = pixCreateTemplate(pixs);
+static Pix *RemoveEnclosingCircle(Pix *pixs) {
+  Pix *pixsi = pixInvert(NULL, pixs);
+  Pix *pixc = pixCreateTemplate(pixs);
   pixSetOrClearBorder(pixc, 1, 1, 1, 1, PIX_SET);
   pixSeedfillBinary(pixc, pixc, pixsi, 4);
   pixInvert(pixc, pixc);
   pixDestroy(&pixsi);
-  Pix* pixt = pixAnd(NULL, pixs, pixc);
+  Pix *pixt = pixAnd(NULL, pixs, pixc);
   l_int32 max_count;
   pixCountConnComp(pixt, 8, &max_count);
   // The count has to go up before we start looking for the minimum.
   l_int32 min_count = MAX_INT32;
-  Pix* pixout = NULL;
+  Pix *pixout = NULL;
   for (int i = 1; i < kMaxCircleErosions; i++) {
     pixDestroy(&pixt);
     pixErodeBrick(pixc, pixc, 3, 3);
@@ -85,9 +85,9 @@ static Pix* RemoveEnclosingCircle(Pix* pixs) {
     } else if (i > 1 && count < min_count) {
       min_count = count;
       pixDestroy(&pixout);
-      pixout = pixCopy(NULL, pixt);  // Save the best.
+      pixout = pixCopy(NULL, pixt); // Save the best.
     } else if (count >= min_count) {
-      break;  // We have passed by the best.
+      break; // We have passed by the best.
     }
   }
   pixDestroy(&pixt);
@@ -100,19 +100,19 @@ static Pix* RemoveEnclosingCircle(Pix* pixs) {
  * pix_binary_ is used as the source image and should not be NULL.
  * On return the blocks list owns all the constructed page layout.
  */
-int Tesseract::SegmentPage(const STRING* input_file, BLOCK_LIST* blocks,
-                           Tesseract* osd_tess, OSResults* osr) {
+int Tesseract::SegmentPage(const STRING *input_file, BLOCK_LIST *blocks,
+                           Tesseract *osd_tess, OSResults *osr) {
   ASSERT_HOST(pix_binary_ != NULL);
   int width = pixGetWidth(pix_binary_);
   int height = pixGetHeight(pix_binary_);
   // Get page segmentation mode.
-  PageSegMode pageseg_mode = static_cast<PageSegMode>(
-      static_cast<int>(tessedit_pageseg_mode));
+  PageSegMode pageseg_mode =
+      static_cast<PageSegMode>(static_cast<int>(tessedit_pageseg_mode));
   // If a UNLV zone file can be found, use that instead of segmentation.
-  if (!PSM_COL_FIND_ENABLED(pageseg_mode) &&
-      input_file != NULL && input_file->length() > 0) {
+  if (!PSM_COL_FIND_ENABLED(pageseg_mode) && input_file != NULL &&
+      input_file->length() > 0) {
     STRING name = *input_file;
-    const char* lastdot = strrchr(name.string(), '.');
+    const char *lastdot = strrchr(name.string(), '.');
     if (lastdot != NULL)
       name[lastdot - name.string()] = '\0';
     read_unlv_file(name, width, height, blocks);
@@ -121,7 +121,7 @@ int Tesseract::SegmentPage(const STRING* input_file, BLOCK_LIST* blocks,
     // No UNLV file present. Work according to the PageSegMode.
     // First make a single block covering the whole image.
     BLOCK_IT block_it(blocks);
-    BLOCK* block = new BLOCK("", TRUE, 0, 0, 0, 0, width, height);
+    BLOCK *block = new BLOCK("", TRUE, 0, 0, 0, 0, width, height);
     block->set_right_to_left(right_to_left());
     block_it.add_to_end(block);
   } else {
@@ -150,7 +150,7 @@ int Tesseract::SegmentPage(const STRING* input_file, BLOCK_LIST* blocks,
     deskew_ = FCOORD(1.0f, 0.0f);
     reskew_ = FCOORD(1.0f, 0.0f);
     if (pageseg_mode == PSM_CIRCLE_WORD) {
-      Pix* pixcleaned = RemoveEnclosingCircle(pix_binary_);
+      Pix *pixcleaned = RemoveEnclosingCircle(pix_binary_);
       if (pixcleaned != NULL) {
         pixDestroy(&pix_binary_);
         pix_binary_ = pixcleaned;
@@ -165,7 +165,7 @@ int Tesseract::SegmentPage(const STRING* input_file, BLOCK_LIST* blocks,
   if (blocks->empty()) {
     if (textord_debug_tabfind)
       tprintf("Empty page\n");
-    return 0;  // AutoPageSeg found an empty page.
+    return 0; // AutoPageSeg found an empty page.
   }
   bool splitting =
       pageseg_devanagari_split_strategy != ShiroRekhaSplitter::NO_SPLIT;
@@ -201,23 +201,23 @@ int Tesseract::SegmentPage(const STRING* input_file, BLOCK_LIST* blocks,
  * another Tesseract that was initialized especially for osd, and the results
  * will be output into osr (orientation and script result).
  */
-int Tesseract::AutoPageSeg(PageSegMode pageseg_mode, BLOCK_LIST* blocks,
-                           TO_BLOCK_LIST* to_blocks,
-                           BLOBNBOX_LIST* diacritic_blobs, Tesseract* osd_tess,
-                           OSResults* osr) {
-  Pix* photomask_pix = NULL;
-  Pix* musicmask_pix = NULL;
+int Tesseract::AutoPageSeg(PageSegMode pageseg_mode, BLOCK_LIST *blocks,
+                           TO_BLOCK_LIST *to_blocks,
+                           BLOBNBOX_LIST *diacritic_blobs, Tesseract *osd_tess,
+                           OSResults *osr) {
+  Pix *photomask_pix = NULL;
+  Pix *musicmask_pix = NULL;
   // The blocks made by the ColumnFinder. Moved to blocks before return.
   BLOCK_LIST found_blocks;
   TO_BLOCK_LIST temp_blocks;
 
-  ColumnFinder* finder = SetupPageSegAndDetectOrientation(
+  ColumnFinder *finder = SetupPageSegAndDetectOrientation(
       pageseg_mode, blocks, osd_tess, osr, &temp_blocks, &photomask_pix,
       &musicmask_pix);
   int result = 0;
   if (finder != NULL) {
     TO_BLOCK_IT to_block_it(&temp_blocks);
-    TO_BLOCK* to_block = to_block_it.data();
+    TO_BLOCK *to_block = to_block_it.data();
     if (musicmask_pix != NULL) {
       // TODO(rays) pass the musicmask_pix into FindBlocks and mark music
       // blocks separately. For now combine with photomask_pix.
@@ -236,7 +236,8 @@ int Tesseract::AutoPageSeg(PageSegMode pageseg_mode, BLOCK_LIST* blocks,
   }
   pixDestroy(&photomask_pix);
   pixDestroy(&musicmask_pix);
-  if (result < 0) return result;
+  if (result < 0)
+    return result;
 
   blocks->clear();
   BLOCK_IT block_it(blocks);
@@ -247,12 +248,12 @@ int Tesseract::AutoPageSeg(PageSegMode pageseg_mode, BLOCK_LIST* blocks,
 
 // Helper adds all the scripts from sid_set converted to ids from osd_set to
 // allowed_ids.
-static void AddAllScriptsConverted(const UNICHARSET& sid_set,
-                                   const UNICHARSET& osd_set,
-                                   GenericVector<int>* allowed_ids) {
+static void AddAllScriptsConverted(const UNICHARSET &sid_set,
+                                   const UNICHARSET &osd_set,
+                                   GenericVector<int> *allowed_ids) {
   for (int i = 0; i < sid_set.get_script_table_size(); ++i) {
     if (i != sid_set.null_sid()) {
-      const char* script = sid_set.get_script_from_script_id(i);
+      const char *script = sid_set.get_script_from_script_id(i);
       allowed_ids->push_back(osd_set.get_script_id_from_name(script));
     }
   }
@@ -271,10 +272,10 @@ static void AddAllScriptsConverted(const UNICHARSET& sid_set,
  * See AutoPageSeg for other arguments.
  * The returned ColumnFinder must be deleted after use.
  */
-ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
-    PageSegMode pageseg_mode, BLOCK_LIST* blocks, Tesseract* osd_tess,
-    OSResults* osr, TO_BLOCK_LIST* to_blocks, Pix** photo_mask_pix,
-    Pix** music_mask_pix) {
+ColumnFinder *Tesseract::SetupPageSegAndDetectOrientation(
+    PageSegMode pageseg_mode, BLOCK_LIST *blocks, Tesseract *osd_tess,
+    OSResults *osr, TO_BLOCK_LIST *to_blocks, Pix **photo_mask_pix,
+    Pix **music_mask_pix) {
   int vertical_x = 0;
   int vertical_y = 1;
   TabVector_LIST v_lines;
@@ -286,10 +287,9 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
     pixa_debug_.AddPix(pix_binary_, "PageSegInput");
   }
   // Leptonica is used to find the rule/separator lines in the input.
-  LineFinder::FindAndRemoveLines(source_resolution_,
-                                 textord_tabfind_show_vlines, pix_binary_,
-                                 &vertical_x, &vertical_y, music_mask_pix,
-                                 &v_lines, &h_lines);
+  LineFinder::FindAndRemoveLines(
+      source_resolution_, textord_tabfind_show_vlines, pix_binary_, &vertical_x,
+      &vertical_y, music_mask_pix, &v_lines, &h_lines);
   if (tessedit_dump_pageseg_images) {
     pixa_debug_.AddPix(pix_binary_, "NoLines");
   }
@@ -298,7 +298,8 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
   if (tessedit_dump_pageseg_images) {
     pixa_debug_.AddPix(pix_binary_, "NoImages");
   }
-  if (!PSM_COL_FIND_ENABLED(pageseg_mode)) v_lines.clear();
+  if (!PSM_COL_FIND_ENABLED(pageseg_mode))
+    v_lines.clear();
 
   // The rest of the algorithm uses the usual connected components.
   textord_.find_components(pix_binary_, blocks, to_blocks);
@@ -307,9 +308,9 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
   // There must be exactly one input block.
   // TODO(rays) handle new textline finding with a UNLV zone file.
   ASSERT_HOST(to_blocks->singleton());
-  TO_BLOCK* to_block = to_block_it.data();
+  TO_BLOCK *to_block = to_block_it.data();
   TBOX blkbox = to_block->block->bounding_box();
-  ColumnFinder* finder = NULL;
+  ColumnFinder *finder = NULL;
   int estimated_resolution = source_resolution_;
   if (source_resolution_ == kMinCredibleResolution) {
     // Try to estimate resolution from typical body text size.
@@ -343,9 +344,8 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
                          pageseg_mode == PSM_SINGLE_BLOCK_VERT_TEXT;
     if (!vertical_text && textord_tabfind_vertical_text &&
         PSM_ORIENTATION_ENABLED(pageseg_mode)) {
-      vertical_text =
-          finder->IsVerticallyAlignedText(textord_tabfind_vertical_text_ratio,
-                                          to_block, &osd_blobs);
+      vertical_text = finder->IsVerticallyAlignedText(
+          textord_tabfind_vertical_text_ratio, to_block, &osd_blobs);
     }
     if (PSM_OSD_ENABLED(pageseg_mode) && osd_tess != NULL && osr != NULL) {
       GenericVector<int> osd_scripts;
@@ -373,14 +373,14 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
         }
       }
       int best_script_id = osr->best_result.script_id;
-      const char* best_script_str =
+      const char *best_script_str =
           osd_tess->unicharset.get_script_from_script_id(best_script_id);
       bool cjk = best_script_id == osd_tess->unicharset.han_sid() ||
-          best_script_id == osd_tess->unicharset.hiragana_sid() ||
-          best_script_id == osd_tess->unicharset.katakana_sid() ||
-          strcmp("Japanese", best_script_str) == 0 ||
-          strcmp("Korean", best_script_str) == 0 ||
-          strcmp("Hangul", best_script_str) == 0;
+                 best_script_id == osd_tess->unicharset.hiragana_sid() ||
+                 best_script_id == osd_tess->unicharset.katakana_sid() ||
+                 strcmp("Japanese", best_script_str) == 0 ||
+                 strcmp("Korean", best_script_str) == 0 ||
+                 strcmp("Hangul", best_script_str) == 0;
       if (cjk) {
         finder->set_cjk_script(true);
       }
@@ -389,13 +389,13 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
         if (!cjk && !vertical_text && osd_orientation == 2) {
           // upside down latin text is improbable with such a weak margin.
           tprintf("OSD: Weak margin (%.2f), horiz textlines, not CJK: "
-                  "Don't rotate.\n", osd_margin);
+                  "Don't rotate.\n",
+                  osd_margin);
           osd_orientation = 0;
         } else {
-          tprintf(
-              "OSD: Weak margin (%.2f) for %d blob text block, "
-              "but using orientation anyway: %d\n",
-              osd_margin, osd_blobs.length(), osd_orientation);
+          tprintf("OSD: Weak margin (%.2f) for %d blob text block, "
+                  "but using orientation anyway: %d\n",
+                  osd_margin, osd_blobs.length(), osd_orientation);
         }
       }
     }
@@ -406,4 +406,4 @@ ColumnFinder* Tesseract::SetupPageSegAndDetectOrientation(
   return finder;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

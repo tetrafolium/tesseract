@@ -19,19 +19,19 @@
 ///////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
-#pragma warning(disable:4244)  // Conversion warnings
+#pragma warning(disable : 4244) // Conversion warnings
 #endif
 
 #ifdef HAVE_CONFIG_H
 #include "config_auto.h"
 #endif
 
-#include "linefind.h"
 #include "alignedblob.h"
-#include "tabvector.h"
 #include "blobbox.h"
 #include "edgblob.h"
+#include "linefind.h"
 #include "openclwrapper.h"
+#include "tabvector.h"
 
 #include "allheaders.h"
 
@@ -64,28 +64,28 @@ const double kMinMusicPixelFraction = 0.75;
 // Erases the unused blobs from the line_pix image, taking into account
 // whether this was a horizontal or vertical line set.
 static void RemoveUnusedLineSegments(bool horizontal_lines,
-                                     BLOBNBOX_LIST* line_bblobs,
-                                     Pix* line_pix) {
+                                     BLOBNBOX_LIST *line_bblobs,
+                                     Pix *line_pix) {
   int height = pixGetHeight(line_pix);
   BLOBNBOX_IT bbox_it(line_bblobs);
   for (bbox_it.mark_cycle_pt(); !bbox_it.cycled_list(); bbox_it.forward()) {
-    BLOBNBOX* blob = bbox_it.data();
+    BLOBNBOX *blob = bbox_it.data();
     if (blob->left_tab_type() != TT_VLINE) {
-      const TBOX& box = blob->bounding_box();
-      Box* pixbox = NULL;
+      const TBOX &box = blob->bounding_box();
+      Box *pixbox = NULL;
       if (horizontal_lines) {
         // Horizontal lines are in tess format and also have x and y flipped
         // (to use FindVerticalAlignment) so we have to flip x and y and then
         // convert to Leptonica by height - flipped x (ie the right edge).
         // See GetLineBoxes for more explanation.
-        pixbox = boxCreate(box.bottom(), height - box.right(),
-                           box.height(), box.width());
+        pixbox = boxCreate(box.bottom(), height - box.right(), box.height(),
+                           box.width());
       } else {
         // For vertical lines, just flip upside-down to convert to Leptonica.
         // The y position of the box in Leptonica terms is the distance from
         // the top of the image to the top of the box.
-        pixbox = boxCreate(box.left(), height - box.top(),
-                           box.width(), box.height());
+        pixbox = boxCreate(box.left(), height - box.top(), box.width(),
+                           box.height());
       }
       pixClearInRect(line_pix, pixbox);
       boxDestroy(&pixbox);
@@ -97,14 +97,14 @@ static void RemoveUnusedLineSegments(bool horizontal_lines,
 // as well by removing components that touch the line, but are not in the
 // non_line_pix mask. It is assumed that the non_line_pix mask has already
 // been prepared to required accuracy.
-static void SubtractLinesAndResidue(Pix* line_pix, Pix* non_line_pix,
-                                    int resolution, Pix* src_pix) {
+static void SubtractLinesAndResidue(Pix *line_pix, Pix *non_line_pix,
+                                    int resolution, Pix *src_pix) {
   // First remove the lines themselves.
   pixSubtract(src_pix, src_pix, line_pix);
   // Subtract the non-lines from the image to get the residue.
-  Pix* residue_pix = pixSubtract(NULL, src_pix, non_line_pix);
+  Pix *residue_pix = pixSubtract(NULL, src_pix, non_line_pix);
   // Dilate the lines so they touch the residue.
-  Pix* fat_line_pix = pixDilateBrick(NULL, line_pix, 3, 3);
+  Pix *fat_line_pix = pixDilateBrick(NULL, line_pix, 3, 3);
   // Seed fill the fat lines to get all the residue.
   pixSeedfillBinary(fat_line_pix, fat_line_pix, residue_pix, 8);
   // Subtract the residue from the original image.
@@ -115,12 +115,12 @@ static void SubtractLinesAndResidue(Pix* line_pix, Pix* non_line_pix,
 
 // Returns the maximum strokewidth in the given binary image by doubling
 // the maximum of the distance function.
-static int MaxStrokeWidth(Pix* pix) {
-  Pix* dist_pix = pixDistanceFunction(pix, 4, 8, L_BOUNDARY_BG);
+static int MaxStrokeWidth(Pix *pix) {
+  Pix *dist_pix = pixDistanceFunction(pix, 4, 8, L_BOUNDARY_BG);
   int width = pixGetWidth(dist_pix);
   int height = pixGetHeight(dist_pix);
   int wpl = pixGetWpl(dist_pix);
-  l_uint32* data = pixGetData(dist_pix);
+  l_uint32 *data = pixGetData(dist_pix);
   // Find the maximum value in the distance image.
   int max_dist = 0;
   for (int y = 0; y < height; ++y) {
@@ -136,12 +136,14 @@ static int MaxStrokeWidth(Pix* pix) {
 }
 
 // Returns the number of components in the intersection_pix touched by line_box.
-static int NumTouchingIntersections(Box* line_box, Pix* intersection_pix) {
-  if (intersection_pix == NULL) return 0;
-  Pix* rect_pix = pixClipRectangle(intersection_pix, line_box, NULL);
-  Boxa* boxa = pixConnComp(rect_pix, NULL, 8);
+static int NumTouchingIntersections(Box *line_box, Pix *intersection_pix) {
+  if (intersection_pix == NULL)
+    return 0;
+  Pix *rect_pix = pixClipRectangle(intersection_pix, line_box, NULL);
+  Boxa *boxa = pixConnComp(rect_pix, NULL, 8);
   pixDestroy(&rect_pix);
-  if (boxa == NULL) return false;
+  if (boxa == NULL)
+    return false;
   int result = boxaGetCount(boxa);
   boxaDestroy(&boxa);
   return result;
@@ -150,8 +152,8 @@ static int NumTouchingIntersections(Box* line_box, Pix* intersection_pix) {
 // Returns the number of black pixels found in the box made by adding the line
 // width to both sides of the line bounding box. (Increasing the smallest
 // dimension of the bounding box.)
-static int CountPixelsAdjacentToLine(int line_width, Box* line_box,
-                                     Pix* nonline_pix) {
+static int CountPixelsAdjacentToLine(int line_width, Box *line_box,
+                                     Pix *nonline_pix) {
   l_int32 x, y, box_width, box_height;
   boxGetGeometry(line_box, &x, &y, &box_width, &box_height);
   if (box_width > box_height) {
@@ -165,8 +167,8 @@ static int CountPixelsAdjacentToLine(int line_width, Box* line_box,
     x = MAX(0, x - line_width);
     box_width = right - x;
   }
-  Box* box = boxCreate(x, y, box_width, box_height);
-  Pix* rect_pix = pixClipRectangle(nonline_pix, box, NULL);
+  Box *box = boxCreate(x, y, box_width, box_height);
+  Pix *rect_pix = pixClipRectangle(nonline_pix, box, NULL);
   boxDestroy(&box);
   l_int32 result;
   pixCountPixels(rect_pix, &result, NULL);
@@ -183,19 +185,19 @@ static int CountPixelsAdjacentToLine(int line_width, Box* line_box,
 //    or Hindi words, or underlines.)
 // Bad line components are erased from line_pix.
 // Returns the number of remaining connected components.
-static int FilterFalsePositives(int resolution, Pix* nonline_pix,
-                                Pix* intersection_pix, Pix* line_pix) {
+static int FilterFalsePositives(int resolution, Pix *nonline_pix,
+                                Pix *intersection_pix, Pix *line_pix) {
   int min_thick_length = static_cast<int>(resolution * kThickLengthMultiple);
-  Pixa* pixa = NULL;
-  Boxa* boxa = pixConnComp(line_pix, &pixa, 8);
+  Pixa *pixa = NULL;
+  Boxa *boxa = pixConnComp(line_pix, &pixa, 8);
   // Iterate over the boxes to remove false positives.
   int nboxes = boxaGetCount(boxa);
   int remaining_boxes = nboxes;
   for (int i = 0; i < nboxes; ++i) {
-    Box* box = boxaGetBox(boxa, i, L_CLONE);
+    Box *box = boxaGetBox(boxa, i, L_CLONE);
     l_int32 x, y, box_width, box_height;
     boxGetGeometry(box, &x, &y, &box_width, &box_height);
-    Pix* comp_pix = pixaGetPix(pixa, i, L_CLONE);
+    Pix *comp_pix = pixaGetPix(pixa, i, L_CLONE);
     int max_width = MaxStrokeWidth(comp_pix);
     pixDestroy(&comp_pix);
     bool bad_line = false;
@@ -207,12 +209,11 @@ static int FilterFalsePositives(int resolution, Pix* nonline_pix,
       // Too thick for the length.
       bad_line = true;
     }
-    if (!bad_line &&
-        (intersection_pix == NULL ||
-        NumTouchingIntersections(box, intersection_pix) < 2)) {
+    if (!bad_line && (intersection_pix == NULL ||
+                      NumTouchingIntersections(box, intersection_pix) < 2)) {
       // Test non-line density near the line.
-      int nonline_count = CountPixelsAdjacentToLine(max_width, box,
-                                                    nonline_pix);
+      int nonline_count =
+          CountPixelsAdjacentToLine(max_width, box, nonline_pix);
       if (nonline_count > box_height * box_width * kMaxNonLineDensity)
         bad_line = true;
     }
@@ -240,22 +241,22 @@ static int FilterFalsePositives(int resolution, Pix* nonline_pix,
 // The output vectors are owned by the list and Frozen (cannot refit) by
 // having no boxes, as there is no need to refit or merge separator lines.
 // The detected lines are removed from the pix.
-void LineFinder::FindAndRemoveLines(int resolution, bool debug, Pix* pix,
-                                    int* vertical_x, int* vertical_y,
-                                    Pix** pix_music_mask,
-                                    TabVector_LIST* v_lines,
-                                    TabVector_LIST* h_lines) {
+void LineFinder::FindAndRemoveLines(int resolution, bool debug, Pix *pix,
+                                    int *vertical_x, int *vertical_y,
+                                    Pix **pix_music_mask,
+                                    TabVector_LIST *v_lines,
+                                    TabVector_LIST *h_lines) {
   PERF_COUNT_START("FindAndRemoveLines")
   if (pix == NULL || vertical_x == NULL || vertical_y == NULL) {
     tprintf("Error in parameters for LineFinder::FindAndRemoveLines\n");
     return;
   }
-  Pix* pix_vline = NULL;
-  Pix* pix_non_vline = NULL;
-  Pix* pix_hline = NULL;
-  Pix* pix_non_hline = NULL;
-  Pix* pix_intersections = NULL;
-  Pixa* pixa_display = debug ? pixaCreate(0) : NULL;
+  Pix *pix_vline = NULL;
+  Pix *pix_non_vline = NULL;
+  Pix *pix_hline = NULL;
+  Pix *pix_non_hline = NULL;
+  Pix *pix_intersections = NULL;
+  Pixa *pixa_display = debug ? pixaCreate(0) : NULL;
   GetLineMasks(resolution, pix, &pix_vline, &pix_non_vline, &pix_hline,
                &pix_non_hline, &pix_intersections, pix_music_mask,
                pixa_display);
@@ -285,7 +286,7 @@ void LineFinder::FindAndRemoveLines(int resolution, bool debug, Pix* pix,
     pixAnd(pix_intersections, pix_vline, pix_hline);
     // Fatten up the intersections and seed-fill to get the intersection
     // residue.
-    Pix* pix_join_residue = pixDilateBrick(NULL, pix_intersections, 5, 5);
+    Pix *pix_join_residue = pixDilateBrick(NULL, pix_intersections, 5, 5);
     pixSeedfillBinary(pix_join_residue, pix_join_residue, pix, 8);
     // Now remove the intersection residue.
     pixSubtract(pix, pix, pix_join_residue);
@@ -319,7 +320,7 @@ void LineFinder::FindAndRemoveLines(int resolution, bool debug, Pix* pix,
 // The C_OUTLINEs in the C_BLOBs contain no outline data - just empty
 // bounding boxes. The Boxa is consumed and destroyed.
 void LineFinder::ConvertBoxaToBlobs(int image_width, int image_height,
-                                    Boxa** boxes, C_BLOB_LIST* blobs) {
+                                    Boxa **boxes, C_BLOB_LIST *blobs) {
   C_OUTLINE_LIST outlines;
   C_OUTLINE_IT ol_it = &outlines;
   // Iterate the boxes to convert to outlines.
@@ -334,7 +335,7 @@ void LineFinder::ConvertBoxaToBlobs(int image_width, int image_height,
     ICOORD bot_right(x + width, y + height);
     CRACKEDGE startpt;
     startpt.pos = top_left;
-    C_OUTLINE* outline = new C_OUTLINE(&startpt, top_left, bot_right, 0);
+    C_OUTLINE *outline = new C_OUTLINE(&startpt, top_left, bot_right, 0);
     ol_it.add_after_then_move(outline);
   }
   // Use outlines_to_blobs to convert the outlines to blobs and find
@@ -361,16 +362,16 @@ void LineFinder::ConvertBoxaToBlobs(int image_width, int image_height,
 // If no good lines are found, pix_vline is destroyed.
 // None of the input pointers may be NULL, and if *pix_vline is NULL then
 // the function does nothing.
-void LineFinder::FindAndRemoveVLines(int resolution,
-                                     Pix* pix_intersections,
-                                     int* vertical_x, int* vertical_y,
-                                     Pix** pix_vline, Pix* pix_non_vline,
-                                     Pix* src_pix, TabVector_LIST* vectors) {
-  if (pix_vline == NULL || *pix_vline == NULL) return;
+void LineFinder::FindAndRemoveVLines(int resolution, Pix *pix_intersections,
+                                     int *vertical_x, int *vertical_y,
+                                     Pix **pix_vline, Pix *pix_non_vline,
+                                     Pix *src_pix, TabVector_LIST *vectors) {
+  if (pix_vline == NULL || *pix_vline == NULL)
+    return;
   C_BLOB_LIST line_cblobs;
   BLOBNBOX_LIST line_bblobs;
-  GetLineBoxes(false, *pix_vline, pix_intersections,
-               &line_cblobs, &line_bblobs);
+  GetLineBoxes(false, *pix_vline, pix_intersections, &line_cblobs,
+               &line_bblobs);
   int width = pixGetWidth(src_pix);
   int height = pixGetHeight(src_pix);
   ICOORD bleft(0, 0);
@@ -397,12 +398,12 @@ void LineFinder::FindAndRemoveVLines(int resolution,
 // If no good lines are found, pix_hline is destroyed.
 // None of the input pointers may be NULL, and if *pix_hline is NULL then
 // the function does nothing.
-void LineFinder::FindAndRemoveHLines(int resolution,
-                                     Pix* pix_intersections,
+void LineFinder::FindAndRemoveHLines(int resolution, Pix *pix_intersections,
                                      int vertical_x, int vertical_y,
-                                     Pix** pix_hline, Pix* pix_non_hline,
-                                     Pix* src_pix, TabVector_LIST* vectors) {
-  if (pix_hline == NULL || *pix_hline == NULL) return;
+                                     Pix **pix_hline, Pix *pix_non_hline,
+                                     Pix *src_pix, TabVector_LIST *vectors) {
+  if (pix_hline == NULL || *pix_hline == NULL)
+    return;
   C_BLOB_LIST line_cblobs;
   BLOBNBOX_LIST line_bblobs;
   GetLineBoxes(true, *pix_hline, pix_intersections, &line_cblobs, &line_bblobs);
@@ -435,17 +436,16 @@ void LineFinder::FindAndRemoveHLines(int resolution,
 // The input line_bblobs list is const really.
 // The output vertical_x and vertical_y are the total of all the vectors.
 // The output list of TabVector makes no reference to the input BLOBNBOXes.
-void LineFinder::FindLineVectors(const ICOORD& bleft, const ICOORD& tright,
-                                 BLOBNBOX_LIST* line_bblobs,
-                                 int* vertical_x, int* vertical_y,
-                                 TabVector_LIST* vectors) {
+void LineFinder::FindLineVectors(const ICOORD &bleft, const ICOORD &tright,
+                                 BLOBNBOX_LIST *line_bblobs, int *vertical_x,
+                                 int *vertical_y, TabVector_LIST *vectors) {
   BLOBNBOX_IT bbox_it(line_bblobs);
   int b_count = 0;
   // Put all the blobs into the grid to find the lines, and move the blobs
   // to the output lists.
   AlignedBlob blob_grid(kLineFindGridSize, bleft, tright);
   for (bbox_it.mark_cycle_pt(); !bbox_it.cycled_list(); bbox_it.forward()) {
-    BLOBNBOX* bblob = bbox_it.data();
+    BLOBNBOX *bblob = bbox_it.data();
     bblob->set_left_tab_type(TT_MAYBE_ALIGNED);
     bblob->set_left_rule(bleft.x());
     bblob->set_right_rule(tright.x());
@@ -459,21 +459,20 @@ void LineFinder::FindLineVectors(const ICOORD& bleft, const ICOORD& tright,
 
   // Search the entire grid, looking for vertical line vectors.
   BlobGridSearch lsearch(&blob_grid);
-  BLOBNBOX* bbox;
+  BLOBNBOX *bbox;
   TabVector_IT vector_it(vectors);
   *vertical_x = 0;
   *vertical_y = 1;
   lsearch.StartFullSearch();
   while ((bbox = lsearch.NextFullSearch()) != NULL) {
     if (bbox->left_tab_type() == TT_MAYBE_ALIGNED) {
-      const TBOX& box = bbox->bounding_box();
+      const TBOX &box = bbox->bounding_box();
       if (AlignedBlob::WithinTestRegion(2, box.left(), box.bottom()))
-        tprintf("Finding line vector starting at bbox (%d,%d)\n",
-                box.left(), box.bottom());
+        tprintf("Finding line vector starting at bbox (%d,%d)\n", box.left(),
+                box.bottom());
       AlignedBlobParams align_params(*vertical_x, *vertical_y, box.width());
-      TabVector* vector = blob_grid.FindVerticalAlignment(align_params, bbox,
-                                                          vertical_x,
-                                                          vertical_y);
+      TabVector *vector = blob_grid.FindVerticalAlignment(
+          align_params, bbox, vertical_x, vertical_y);
       if (vector != NULL) {
         vector->Freeze();
         vector_it.add_to_end(vector);
@@ -487,17 +486,16 @@ void LineFinder::FindLineVectors(const ICOORD& bleft, const ICOORD& tright,
 // is taken to be a bar. Bars are used as a seed and the entire touching
 // component is added to the output music mask and subtracted from the lines.
 // Returns NULL and does minimal work if no music is found.
-static Pix* FilterMusic(int resolution, Pix* pix_closed,
-                        Pix* pix_vline, Pix* pix_hline,
-                        l_int32* v_empty, l_int32* h_empty) {
+static Pix *FilterMusic(int resolution, Pix *pix_closed, Pix *pix_vline,
+                        Pix *pix_hline, l_int32 *v_empty, l_int32 *h_empty) {
   int max_stave_height = static_cast<int>(resolution * kMaxStaveHeight);
-  Pix* intersection_pix = pixAnd(NULL, pix_vline, pix_hline);
-  Boxa* boxa = pixConnComp(pix_vline, NULL, 8);
+  Pix *intersection_pix = pixAnd(NULL, pix_vline, pix_hline);
+  Boxa *boxa = pixConnComp(pix_vline, NULL, 8);
   // Iterate over the boxes to find music bars.
   int nboxes = boxaGetCount(boxa);
-  Pix* music_mask = NULL;
+  Pix *music_mask = NULL;
   for (int i = 0; i < nboxes; ++i) {
-    Box* box = boxaGetBox(boxa, i, L_CLONE);
+    Box *box = boxaGetBox(boxa, i, L_CLONE);
     l_int32 x, y, box_width, box_height;
     boxGetGeometry(box, &x, &y, &box_width, &box_height);
     int joins = NumTouchingIntersections(box, intersection_pix);
@@ -506,8 +504,8 @@ static Pix* FilterMusic(int resolution, Pix* pix_closed,
     if (joins >= 5 && (joins - 1) * max_stave_height >= 4 * box_height) {
       // This is a music bar. Add to the mask.
       if (music_mask == NULL)
-        music_mask = pixCreate(pixGetWidth(pix_vline), pixGetHeight(pix_vline),
-                               1);
+        music_mask =
+            pixCreate(pixGetWidth(pix_vline), pixGetHeight(pix_vline), 1);
       pixSetInRect(music_mask, box);
     }
     boxDestroy(&box);
@@ -522,12 +520,12 @@ static Pix* FilterMusic(int resolution, Pix* pix_closed,
     // Filter out false positives. CCs in the music_mask should be the vast
     // majority of the pixels in their bounding boxes, as we expect just a
     // tiny amount of text, a few phrase marks, and crescendo etc left.
-    Boxa* boxa = pixConnComp(music_mask, NULL, 8);
+    Boxa *boxa = pixConnComp(music_mask, NULL, 8);
     // Iterate over the boxes to find music components.
     int nboxes = boxaGetCount(boxa);
     for (int i = 0; i < nboxes; ++i) {
-      Box* box = boxaGetBox(boxa, i, L_CLONE);
-      Pix* rect_pix = pixClipRectangle(music_mask, box, NULL);
+      Box *box = boxaGetBox(boxa, i, L_CLONE);
+      Pix *rect_pix = pixClipRectangle(music_mask, box, NULL);
       l_int32 music_pixels;
       pixCountPixels(rect_pix, &music_pixels, NULL);
       pixDestroy(&rect_pix);
@@ -569,13 +567,12 @@ static Pix* FilterMusic(int resolution, Pix* pix_closed,
 // but any of the returns that are empty will be NULL on output.
 // None of the input (1st level) pointers may be NULL except pix_music_mask,
 // which will disable music detection, and pixa_display.
-void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
-                              Pix** pix_vline, Pix** pix_non_vline,
-                              Pix** pix_hline, Pix** pix_non_hline,
-                              Pix** pix_intersections, Pix** pix_music_mask,
-                              Pixa* pixa_display) {
-  Pix* pix_closed = NULL;
-  Pix* pix_hollow = NULL;
+void LineFinder::GetLineMasks(int resolution, Pix *src_pix, Pix **pix_vline,
+                              Pix **pix_non_vline, Pix **pix_hline,
+                              Pix **pix_non_hline, Pix **pix_intersections,
+                              Pix **pix_music_mask, Pixa *pixa_display) {
+  Pix *pix_closed = NULL;
+  Pix *pix_hollow = NULL;
 
   int max_line_width = resolution / kThinLineFraction;
   int min_line_length = resolution / kMinLineLengthFraction;
@@ -590,9 +587,8 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
 #ifdef USE_OPENCL
   if (OpenclDevice::selectedDeviceIsOpenCL()) {
     // OpenCL pixGetLines Operation
-    int clStatus = OpenclDevice::initMorphCLAllocations(pixGetWpl(src_pix),
-                                                        pixGetHeight(src_pix),
-                                                        src_pix);
+    int clStatus = OpenclDevice::initMorphCLAllocations(
+        pixGetWpl(src_pix), pixGetHeight(src_pix), src_pix);
     bool getpixclosed = pix_music_mask != NULL ? true : false;
     OpenclDevice::pixGetLinesCL(NULL, src_pix, pix_vline, pix_hline,
                                 &pix_closed, getpixclosed, closing_brick,
@@ -600,30 +596,31 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
                                 min_line_length, min_line_length);
   } else {
 #endif
-  // Close up small holes, making it less likely that false alarms are found
-  // in thickened text (as it will become more solid) and also smoothing over
-  // some line breaks and nicks in the edges of the lines.
-  pix_closed = pixCloseBrick(NULL, src_pix, closing_brick, closing_brick);
-  if (pixa_display != NULL)
-    pixaAddPix(pixa_display, pix_closed, L_CLONE);
-  // Open up with a big box to detect solid areas, which can then be subtracted.
-  // This is very generous and will leave in even quite wide lines.
-  Pix* pix_solid = pixOpenBrick(NULL, pix_closed, max_line_width,
-                                max_line_width);
-  if (pixa_display != NULL)
-    pixaAddPix(pixa_display, pix_solid, L_CLONE);
-  pix_hollow = pixSubtract(NULL, pix_closed, pix_solid);
+    // Close up small holes, making it less likely that false alarms are found
+    // in thickened text (as it will become more solid) and also smoothing over
+    // some line breaks and nicks in the edges of the lines.
+    pix_closed = pixCloseBrick(NULL, src_pix, closing_brick, closing_brick);
+    if (pixa_display != NULL)
+      pixaAddPix(pixa_display, pix_closed, L_CLONE);
+    // Open up with a big box to detect solid areas, which can then be
+    // subtracted. This is very generous and will leave in even quite wide
+    // lines.
+    Pix *pix_solid =
+        pixOpenBrick(NULL, pix_closed, max_line_width, max_line_width);
+    if (pixa_display != NULL)
+      pixaAddPix(pixa_display, pix_solid, L_CLONE);
+    pix_hollow = pixSubtract(NULL, pix_closed, pix_solid);
 
-  pixDestroy(&pix_solid);
+    pixDestroy(&pix_solid);
 
-  // Now open up in both directions independently to find lines of at least
-  // 1 inch/kMinLineLengthFraction in length.
-  if (pixa_display != NULL)
-    pixaAddPix(pixa_display, pix_hollow, L_CLONE);
-  *pix_vline = pixOpenBrick(NULL, pix_hollow, 1, min_line_length);
-  *pix_hline = pixOpenBrick(NULL, pix_hollow, min_line_length, 1);
+    // Now open up in both directions independently to find lines of at least
+    // 1 inch/kMinLineLengthFraction in length.
+    if (pixa_display != NULL)
+      pixaAddPix(pixa_display, pix_hollow, L_CLONE);
+    *pix_vline = pixOpenBrick(NULL, pix_hollow, 1, min_line_length);
+    *pix_hline = pixOpenBrick(NULL, pix_hollow, min_line_length, 1);
 
-  pixDestroy(&pix_hollow);
+    pixDestroy(&pix_hollow);
 #ifdef USE_OPENCL
   }
 #endif
@@ -636,17 +633,16 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
   pixZero(*pix_hline, &h_empty);
   if (pix_music_mask != NULL) {
     if (!v_empty && !h_empty) {
-      *pix_music_mask = FilterMusic(resolution, pix_closed,
-                                    *pix_vline, *pix_hline,
-                                    &v_empty, &h_empty);
+      *pix_music_mask = FilterMusic(resolution, pix_closed, *pix_vline,
+                                    *pix_hline, &v_empty, &h_empty);
     } else {
       *pix_music_mask = NULL;
     }
   }
   pixDestroy(&pix_closed);
-  Pix* pix_nonlines = NULL;
+  Pix *pix_nonlines = NULL;
   *pix_intersections = NULL;
-  Pix* extra_non_hlines = NULL;
+  Pix *extra_non_hlines = NULL;
   if (!v_empty) {
     // Subtract both line candidates from the source to get definite non-lines.
     pix_nonlines = pixSubtract(NULL, src_pix, *pix_vline);
@@ -667,7 +663,7 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
     }
     if (!FilterFalsePositives(resolution, *pix_non_vline, *pix_intersections,
                               *pix_vline))
-      pixDestroy(pix_vline);  // No candidates left.
+      pixDestroy(pix_vline); // No candidates left.
   } else {
     // No vertical lines.
     pixDestroy(pix_vline);
@@ -691,12 +687,15 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
     }
     if (!FilterFalsePositives(resolution, *pix_non_hline, *pix_intersections,
                               *pix_hline))
-      pixDestroy(pix_hline);  // No candidates left.
+      pixDestroy(pix_hline); // No candidates left.
   }
   if (pixa_display != NULL) {
-    if (*pix_vline != NULL) pixaAddPix(pixa_display, *pix_vline, L_CLONE);
-    if (*pix_hline != NULL) pixaAddPix(pixa_display, *pix_hline, L_CLONE);
-    if (pix_nonlines != NULL) pixaAddPix(pixa_display, pix_nonlines, L_CLONE);
+    if (*pix_vline != NULL)
+      pixaAddPix(pixa_display, *pix_vline, L_CLONE);
+    if (*pix_hline != NULL)
+      pixaAddPix(pixa_display, *pix_hline, L_CLONE);
+    if (pix_nonlines != NULL)
+      pixaAddPix(pixa_display, pix_nonlines, L_CLONE);
     if (*pix_non_vline != NULL)
       pixaAddPix(pixa_display, *pix_non_vline, L_CLONE);
     if (*pix_non_hline != NULL)
@@ -712,17 +711,16 @@ void LineFinder::GetLineMasks(int resolution, Pix* src_pix,
 // Returns a list of boxes corresponding to the candidate line segments. Sets
 // the line_crossings member of the boxes so we can later determin the number
 // of intersections touched by a full line.
-void LineFinder::GetLineBoxes(bool horizontal_lines,
-                              Pix* pix_lines, Pix* pix_intersections,
-                              C_BLOB_LIST* line_cblobs,
-                              BLOBNBOX_LIST* line_bblobs) {
+void LineFinder::GetLineBoxes(bool horizontal_lines, Pix *pix_lines,
+                              Pix *pix_intersections, C_BLOB_LIST *line_cblobs,
+                              BLOBNBOX_LIST *line_bblobs) {
   // Put a single pixel crack in every line at an arbitrary spacing,
   // so they break up and the bounding boxes can be used to get the
   // direction accurately enough without needing outlines.
   int wpl = pixGetWpl(pix_lines);
   int width = pixGetWidth(pix_lines);
   int height = pixGetHeight(pix_lines);
-  l_uint32* data = pixGetData(pix_lines);
+  l_uint32 *data = pixGetData(pix_lines);
   if (horizontal_lines) {
     for (int y = 0; y < height; ++y, data += wpl) {
       for (int x = kCrackSpacing; x < width; x += kCrackSpacing) {
@@ -735,19 +733,19 @@ void LineFinder::GetLineBoxes(bool horizontal_lines,
     }
   }
   // Get the individual connected components
-  Boxa* boxa = pixConnComp(pix_lines, NULL, 8);
+  Boxa *boxa = pixConnComp(pix_lines, NULL, 8);
   ConvertBoxaToBlobs(width, height, &boxa, line_cblobs);
   // Make the BLOBNBOXes from the C_BLOBs.
   C_BLOB_IT blob_it(line_cblobs);
   BLOBNBOX_IT bbox_it(line_bblobs);
   for (blob_it.mark_cycle_pt(); !blob_it.cycled_list(); blob_it.forward()) {
-    C_BLOB* cblob = blob_it.data();
-    BLOBNBOX* bblob = new BLOBNBOX(cblob);
+    C_BLOB *cblob = blob_it.data();
+    BLOBNBOX *bblob = new BLOBNBOX(cblob);
     bbox_it.add_to_end(bblob);
     // Determine whether the line segment touches two intersections.
-    const TBOX& bbox = bblob->bounding_box();
-    Box* box = boxCreate(bbox.left(), bbox.bottom(),
-                         bbox.width(), bbox.height());
+    const TBOX &bbox = bblob->bounding_box();
+    Box *box =
+        boxCreate(bbox.left(), bbox.bottom(), bbox.width(), bbox.height());
     bblob->set_line_crossings(NumTouchingIntersections(box, pix_intersections));
     boxDestroy(&box);
     // Transform the bounding box prior to finding lines. To save writing
@@ -759,16 +757,15 @@ void LineFinder::GetLineBoxes(bool horizontal_lines,
       // bbox.bottom(), being the MIN y coord, is actually the top, so to get
       // back to Leptonica coords in RemoveUnusedLineSegments, we have to
       // use height - box.right() as the top, which looks very odd.
-      TBOX new_box(height - bbox.top(), bbox.left(),
-                   height - bbox.bottom(), bbox.right());
+      TBOX new_box(height - bbox.top(), bbox.left(), height - bbox.bottom(),
+                   bbox.right());
       bblob->set_bounding_box(new_box);
     } else {
-      TBOX new_box(bbox.left(), height - bbox.top(),
-                   bbox.right(), height - bbox.bottom());
+      TBOX new_box(bbox.left(), height - bbox.top(), bbox.right(),
+                   height - bbox.bottom());
       bblob->set_bounding_box(new_box);
     }
   }
 }
 
-}  // namespace tesseract.
-
+} // namespace tesseract.

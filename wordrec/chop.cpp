@@ -28,10 +28,10 @@
 ----------------------------------------------------------------------*/
 
 #include "chop.h"
-#include "outlines.h"
 #include "callcpp.h"
-#include "plotedges.h"
 #include "const.h"
+#include "outlines.h"
+#include "plotedges.h"
 #include "wordrec.h"
 
 #include <math.h>
@@ -55,13 +55,12 @@ PRIORITY Wordrec::point_priority(EDGEPT *point) {
   return (PRIORITY)angle_change(point->prev, point, point->next);
 }
 
-
 /**
  * @name add_point_to_list
  *
  * Add an edge point to a POINT_GROUP containg a list of other points.
  */
-void Wordrec::add_point_to_list(PointHeap* point_heap, EDGEPT *point) {
+void Wordrec::add_point_to_list(PointHeap *point_heap, EDGEPT *point) {
   if (point_heap->size() < MAX_NUM_POINTS - 2) {
     PointPair pair(point_priority(point), point);
     point_heap->Push(&pair);
@@ -99,13 +98,13 @@ int Wordrec::angle_change(EDGEPT *point1, EDGEPT *point2, EDGEPT *point3) {
   vector2.y = point3->pos.y - point2->pos.y;
   /* Use cross product */
   length = (float)sqrt((float)LENGTH(vector1) * LENGTH(vector2));
-  if ((int) length == 0)
+  if ((int)length == 0)
     return (0);
-  angle = static_cast<int>(floor(asin(CROSS (vector1, vector2) /
-                                      length) / PI * 180.0 + 0.5));
+  angle = static_cast<int>(
+      floor(asin(CROSS(vector1, vector2) / length) / PI * 180.0 + 0.5));
 
   /* Use dot product */
-  if (SCALAR (vector1, vector2) < 0)
+  if (SCALAR(vector1, vector2) < 0)
     angle = 180 - angle;
   /* Adjust angle */
   if (angle > 180)
@@ -122,8 +121,7 @@ int Wordrec::angle_change(EDGEPT *point1, EDGEPT *point2, EDGEPT *point3) {
  * point may not be exactly vertical from the critical point.
  */
 EDGEPT *Wordrec::pick_close_point(EDGEPT *critical_point,
-                                  EDGEPT *vertical_point,
-                                  int *best_dist) {
+                                  EDGEPT *vertical_point, int *best_dist) {
   EDGEPT *best_point = NULL;
   int this_distance;
   int found_better;
@@ -131,13 +129,13 @@ EDGEPT *Wordrec::pick_close_point(EDGEPT *critical_point,
   do {
     found_better = FALSE;
 
-    this_distance = edgept_dist (critical_point, vertical_point);
+    this_distance = edgept_dist(critical_point, vertical_point);
     if (this_distance <= *best_dist) {
 
-      if (!(same_point (critical_point->pos, vertical_point->pos) ||
-        same_point (critical_point->pos, vertical_point->next->pos) ||
-        (best_point && same_point (best_point->pos, vertical_point->pos)) ||
-      is_exterior_point (critical_point, vertical_point))) {
+      if (!(same_point(critical_point->pos, vertical_point->pos) ||
+            same_point(critical_point->pos, vertical_point->next->pos) ||
+            (best_point && same_point(best_point->pos, vertical_point->pos)) ||
+            is_exterior_point(critical_point, vertical_point))) {
         *best_dist = this_distance;
         best_point = vertical_point;
         if (chop_vertical_creep)
@@ -145,12 +143,10 @@ EDGEPT *Wordrec::pick_close_point(EDGEPT *critical_point,
       }
     }
     vertical_point = vertical_point->next;
-  }
-  while (found_better == TRUE);
+  } while (found_better == TRUE);
 
   return (best_point);
 }
-
 
 /**
  * @name prioritize_points
@@ -159,7 +155,7 @@ EDGEPT *Wordrec::pick_close_point(EDGEPT *critical_point,
  * each of these points assign a priority.  Sort these points using a
  * heap structure so that they can be visited in order.
  */
-void Wordrec::prioritize_points(TESSLINE *outline, PointHeap* points) {
+void Wordrec::prioritize_points(TESSLINE *outline, PointHeap *points) {
   EDGEPT *this_point;
   EDGEPT *local_min = NULL;
   EDGEPT *local_max = NULL;
@@ -169,24 +165,22 @@ void Wordrec::prioritize_points(TESSLINE *outline, PointHeap* points) {
   local_max = this_point;
   do {
     if (this_point->vec.y < 0) {
-                                 /* Look for minima */
+      /* Look for minima */
       if (local_max != NULL)
         new_max_point(local_max, points);
-      else if (is_inside_angle (this_point))
+      else if (is_inside_angle(this_point))
         add_point_to_list(points, this_point);
       local_max = NULL;
       local_min = this_point->next;
-    }
-    else if (this_point->vec.y > 0) {
-                                 /* Look for maxima */
+    } else if (this_point->vec.y > 0) {
+      /* Look for maxima */
       if (local_min != NULL)
         new_min_point(local_min, points);
-      else if (is_inside_angle (this_point))
+      else if (is_inside_angle(this_point))
         add_point_to_list(points, this_point);
       local_min = NULL;
       local_max = this_point->next;
-    }
-    else {
+    } else {
       /* Flat area */
       if (local_max != NULL) {
         if (local_max->prev->vec.y != 0) {
@@ -194,8 +188,7 @@ void Wordrec::prioritize_points(TESSLINE *outline, PointHeap* points) {
         }
         local_max = this_point->next;
         local_min = NULL;
-      }
-      else {
+      } else {
         if (local_min->prev->vec.y != 0) {
           new_min_point(local_min, points);
         }
@@ -204,12 +197,10 @@ void Wordrec::prioritize_points(TESSLINE *outline, PointHeap* points) {
       }
     }
 
-                                 /* Next point */
+    /* Next point */
     this_point = this_point->next;
-  }
-  while (this_point != outline->loop);
+  } while (this_point != outline->loop);
 }
-
 
 /**
  * @name new_min_point
@@ -218,22 +209,21 @@ void Wordrec::prioritize_points(TESSLINE *outline, PointHeap* points) {
  * Return the new value for the local minimum.  If a point is saved then
  * the local minimum is reset to NULL.
  */
-void Wordrec::new_min_point(EDGEPT *local_min, PointHeap* points) {
+void Wordrec::new_min_point(EDGEPT *local_min, PointHeap *points) {
   inT16 dir;
 
-  dir = direction (local_min);
+  dir = direction(local_min);
 
   if (dir < 0) {
     add_point_to_list(points, local_min);
     return;
   }
 
-  if (dir == 0 && point_priority (local_min) < 0) {
+  if (dir == 0 && point_priority(local_min) < 0) {
     add_point_to_list(points, local_min);
     return;
   }
 }
-
 
 /**
  * @name new_max_point
@@ -242,22 +232,21 @@ void Wordrec::new_min_point(EDGEPT *local_min, PointHeap* points) {
  * Return the new value for the local minimum.  If a point is saved then
  * the local minimum is reset to NULL.
  */
-void Wordrec::new_max_point(EDGEPT *local_max, PointHeap* points) {
+void Wordrec::new_max_point(EDGEPT *local_max, PointHeap *points) {
   inT16 dir;
 
-  dir = direction (local_max);
+  dir = direction(local_max);
 
   if (dir > 0) {
     add_point_to_list(points, local_max);
     return;
   }
 
-  if (dir == 0 && point_priority (local_max) < 0) {
+  if (dir == 0 && point_priority(local_max) < 0) {
     add_point_to_list(points, local_max);
     return;
   }
 }
-
 
 /**
  * @name vertical_projection_point
@@ -271,14 +260,15 @@ void Wordrec::new_max_point(EDGEPT *local_max, PointHeap* points) {
  * a result, and any points that were newly created are also saved on
  * the new_points list.
  */
-void Wordrec::vertical_projection_point(EDGEPT *split_point, EDGEPT *target_point,
-                                        EDGEPT** best_point,
+void Wordrec::vertical_projection_point(EDGEPT *split_point,
+                                        EDGEPT *target_point,
+                                        EDGEPT **best_point,
                                         EDGEPT_CLIST *new_points) {
-  EDGEPT *p;                     /* Iterator */
-  EDGEPT *this_edgept;           /* Iterator */
+  EDGEPT *p;           /* Iterator */
+  EDGEPT *this_edgept; /* Iterator */
   EDGEPT_C_IT new_point_it(new_points);
-  int x = split_point->pos.x;    /* X value of vertical */
-  int best_dist = LARGE_DISTANCE;/* Best point found */
+  int x = split_point->pos.x;     /* X value of vertical */
+  int best_dist = LARGE_DISTANCE; /* Best point found */
 
   if (*best_point != NULL)
     best_dist = edgept_dist(split_point, *best_point);
@@ -289,8 +279,7 @@ void Wordrec::vertical_projection_point(EDGEPT *split_point, EDGEPT *target_poin
     if (((p->pos.x <= x && x <= p->next->pos.x) ||
          (p->next->pos.x <= x && x <= p->pos.x)) &&
         !same_point(split_point->pos, p->pos) &&
-        !same_point(split_point->pos, p->next->pos) &&
-        !p->IsChopPt() &&
+        !same_point(split_point->pos, p->next->pos) && !p->IsChopPt() &&
         (*best_point == NULL || !same_point((*best_point)->pos, p->pos))) {
 
       if (near_point(split_point, p, p->next, &this_edgept)) {
@@ -298,17 +287,15 @@ void Wordrec::vertical_projection_point(EDGEPT *split_point, EDGEPT *target_poin
       }
 
       if (*best_point == NULL)
-        best_dist = edgept_dist (split_point, this_edgept);
+        best_dist = edgept_dist(split_point, this_edgept);
 
-      this_edgept =
-        pick_close_point(split_point, this_edgept, &best_dist);
+      this_edgept = pick_close_point(split_point, this_edgept, &best_dist);
       if (this_edgept)
         *best_point = this_edgept;
     }
 
     p = p->next;
-  }
-  while (p != target_point);
+  } while (p != target_point);
 }
 
-}  // namespace tesseract
+} // namespace tesseract

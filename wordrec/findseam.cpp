@@ -27,8 +27,8 @@
 ----------------------------------------------------------------------*/
 #include "findseam.h"
 #include "gradechop.h"
-#include "plotedges.h"
 #include "outlines.h"
+#include "plotedges.h"
 #include "seam.h"
 #include "wordrec.h"
 
@@ -40,14 +40,14 @@
 /*----------------------------------------------------------------------
               T y p e s
 ----------------------------------------------------------------------*/
-#define SPLIT_CLOSENESS        20/* Difference in x value */
-                                 /* How many to keep */
-#define MAX_NUM_SEAMS          150
-                                 /* How many to keep */
-#define MAX_OLD_SEAMS          150
-#define NO_FULL_PRIORITY       -1/* Special marker for pri. */
-                                 /* Evalute right away */
-#define BAD_PRIORITY           9999.0
+#define SPLIT_CLOSENESS 20 /* Difference in x value */
+                           /* How many to keep */
+#define MAX_NUM_SEAMS 150
+/* How many to keep */
+#define MAX_OLD_SEAMS 150
+#define NO_FULL_PRIORITY -1 /* Special marker for pri. */
+                            /* Evalute right away */
+#define BAD_PRIORITY 9999.0
 
 /*----------------------------------------------------------------------
               F u n c t i o n s
@@ -61,8 +61,9 @@ namespace tesseract {
  * and the new seam is worse than the worst.
  **********************************************************************/
 void Wordrec::add_seam_to_queue(float new_priority, SEAM *new_seam,
-                                SeamQueue* seams) {
-  if (new_seam == NULL) return;
+                                SeamQueue *seams) {
+  if (new_seam == NULL)
+    return;
   if (chop_debug) {
     tprintf("Pushing new seam with priority %g :", new_priority);
     new_seam->Print("seam: ");
@@ -84,7 +85,6 @@ void Wordrec::add_seam_to_queue(float new_priority, SEAM *new_seam,
   SeamPair new_pair(new_priority, new_seam);
   seams->Push(&new_pair);
 }
-
 
 /**********************************************************************
  * choose_best_seam
@@ -112,7 +112,8 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
     split_point += split->point2->pos;
     split_point /= 2;
     seam = new SEAM(my_priority, split_point, *split);
-    if (chop_debug > 1) seam->Print("Partial priority    ");
+    if (chop_debug > 1)
+      seam->Print("Partial priority    ");
     add_seam_to_queue(my_priority, seam, seam_queue);
 
     if (my_priority > chop_good_split)
@@ -130,7 +131,7 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
                                      chop_overlap_knob, chop_centered_maxwidth,
                                      chop_center_knob, chop_width_change_knob);
     if (chop_debug) {
-      sprintf (str, "Full my_priority %0.0f,  ", my_priority);
+      sprintf(str, "Full my_priority %0.0f,  ", my_priority);
       seam->Print(str);
     }
 
@@ -152,7 +153,7 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
     if (my_priority < chop_good_split) {
       if (seam)
         delete seam;
-      return;                    /* Made good answer */
+      return; /* Made good answer */
     }
 
     if (seam) {
@@ -166,7 +167,7 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
                  seam_pile->PeekTop().key() > seam_pair.key()) {
         combine_seam(*seam_pile, seam, seam_queue);
         SeamDecPair pair;
-        seam_pile->Pop(&pair);  // pop the worst.
+        seam_pile->Pop(&pair); // pop the worst.
         // Replace the seam in pair (deleting the old one) with
         // the new seam and score, then push back into the heap.
         pair.set_key(seam_pair.key());
@@ -177,14 +178,13 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
       }
     }
 
-    my_priority = seam_queue->empty() ? NO_FULL_PRIORITY
-                                      : seam_queue->PeekTop().key();
+    my_priority =
+        seam_queue->empty() ? NO_FULL_PRIORITY : seam_queue->PeekTop().key();
     if ((my_priority > chop_ok_split) ||
-      (my_priority > chop_good_split && split))
+        (my_priority > chop_good_split && split))
       return;
   }
 }
-
 
 /**********************************************************************
  * combine_seam
@@ -193,14 +193,15 @@ void Wordrec::choose_best_seam(SeamQueue *seam_queue, const SPLIT *split,
  * from this union should be added to the seam queue.  The return value
  * tells whether or not any additional seams were added to the queue.
  **********************************************************************/
-void Wordrec::combine_seam(const SeamPile& seam_pile,
-                           const SEAM* seam, SeamQueue* seam_queue) {
+void Wordrec::combine_seam(const SeamPile &seam_pile, const SEAM *seam,
+                           SeamQueue *seam_queue) {
   for (int x = 0; x < seam_pile.size(); ++x) {
     const SEAM *this_one = seam_pile.get(x).data();
     if (seam->CombineableWith(*this_one, SPLIT_CLOSENESS, chop_ok_split)) {
       SEAM *new_one = new SEAM(*seam);
       new_one->CombineWith(*this_one);
-      if (chop_debug > 1) new_one->Print("Combo priority       ");
+      if (chop_debug > 1)
+        new_one->Print("Combo priority       ");
       add_seam_to_queue(new_one->priority(), new_one, seam_queue);
     }
   }
@@ -240,8 +241,8 @@ SEAM *Wordrec::pick_good_seam(TBLOB *blob) {
   SeamQueue seam_queue(MAX_NUM_SEAMS);
 
   try_point_pairs(points, num_points, &seam_queue, &seam_pile, &seam, blob);
-  try_vertical_splits(points, num_points, &new_points,
-                      &seam_queue, &seam_pile, &seam, blob);
+  try_vertical_splits(points, num_points, &new_points, &seam_queue, &seam_pile,
+                      &seam, blob);
 
   if (seam == NULL) {
     choose_best_seam(&seam_queue, NULL, BAD_PRIORITY, &seam, blob, &seam_pile);
@@ -285,7 +286,6 @@ SEAM *Wordrec::pick_good_seam(TBLOB *blob) {
   return (seam);
 }
 
-
 /**********************************************************************
  * try_point_pairs
  *
@@ -293,12 +293,9 @@ SEAM *Wordrec::pick_good_seam(TBLOB *blob) {
  * together.  See if any of them are suitable for use.  Use a seam
  * queue and seam pile that have already been initialized and used.
  **********************************************************************/
-void Wordrec::try_point_pairs(EDGEPT * points[MAX_NUM_POINTS],
-                              inT16 num_points,
-                              SeamQueue* seam_queue,
-                              SeamPile* seam_pile,
-                              SEAM ** seam,
-                              TBLOB * blob) {
+void Wordrec::try_point_pairs(EDGEPT *points[MAX_NUM_POINTS], inT16 num_points,
+                              SeamQueue *seam_queue, SeamPile *seam_pile,
+                              SEAM **seam, TBLOB *blob) {
   inT16 x;
   inT16 y;
   PRIORITY priority;
@@ -320,7 +317,6 @@ void Wordrec::try_point_pairs(EDGEPT * points[MAX_NUM_POINTS],
   }
 }
 
-
 /**********************************************************************
  * try_vertical_splits
  *
@@ -331,13 +327,10 @@ void Wordrec::try_point_pairs(EDGEPT * points[MAX_NUM_POINTS],
  * the blob while examining vertical splits and which may safely be
  * removed once a seam is chosen if they are not part of the seam.
  **********************************************************************/
-void Wordrec::try_vertical_splits(EDGEPT * points[MAX_NUM_POINTS],
-                                  inT16 num_points,
-                                  EDGEPT_CLIST *new_points,
-                                  SeamQueue* seam_queue,
-                                  SeamPile* seam_pile,
-                                  SEAM ** seam,
-                                  TBLOB * blob) {
+void Wordrec::try_vertical_splits(EDGEPT *points[MAX_NUM_POINTS],
+                                  inT16 num_points, EDGEPT_CLIST *new_points,
+                                  SeamQueue *seam_queue, SeamPile *seam_pile,
+                                  SEAM **seam, TBLOB *blob) {
   EDGEPT *vertical_point = NULL;
   inT16 x;
   PRIORITY priority;
@@ -346,8 +339,8 @@ void Wordrec::try_vertical_splits(EDGEPT * points[MAX_NUM_POINTS],
   for (x = 0; x < num_points; x++) {
     vertical_point = NULL;
     for (outline = blob->outlines; outline; outline = outline->next) {
-      vertical_projection_point(points[x], outline->loop,
-                                &vertical_point, new_points);
+      vertical_projection_point(points[x], outline->loop, &vertical_point,
+                                new_points);
     }
 
     if (vertical_point && points[x] != vertical_point->next &&
@@ -361,4 +354,4 @@ void Wordrec::try_vertical_splits(EDGEPT * points[MAX_NUM_POINTS],
   }
 }
 
-}
+} // namespace tesseract

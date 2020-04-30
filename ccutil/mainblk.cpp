@@ -17,21 +17,21 @@
  *
  **********************************************************************/
 
-#include          "fileerr.h"
+#include "fileerr.h"
 #ifdef __UNIX__
-#include          <unistd.h>
-#include          <signal.h>
+#include <signal.h>
+#include <unistd.h>
 #else
-#include          <io.h>
+#include <io.h>
 #endif
-#include          <stdlib.h>
-#include          "ccutil.h"
+#include "ccutil.h"
+#include <stdlib.h>
 
-#define VARDIR        "configs/" /**< variables files */
+#define VARDIR "configs/" /**< variables files */
 #define EXTERN
 
 const ERRCODE NO_PATH =
-"Warning:explicit path for executable will not be used for configs";
+    "Warning:explicit path for executable will not be used for configs";
 static const ERRCODE USAGE = "Usage";
 
 namespace tesseract {
@@ -51,7 +51,7 @@ namespace tesseract {
  * @param basename - name of image
  */
 void CCUtil::main_setup(const char *argv0, const char *basename) {
-  imagebasename = basename;      /**< name of image */
+  imagebasename = basename; /**< name of image */
 
   char *tessdata_prefix = getenv("TESSDATA_PREFIX");
 
@@ -101,6 +101,6 @@ void CCUtil::main_setup(const char *argv0, const char *basename) {
   if ((strcmp(lastchar, "/") != 0) && (strcmp(lastchar, "\\") != 0))
     datadir += "/";
 
-  datadir += m_data_sub_dir;     /**< data directory */
+  datadir += m_data_sub_dir; /**< data directory */
 }
-}  // namespace tesseract
+} // namespace tesseract

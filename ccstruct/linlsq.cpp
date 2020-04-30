@@ -17,10 +17,10 @@
  *
  **********************************************************************/
 
-#include          <stdio.h>
-#include          <math.h>
-#include          "errcode.h"
-#include          "linlsq.h"
+#include "linlsq.h"
+#include "errcode.h"
+#include <math.h>
+#include <stdio.h>
 
 const ERRCODE EMPTY_LLSQ = "Can't delete from an empty LLSQ";
 
@@ -31,14 +31,13 @@ const ERRCODE EMPTY_LLSQ = "Can't delete from an empty LLSQ";
  **********************************************************************/
 
 void LLSQ::clear() {  // initialize
-  total_weight = 0.0;                         // no elements
-  sigx = 0.0;                      // update accumulators
+  total_weight = 0.0; // no elements
+  sigx = 0.0;         // update accumulators
   sigy = 0.0;
   sigxx = 0.0;
   sigxy = 0.0;
   sigyy = 0.0;
 }
-
 
 /**********************************************************************
  * LLSQ::add
@@ -46,9 +45,9 @@ void LLSQ::clear() {  // initialize
  * Add an element to the accumulator.
  **********************************************************************/
 
-void LLSQ::add(double x, double y) {          // add an element
-  total_weight++;                           // count elements
-  sigx += x;                     // update accumulators
+void LLSQ::add(double x, double y) { // add an element
+  total_weight++;                    // count elements
+  sigx += x;                         // update accumulators
   sigy += y;
   sigxx += x * x;
   sigxy += x * y;
@@ -57,22 +56,21 @@ void LLSQ::add(double x, double y) {          // add an element
 // Adds an element with a specified weight.
 void LLSQ::add(double x, double y, double weight) {
   total_weight += weight;
-  sigx += x * weight;                     // update accumulators
+  sigx += x * weight; // update accumulators
   sigy += y * weight;
   sigxx += x * x * weight;
   sigxy += x * y * weight;
   sigyy += y * y * weight;
 }
 // Adds a whole LLSQ.
-void LLSQ::add(const LLSQ& other) {
+void LLSQ::add(const LLSQ &other) {
   total_weight += other.total_weight;
-  sigx += other.sigx;                     // update accumulators
+  sigx += other.sigx; // update accumulators
   sigy += other.sigy;
   sigxx += other.sigxx;
   sigxy += other.sigxy;
   sigyy += other.sigyy;
 }
-
 
 /**********************************************************************
  * LLSQ::remove
@@ -80,17 +78,16 @@ void LLSQ::add(const LLSQ& other) {
  * Delete an element from the acculuator.
  **********************************************************************/
 
-void LLSQ::remove(double x, double y) {          // delete an element
-  if (total_weight <= 0.0)                       // illegal
+void LLSQ::remove(double x, double y) { // delete an element
+  if (total_weight <= 0.0)              // illegal
     EMPTY_LLSQ.error("LLSQ::remove", ABORT, NULL);
-  total_weight--;                           // count elements
-  sigx -= x;                     // update accumulators
+  total_weight--; // count elements
+  sigx -= x;      // update accumulators
   sigy -= y;
   sigxx -= x * x;
   sigxy -= x * y;
   sigyy -= y * y;
 }
-
 
 /**********************************************************************
  * LLSQ::m
@@ -98,15 +95,14 @@ void LLSQ::remove(double x, double y) {          // delete an element
  * Return the gradient of the line fit.
  **********************************************************************/
 
-double LLSQ::m() const {  // get gradient
+double LLSQ::m() const { // get gradient
   double covar = covariance();
   double x_var = x_variance();
   if (x_var != 0.0)
     return covar / x_var;
   else
-    return 0.0;                    // too little
+    return 0.0; // too little
 }
-
 
 /**********************************************************************
  * LLSQ::c
@@ -114,13 +110,12 @@ double LLSQ::m() const {  // get gradient
  * Return the constant of the line fit.
  **********************************************************************/
 
-double LLSQ::c(double m) const {          // get constant
+double LLSQ::c(double m) const { // get constant
   if (total_weight > 0.0)
     return (sigy - m * sigx) / total_weight;
   else
-    return 0;                    // too little
+    return 0; // too little
 }
-
 
 /**********************************************************************
  * LLSQ::rms
@@ -128,22 +123,21 @@ double LLSQ::c(double m) const {          // get constant
  * Return the rms error of the fit.
  **********************************************************************/
 
-double LLSQ::rms(double m,  double c) const {          // get error
-  double error;                  // total error
+double LLSQ::rms(double m, double c) const { // get error
+  double error;                              // total error
 
   if (total_weight > 0) {
-    error = sigyy + m * (m * sigxx + 2 * (c * sigx - sigxy)) + c *
-            (total_weight * c - 2 * sigy);
+    error = sigyy + m * (m * sigxx + 2 * (c * sigx - sigxy)) +
+            c * (total_weight * c - 2 * sigy);
     if (error >= 0)
-      error = sqrt(error / total_weight);  // sqrt of mean
+      error = sqrt(error / total_weight); // sqrt of mean
     else
       error = 0;
   } else {
-    error = 0;                   // too little
+    error = 0; // too little
   }
   return error;
 }
-
 
 /**********************************************************************
  * LLSQ::pearson
@@ -151,12 +145,12 @@ double LLSQ::rms(double m,  double c) const {          // get error
  * Return the pearson product moment correlation coefficient.
  **********************************************************************/
 
-double LLSQ::pearson() const {  // get correlation
-  double r = 0.0;                  // Correlation is 0 if insufficent data.
+double LLSQ::pearson() const { // get correlation
+  double r = 0.0;              // Correlation is 0 if insufficent data.
 
   double covar = covariance();
   if (covar != 0.0) {
-    double var_product = x_variance()  * y_variance();
+    double var_product = x_variance() * y_variance();
     if (var_product > 0.0)
       r = covar / sqrt(var_product);
   }
@@ -196,8 +190,7 @@ FCOORD LLSQ::mean_point() const {
 double LLSQ::rms_orth(const FCOORD &dir) const {
   FCOORD v = !dir;
   v.normalise();
-  return sqrt(v.x() * v.x() * x_variance() +
-              2 * v.x() * v.y() * covariance() +
+  return sqrt(v.x() * v.x() * x_variance() + 2 * v.x() * v.y() * covariance() +
               v.y() * v.y() * y_variance());
 }
 

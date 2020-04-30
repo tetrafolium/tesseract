@@ -1,6 +1,6 @@
 #include "validate_grapheme.h"
 #include "tprintf.h"
-#include "unicode/uchar.h"  // From libicu
+#include "unicode/uchar.h" // From libicu
 
 namespace tesseract {
 
@@ -17,7 +17,8 @@ bool ValidateGrapheme::ConsumeGraphemeIfValid() {
         cc == CharClass::kCombiner || cc == CharClass::kVirama;
     // Reject easily detected badly formed sequences.
     if (prev_cc == CharClass::kWhitespace && is_combiner) {
-      if (report_errors_) tprintf("Word started with a combiner:0x%x\n", ch);
+      if (report_errors_)
+        tprintf("Word started with a combiner:0x%x\n", ch);
       return false;
     }
     if (prev_cc == CharClass::kVirama && cc == CharClass::kVirama) {
@@ -41,16 +42,20 @@ bool ValidateGrapheme::ConsumeGraphemeIfValid() {
     prev_ch = ch;
     prev_cc = cc;
   }
-  if (num_codes_in_grapheme > 0) MultiCodePart(num_codes_in_grapheme);
+  if (num_codes_in_grapheme > 0)
+    MultiCodePart(num_codes_in_grapheme);
   return true;
 }
 
 Validator::CharClass ValidateGrapheme::UnicodeToCharClass(char32 ch) const {
-  if (IsVedicAccent(ch)) return CharClass::kVedicMark;
+  if (IsVedicAccent(ch))
+    return CharClass::kVedicMark;
   // The ZeroWidth[Non]Joiner characters are mapped to kCombiner as they
   // always combine with the previous character.
-  if (u_hasBinaryProperty(ch, UCHAR_GRAPHEME_LINK)) return CharClass::kVirama;
-  if (u_isUWhiteSpace(ch)) return CharClass::kWhitespace;
+  if (u_hasBinaryProperty(ch, UCHAR_GRAPHEME_LINK))
+    return CharClass::kVirama;
+  if (u_isUWhiteSpace(ch))
+    return CharClass::kWhitespace;
   int char_type = u_charType(ch);
   if (char_type == U_NON_SPACING_MARK || char_type == U_ENCLOSING_MARK ||
       char_type == U_COMBINING_SPACING_MARK || ch == kZeroWidthNonJoiner ||
@@ -68,7 +73,8 @@ bool ValidateGrapheme::IsBadlyFormed(char32 prev_ch, char32 ch) {
     return true;
   }
   if (IsBadlyFormedThai(prev_ch, ch)) {
-    if (report_errors_) tprintf("Badly formed Thai:0x%x 0x%x\n", prev_ch, ch);
+    if (report_errors_)
+      tprintf("Badly formed Thai:0x%x 0x%x\n", prev_ch, ch);
     return true;
   }
   return false;
@@ -171,4 +177,4 @@ bool ValidateGrapheme::IsBadlyFormedThai(char32 prev_ch, char32 ch) {
   return false;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

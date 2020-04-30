@@ -22,16 +22,16 @@
 #ifndef TESSERACT_CCUTIL_BITVECTOR_H_
 #define TESSERACT_CCUTIL_BITVECTOR_H_
 
+#include "host.h"
 #include <assert.h>
 #include <stdio.h>
-#include "host.h"
 
 namespace tesseract {
 
 // Trivial class to encapsulate a fixed-length array of bits, with
 // Serialize/DeSerialize. Replaces the old macros.
 class BitVector {
- public:
+public:
   // Fast lookup table to get the first least significant set bit in a byte.
   // For zero, the table has 255, but since it is a special case, most code
   // that uses this table will check for zero before looking up lsb_index_.
@@ -45,23 +45,21 @@ class BitVector {
   BitVector();
   // Initializes the array to length * false.
   explicit BitVector(int length);
-  BitVector(const BitVector& src);
-  BitVector& operator=(const BitVector& src);
+  BitVector(const BitVector &src);
+  BitVector &operator=(const BitVector &src);
   ~BitVector();
 
   // Initializes the array to length * false.
   void Init(int length);
 
   // Returns the number of bits that are accessible in the vector.
-  int size() const {
-    return bit_size_;
-  }
+  int size() const { return bit_size_; }
 
   // Writes to the given file. Returns false in case of error.
-  bool Serialize(FILE* fp) const;
+  bool Serialize(FILE *fp) const;
   // Reads from the given file. Returns false in case of error.
   // If swap is true, assumes a big/little-endian swap is needed.
-  bool DeSerialize(bool swap, FILE* fp);
+  bool DeSerialize(bool swap, FILE *fp);
 
   void SetAllFalse();
   void SetAllTrue();
@@ -69,12 +67,8 @@ class BitVector {
   // Accessors to set/reset/get bits.
   // The range of index is [0, size()-1].
   // There is debug-only bounds checking.
-  void SetBit(int index) {
-    array_[WordIndex(index)] |= BitMask(index);
-  }
-  void ResetBit(int index) {
-    array_[WordIndex(index)] &= ~BitMask(index);
-  }
+  void SetBit(int index) { array_[WordIndex(index)] |= BitMask(index); }
+  void ResetBit(int index) { array_[WordIndex(index)] &= ~BitMask(index); }
   void SetValue(int index, bool value) {
     if (value)
       SetBit(index);
@@ -97,13 +91,13 @@ class BitVector {
 
   // Logical in-place operations on whole bit vectors. Tries to do something
   // sensible if they aren't the same size, but they should be really.
-  void operator|=(const BitVector& other);
-  void operator&=(const BitVector& other);
-  void operator^=(const BitVector& other);
+  void operator|=(const BitVector &other);
+  void operator&=(const BitVector &other);
+  void operator^=(const BitVector &other);
   // Set subtraction *this = v1 - v2.
-  void SetSubtract(const BitVector& v1, const BitVector& v2);
+  void SetSubtract(const BitVector &v1, const BitVector &v2);
 
- private:
+private:
   // Allocates memory for a vector of the given length.
   void Alloc(int length);
 
@@ -114,29 +108,23 @@ class BitVector {
     return index / kBitFactor;
   }
   // Returns a mask to select the appropriate bit for the given index.
-  uinT32 BitMask(int index) const {
-    return 1 << (index & (kBitFactor - 1));
-  }
+  uinT32 BitMask(int index) const { return 1 << (index & (kBitFactor - 1)); }
   // Returns the number of array elements needed to represent the current
   // bit_size_.
-  int WordLength() const {
-    return (bit_size_ + kBitFactor - 1) / kBitFactor;
-  }
+  int WordLength() const { return (bit_size_ + kBitFactor - 1) / kBitFactor; }
   // Returns the number of bytes consumed by the array_.
-  int ByteLength() const {
-    return WordLength() * sizeof(*array_);
-  }
+  int ByteLength() const { return WordLength() * sizeof(*array_); }
 
   // Number of bits in this BitVector.
   inT32 bit_size_;
   // Array of words used to pack the bits.
   // Bits are stored little-endian by uinT32 word, ie by word first and then
   // starting with the least significant bit in each word.
-  uinT32* array_;
+  uinT32 *array_;
   // Number of bits in an array_ element.
   static const int kBitFactor = sizeof(uinT32) * 8;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_CCUTIL_BITVECTOR_H_
+#endif // TESSERACT_CCUTIL_BITVECTOR_H_

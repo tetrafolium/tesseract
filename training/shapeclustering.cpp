@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
   ParseArguments(&argc, &argv);
 
   STRING file_prefix;
-  tesseract::MasterTrainer* trainer =
+  tesseract::MasterTrainer *trainer =
       tesseract::LoadTrainingData(argc, argv, false, nullptr, &file_prefix);
 
   if (!trainer)
@@ -56,11 +56,10 @@ int main(int argc, char **argv) {
 
   if (FLAGS_display_cloud_font >= 0) {
 #ifndef GRAPHICS_DISABLED
-    trainer->DisplaySamples(FLAGS_canonical_class1.c_str(),
-                            FLAGS_display_cloud_font,
-                            FLAGS_canonical_class2.c_str(),
-                            FLAGS_display_canonical_font);
-#endif  // GRAPHICS_DISABLED
+    trainer->DisplaySamples(
+        FLAGS_canonical_class1.c_str(), FLAGS_display_cloud_font,
+        FLAGS_canonical_class2.c_str(), FLAGS_display_canonical_font);
+#endif // GRAPHICS_DISABLED
     return 0;
   } else if (!FLAGS_canonical_class1.empty()) {
     trainer->DebugCanonical(FLAGS_canonical_class1.c_str(),

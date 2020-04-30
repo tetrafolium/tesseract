@@ -24,17 +24,16 @@
 
 #include "baselinedetect.h"
 #include "drawtord.h"
-#include "textord.h"
 #include "makerow.h"
 #include "pageres.h"
+#include "textord.h"
 #include "tordmain.h"
 #include "wordseg.h"
 
 namespace tesseract {
 
-Textord::Textord(CCStruct* ccstruct)
-    : ccstruct_(ccstruct),
-      use_cjk_fp_model_(false),
+Textord::Textord(CCStruct *ccstruct)
+    : ccstruct_(ccstruct), use_cjk_fp_model_(false),
       // makerow.cpp ///////////////////////////////////////////
       BOOL_MEMBER(textord_single_height_mode, false,
                   "Script has no xheight, so use a single mode",
@@ -226,15 +225,14 @@ Textord::Textord(CCStruct* ccstruct)
       double_MEMBER(textord_blshift_xfraction, 9.99,
                     "Min size of baseline shift", ccstruct_->params()) {}
 
-Textord::~Textord() {
-}
+Textord::~Textord() {}
 
 // Make the textlines and words inside each block.
-void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
-                          int width, int height, Pix* binary_pix,
-                          Pix* thresholds_pix, Pix* grey_pix,
-                          bool use_box_bottoms, BLOBNBOX_LIST* diacritic_blobs,
-                          BLOCK_LIST* blocks, TO_BLOCK_LIST* to_blocks) {
+void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD &reskew,
+                          int width, int height, Pix *binary_pix,
+                          Pix *thresholds_pix, Pix *grey_pix,
+                          bool use_box_bottoms, BLOBNBOX_LIST *diacritic_blobs,
+                          BLOCK_LIST *blocks, TO_BLOCK_LIST *to_blocks) {
   page_tr_.set_x(width);
   page_tr_.set_y(height);
   if (to_blocks->empty()) {
@@ -242,7 +240,7 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     find_components(binary_pix, blocks, to_blocks);
     TO_BLOCK_IT it(to_blocks);
     for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-      TO_BLOCK* to_block = it.data();
+      TO_BLOCK *to_block = it.data();
       // Compute the edge offsets whether or not there is a grey_pix.
       // We have by-passed auto page seg, so we have to run it here.
       // By page segmentation mode there is no non-text to avoid running on.
@@ -260,11 +258,11 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     const FCOORD clockwise90(0.0f, -1.0f);
     TO_BLOCK_IT it(to_blocks);
     for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-      TO_BLOCK* to_block = it.data();
-      BLOCK* block = to_block->block;
+      TO_BLOCK *to_block = it.data();
+      BLOCK *block = to_block->block;
       // Create a fake poly_block in block from its bounding box.
-      block->set_poly_block(new POLY_BLOCK(block->bounding_box(),
-                                           PT_VERTICAL_TEXT));
+      block->set_poly_block(
+          new POLY_BLOCK(block->bounding_box(), PT_VERTICAL_TEXT));
       // Rotate the to_block along with its contained block and blobnbox lists.
       to_block->rotate(anticlockwise90);
       // Set the block's rotation values to obey the convention followed in
@@ -275,7 +273,7 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
   }
 
   TO_BLOCK_IT to_block_it(to_blocks);
-  TO_BLOCK* to_block = to_block_it.data();
+  TO_BLOCK *to_block = to_block_it.data();
   // Make the rows in the block.
   float gradient;
   // Do it the old fashioned way.
@@ -283,13 +281,12 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     gradient = make_rows(page_tr_, to_blocks);
   } else if (!PSM_SPARSE(pageseg_mode)) {
     // RAW_LINE, SINGLE_LINE, SINGLE_WORD and SINGLE_CHAR all need a single row.
-    gradient = make_single_row(page_tr_, pageseg_mode != PSM_RAW_LINE,
-                               to_block, to_blocks);
+    gradient = make_single_row(page_tr_, pageseg_mode != PSM_RAW_LINE, to_block,
+                               to_blocks);
   } else {
     gradient = 0.0f;
   }
-  BaselineDetect baseline_detector(textord_baseline_debug,
-                                   reskew, to_blocks);
+  BaselineDetect baseline_detector(textord_baseline_debug, reskew, to_blocks);
   baseline_detector.ComputeStraightBaselines(use_box_bottoms);
   baseline_detector.ComputeBaselineSplinesAndXheights(
       page_tr_, pageseg_mode != PSM_RAW_LINE, textord_heavy_nr,
@@ -302,9 +299,9 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
     // SINGLE_WORD and SINGLE_CHAR cram all the blobs into a
     // single word, and in SINGLE_CHAR mode, all the outlines
     // go in a single blob.
-    TO_BLOCK* to_block = to_block_it.data();
-    make_single_word(pageseg_mode == PSM_SINGLE_CHAR,
-                     to_block->get_rows(), to_block->block->row_list());
+    TO_BLOCK *to_block = to_block_it.data();
+    make_single_word(pageseg_mode == PSM_SINGLE_CHAR, to_block->get_rows(),
+                     to_block->block->row_list());
   }
   // Remove empties.
   cleanup_blocks(PSM_WORD_FIND_ENABLED(pageseg_mode), blocks);
@@ -323,17 +320,17 @@ void Textord::TextordPage(PageSegMode pageseg_mode, const FCOORD& reskew,
 // If we were supposed to return only a single textline, and there is more
 // than one, clean up and leave only the best.
 void Textord::CleanupSingleRowResult(PageSegMode pageseg_mode,
-                                     PAGE_RES* page_res) {
+                                     PAGE_RES *page_res) {
   if (PSM_LINE_FIND_ENABLED(pageseg_mode) || PSM_SPARSE(pageseg_mode))
-    return;  // No cleanup required.
+    return; // No cleanup required.
   PAGE_RES_IT it(page_res);
   // Find the best row, being the greatest mean word conf.
   float row_total_conf = 0.0f;
   int row_word_count = 0;
-  ROW_RES* best_row = NULL;
+  ROW_RES *best_row = NULL;
   float best_conf = 0.0f;
   for (it.restart_page(); it.word() != NULL; it.forward()) {
-    WERD_RES* word = it.word();
+    WERD_RES *word = it.word();
     row_total_conf += word->best_choice->certainty();
     ++row_word_count;
     if (it.next_row() != it.row()) {
@@ -353,4 +350,4 @@ void Textord::CleanupSingleRowResult(PageSegMode pageseg_mode,
   }
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

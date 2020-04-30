@@ -27,8 +27,8 @@ namespace tesseract {
 // in the rectangle that contains the max value.
 // Backprop propagates only to the position that was the max.
 class Maxpool : public Reconfig {
- public:
-  Maxpool(const STRING& name, int ni, int x_scale, int y_scale);
+public:
+  Maxpool(const STRING &name, int ni, int x_scale, int y_scale);
   virtual ~Maxpool();
 
   // Accessors.
@@ -40,31 +40,24 @@ class Maxpool : public Reconfig {
   }
 
   // Reads from the given file. Returns false in case of error.
-  virtual bool DeSerialize(TFile* fp);
+  virtual bool DeSerialize(TFile *fp);
 
   // Runs forward propagation of activations on the input line.
   // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
   // Runs backward propagation of errors on the deltas line.
   // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
- private:
+private:
   // Memory of which input was the max.
   GENERIC_2D_ARRAY<int> maxes_;
 };
 
+} // namespace tesseract.
 
-}  // namespace tesseract.
-
-
-
-
-
-#endif  // TESSERACT_LSTM_MAXPOOL_H_
-
+#endif // TESSERACT_LSTM_MAXPOOL_H_

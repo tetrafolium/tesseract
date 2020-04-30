@@ -28,9 +28,9 @@ namespace tesseract {
 
 // Holds a collection of other networks and forwards calls to each of them.
 class Plumbing : public Network {
- public:
+public:
   // ni_ and no_ will be set by AddToStack.
-  explicit Plumbing(const STRING& name);
+  explicit Plumbing(const STRING &name);
   virtual ~Plumbing();
 
   // Returns the required shape input to the network.
@@ -56,10 +56,10 @@ class Plumbing : public Network {
   // Note that randomizer is a borrowed pointer that should outlive the network
   // and should not be deleted by any of the networks.
   // Returns the number of weights initialized.
-  virtual int InitWeights(float range, TRand* randomizer);
+  virtual int InitWeights(float range, TRand *randomizer);
   // Recursively searches the network for softmaxes with old_no outputs,
   // and remaps their outputs according to code_map. See network.h for details.
-  int RemapOutputs(int old_no, const std::vector<int>& code_map) override;
+  int RemapOutputs(int old_no, const std::vector<int> &code_map) override;
 
   // Converts a float network to an int network.
   virtual void ConvertToInt();
@@ -67,10 +67,10 @@ class Plumbing : public Network {
   // Provides a pointer to a TRand for any networks that care to use it.
   // Note that randomizer is a borrowed pointer that should outlive the network
   // and should not be deleted by any of the networks.
-  virtual void SetRandomizer(TRand* randomizer);
+  virtual void SetRandomizer(TRand *randomizer);
 
   // Adds the given network to the stack.
-  virtual void AddToStack(Network* network);
+  virtual void AddToStack(Network *network);
 
   // Sets needs_to_backprop_ to needs_backprop and returns true if
   // needs_backprop || any weights in this network so the next layer forward
@@ -93,33 +93,31 @@ class Plumbing : public Network {
   virtual void DebugWeights();
 
   // Returns the current stack.
-  const PointerVector<Network>& stack() const {
-    return stack_;
-  }
+  const PointerVector<Network> &stack() const { return stack_; }
   // Returns a set of strings representing the layer-ids of all layers below.
-  void EnumerateLayers(const STRING* prefix,
-                       GenericVector<STRING>* layers) const;
+  void EnumerateLayers(const STRING *prefix,
+                       GenericVector<STRING> *layers) const;
   // Returns a pointer to the network layer corresponding to the given id.
-  Network* GetLayer(const char* id) const;
+  Network *GetLayer(const char *id) const;
   // Returns the learning rate for a specific layer of the stack.
-  float LayerLearningRate(const char* id) const {
-    const float* lr_ptr = LayerLearningRatePtr(id);
+  float LayerLearningRate(const char *id) const {
+    const float *lr_ptr = LayerLearningRatePtr(id);
     ASSERT_HOST(lr_ptr != NULL);
     return *lr_ptr;
   }
   // Scales the learning rate for a specific layer of the stack.
-  void ScaleLayerLearningRate(const char* id, double factor) {
-    float* lr_ptr = LayerLearningRatePtr(id);
+  void ScaleLayerLearningRate(const char *id, double factor) {
+    float *lr_ptr = LayerLearningRatePtr(id);
     ASSERT_HOST(lr_ptr != NULL);
     *lr_ptr *= factor;
   }
   // Returns a pointer to the learning rate for the given layer id.
-  float* LayerLearningRatePtr(const char* id) const;
+  float *LayerLearningRatePtr(const char *id) const;
 
   // Writes to the given file. Returns false in case of error.
-  virtual bool Serialize(TFile* fp) const;
+  virtual bool Serialize(TFile *fp) const;
   // Reads from the given file. Returns false in case of error.
-  virtual bool DeSerialize(TFile* fp);
+  virtual bool DeSerialize(TFile *fp);
 
   // Updates the weights using the given learning rate, momentum and adam_beta.
   // num_samples is used in the adam computation iff use_adam_ is true.
@@ -128,10 +126,10 @@ class Plumbing : public Network {
   // Sums the products of weight updates in *this and other, splitting into
   // positive (same direction) in *same and negative (different direction) in
   // *changed.
-  virtual void CountAlternators(const Network& other, double* same,
-                                double* changed) const;
+  virtual void CountAlternators(const Network &other, double *same,
+                                double *changed) const;
 
- protected:
+protected:
   // The networks.
   PointerVector<Network> stack_;
   // Layer-specific learning rate iff network_flags_ & NF_LAYER_SPECIFIC_LR.
@@ -139,7 +137,6 @@ class Plumbing : public Network {
   GenericVector<float> learning_rates_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_LSTM_PLUMBING_H_
-
+#endif // TESSERACT_LSTM_PLUMBING_H_

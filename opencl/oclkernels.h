@@ -12,7 +12,7 @@
 #define TESSERACT_OPENCL_OCLKERNELS_H_
 
 #ifndef USE_EXTERNAL_KERNEL
-#define KERNEL( ... )# __VA_ARGS__ "\n"
+#define KERNEL(...) #__VA_ARGS__ "\n"
 // Double precision is a default of spreadsheets
 // cl_khr_fp64: Khronos extension
 // cl_amd_fp64: AMD extension
@@ -1068,6 +1068,6 @@ void kernel_ThresholdRectToPix_OneChan(
 
  ; // close char*
 
-#endif  // USE_EXTERNAL_KERNEL
-#endif  // TESSERACT_OPENCL_OCLKERNELS_H_
+#endif // USE_EXTERNAL_KERNEL
+#endif // TESSERACT_OPENCL_OCLKERNELS_H_
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

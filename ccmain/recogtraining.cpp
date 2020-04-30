@@ -35,15 +35,16 @@ const inT16 kMaxBoxEdgeDiff = 2;
 // Opens and returns the pointer to the output file.
 FILE *Tesseract::init_recog_training(const STRING &fname) {
   if (tessedit_ambigs_training) {
-    tessedit_tess_adaption_mode.set_value(0);    // turn off adaption
-    tessedit_enable_doc_dict.set_value(0);       // turn off document dictionary
+    tessedit_tess_adaption_mode.set_value(0); // turn off adaption
+    tessedit_enable_doc_dict.set_value(0);    // turn off document dictionary
     // Explore all segmentations.
     getDict().stopper_no_acceptable_choices.set_value(1);
   }
 
   STRING output_fname = fname;
   const char *lastdot = strrchr(output_fname.string(), '.');
-  if (lastdot != NULL) output_fname[lastdot - output_fname.string()] = '\0';
+  if (lastdot != NULL)
+    output_fname[lastdot - output_fname.string()] = '\0';
   output_fname += ".txt";
   FILE *output_file = open_file(output_fname.string(), "a+");
   return output_file;
@@ -82,7 +83,8 @@ void Tesseract::recog_training_segmented(const STRING &fname,
                                          FILE *output_file) {
   STRING box_fname = fname;
   const char *lastdot = strrchr(box_fname.string(), '.');
-  if (lastdot != NULL) box_fname[lastdot - box_fname.string()] = '\0';
+  if (lastdot != NULL)
+    box_fname[lastdot - box_fname.string()] = '\0';
   box_fname += ".box";
   // ReadNextBox() will close box_file
   FILE *box_file = open_file(box_fname.string(), "r");
@@ -93,15 +95,15 @@ void Tesseract::recog_training_segmented(const STRING &fname,
   STRING label;
 
   // Process all the words on this page.
-  TBOX tbox;  // tesseract-identified box
-  TBOX bbox;  // box from the box file
+  TBOX tbox; // tesseract-identified box
+  TBOX bbox; // box from the box file
   bool keep_going;
   int line_number = 0;
   int examined_words = 0;
   do {
     keep_going = read_t(&page_res_it, &tbox);
-    keep_going &= ReadNextBox(applybox_page, &line_number, box_file, &label,
-                              &bbox);
+    keep_going &=
+        ReadNextBox(applybox_page, &line_number, box_file, &label, &bbox);
     // Align bottom left points of the TBOXes.
     while (keep_going &&
            !NearlyEqual<int>(tbox.bottom(), bbox.bottom(), kMaxBoxEdgeDiff)) {
@@ -109,8 +111,8 @@ void Tesseract::recog_training_segmented(const STRING &fname,
         page_res_it.forward();
         keep_going = read_t(&page_res_it, &tbox);
       } else {
-        keep_going = ReadNextBox(applybox_page, &line_number, box_file, &label,
-                                 &bbox);
+        keep_going =
+            ReadNextBox(applybox_page, &line_number, box_file, &label, &bbox);
       }
     }
     while (keep_going &&
@@ -119,16 +121,16 @@ void Tesseract::recog_training_segmented(const STRING &fname,
         page_res_it.forward();
         keep_going = read_t(&page_res_it, &tbox);
       } else {
-        keep_going = ReadNextBox(applybox_page, &line_number, box_file, &label,
-                                 &bbox);
+        keep_going =
+            ReadNextBox(applybox_page, &line_number, box_file, &label, &bbox);
       }
     }
     // OCR the word if top right points of the TBOXes are similar.
     if (keep_going &&
         NearlyEqual<int>(tbox.right(), bbox.right(), kMaxBoxEdgeDiff) &&
         NearlyEqual<int>(tbox.top(), bbox.top(), kMaxBoxEdgeDiff)) {
-        ambigs_classify_and_output(label.string(), &page_res_it, output_file);
-        examined_words++;
+      ambigs_classify_and_output(label.string(), &page_res_it, output_file);
+      examined_words++;
     }
     page_res_it.forward();
   } while (keep_going);
@@ -150,35 +152,33 @@ void Tesseract::recog_training_segmented(const STRING &fname,
     tprintf("TODO(antonova): clean up recog_training_segmented; "
             " It examined only a small fraction of the ambigs image.\n");
   }
-  tprintf("recog_training_segmented: examined %d / %d words.\n",
-          examined_words, total_words);
+  tprintf("recog_training_segmented: examined %d / %d words.\n", examined_words,
+          total_words);
 }
 
 // Helper prints the given set of blob choices.
-static void PrintPath(int length, const BLOB_CHOICE** blob_choices,
-                      const UNICHARSET& unicharset,
-                      const char *label, FILE *output_file) {
+static void PrintPath(int length, const BLOB_CHOICE **blob_choices,
+                      const UNICHARSET &unicharset, const char *label,
+                      FILE *output_file) {
   float rating = 0.0f;
   float certainty = 0.0f;
   for (int i = 0; i < length; ++i) {
-    const BLOB_CHOICE* blob_choice = blob_choices[i];
+    const BLOB_CHOICE *blob_choice = blob_choices[i];
     fprintf(output_file, "%s",
-           unicharset.id_to_unichar(blob_choice->unichar_id()));
+            unicharset.id_to_unichar(blob_choice->unichar_id()));
     rating += blob_choice->rating();
     if (certainty > blob_choice->certainty())
       certainty = blob_choice->certainty();
   }
-  fprintf(output_file, "\t%s\t%.4f\t%.4f\n",
-         label, rating, certainty);
+  fprintf(output_file, "\t%s\t%.4f\t%.4f\n", label, rating, certainty);
 }
 
 // Helper recursively prints all paths through the ratings matrix, starting
 // at column col.
-static void PrintMatrixPaths(int col, int dim,
-                             const MATRIX& ratings,
-                             int length, const BLOB_CHOICE** blob_choices,
-                             const UNICHARSET& unicharset,
-                             const char *label, FILE *output_file) {
+static void PrintMatrixPaths(int col, int dim, const MATRIX &ratings,
+                             int length, const BLOB_CHOICE **blob_choices,
+                             const UNICHARSET &unicharset, const char *label,
+                             FILE *output_file) {
   for (int row = col; row < dim && row - col < ratings.bandwidth(); ++row) {
     if (ratings.get(col, row) != NOT_CLASSIFIED) {
       BLOB_CHOICE_IT bc_it(ratings.get(col, row));
@@ -200,14 +200,14 @@ static void PrintMatrixPaths(int col, int dim,
 // single unichar also outputs all alternatives from blob_choices of the
 // best choice.
 void Tesseract::ambigs_classify_and_output(const char *label,
-                                           PAGE_RES_IT* pr_it,
+                                           PAGE_RES_IT *pr_it,
                                            FILE *output_file) {
   // Classify word.
   fflush(stdout);
   WordData word_data(*pr_it);
   SetupWordPassN(1, &word_data);
   classify_word_and_language(1, pr_it, &word_data);
-  WERD_RES* werd_res = word_data.word;
+  WERD_RES *werd_res = word_data.word;
   WERD_CHOICE *best_choice = werd_res->best_choice;
   ASSERT_HOST(best_choice != NULL);
 
@@ -220,10 +220,10 @@ void Tesseract::ambigs_classify_and_output(const char *label,
 
   // Dump all paths through the ratings matrix (which is normally small).
   int dim = werd_res->ratings->dimension();
-  const BLOB_CHOICE** blob_choices = new const BLOB_CHOICE*[dim];
-  PrintMatrixPaths(0, dim, *werd_res->ratings, 0, blob_choices,
-                   unicharset, label, output_file);
-  delete [] blob_choices;
+  const BLOB_CHOICE **blob_choices = new const BLOB_CHOICE *[dim];
+  PrintMatrixPaths(0, dim, *werd_res->ratings, 0, blob_choices, unicharset,
+                   label, output_file);
+  delete[] blob_choices;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

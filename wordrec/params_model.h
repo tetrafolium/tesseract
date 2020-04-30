@@ -28,7 +28,7 @@ namespace tesseract {
 
 // Represents the learned weights for a given language.
 class ParamsModel {
- public:
+public:
   // Enum for expressing OCR pass.
   enum PassEnum {
     PTRAIN_PASS1,
@@ -38,8 +38,10 @@ class ParamsModel {
   };
 
   ParamsModel() : pass_(PTRAIN_PASS1) {}
-  ParamsModel(const char *lang, const GenericVector<float> &weights) :
-    lang_(lang), pass_(PTRAIN_PASS1) { weights_vec_[pass_] = weights; }
+  ParamsModel(const char *lang, const GenericVector<float> &weights)
+      : lang_(lang), pass_(PTRAIN_PASS1) {
+    weights_vec_[pass_] = weights;
+  }
   inline bool Initialized() {
     return weights_vec_[pass_].size() == PTRAIN_NUM_FEATURE_TYPES;
   }
@@ -47,7 +49,8 @@ class ParamsModel {
   void Print();
   // Clears weights for all passes.
   void Clear() {
-    for (int p = 0; p < PTRAIN_NUM_PASSES; ++p) weights_vec_[p].clear();
+    for (int p = 0; p < PTRAIN_NUM_PASSES; ++p)
+      weights_vec_[p].clear();
   }
   // Copies the weights of the given params model.
   void Copy(const ParamsModel &other_model);
@@ -63,15 +66,13 @@ class ParamsModel {
   bool LoadFromFile(const char *lang, const char *full_path);
   bool LoadFromFp(const char *lang, TFile *fp);
 
-  const GenericVector<float>& weights() const {
-    return weights_vec_[pass_];
-  }
-  const GenericVector<float>& weights_for_pass(PassEnum pass) const {
+  const GenericVector<float> &weights() const { return weights_vec_[pass_]; }
+  const GenericVector<float> &weights_for_pass(PassEnum pass) const {
     return weights_vec_[pass];
   }
   void SetPass(PassEnum pass) { pass_ = pass; }
 
- private:
+private:
   bool ParseLine(char *line, char **key, float *val);
 
   STRING lang_;
@@ -83,7 +84,6 @@ class ParamsModel {
   GenericVector<float> weights_vec_[PTRAIN_NUM_PASSES];
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_WORDREC_PARAMS_MODEL_H_
-
+#endif // TESSERACT_WORDREC_PARAMS_MODEL_H_

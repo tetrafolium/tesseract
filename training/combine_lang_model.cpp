@@ -37,7 +37,7 @@ BOOL_PARAM_FLAG(pass_through_recoder, false,
                 "If true, the recoder is a simple pass-through of the"
                 " unicharset. Otherwise, potentially a compression of it");
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   tesseract::ParseCommandLineFlags(argv[0], &argc, &argv, true);
 
   // Check validity of input flags.

@@ -46,11 +46,11 @@ constexpr int kNumInputGroups = kNumInputsPerRegister / kNumInputsPerGroup;
 // weights and reps are scratch registers.
 // This function must be inlined with references in order for the compiler to
 // correctly use the registers declared in the caller.
-inline void MultiplyGroup(const __m256i& rep_input, const __m256i& ones,
-                          const int8_t*& wi, __m256i& weights, __m256i& reps,
-                          __m256i& result) {
+inline void MultiplyGroup(const __m256i &rep_input, const __m256i &ones,
+                          const int8_t *&wi, __m256i &weights, __m256i &reps,
+                          __m256i &result) {
   // Load a 4x8 block of weights.
-  weights = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(wi));
+  weights = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(wi));
   wi += kNumInputsPerRegister;
   // Normalize the signs on rep_input, weights, so weights is always +ve.
   reps = _mm256_sign_epi8(rep_input, weights);
@@ -70,9 +70,9 @@ inline void MultiplyGroup(const __m256i& rep_input, const __m256i& ones,
 // Extracts and converts 8x32-bit results from result, adding the bias from wi
 // and scaling by scales, before storing in *v. Note that wi, scales and v are
 // expected to contain 8 consecutive elements or num_out if less.
-inline void ExtractResults(__m256i& result, __m256i& shift_id,
-                           const int8_t*& wi, const double*& scales,
-                           int num_out, double*& v) {
+inline void ExtractResults(__m256i &result, __m256i &shift_id,
+                           const int8_t *&wi, const double *&scales,
+                           int num_out, double *&v) {
   for (int out = 0; out < num_out; ++out) {
     int32_t res = _mm256_extract_epi32(result, 0);
     *v++ = (static_cast<double>(res) / MAX_INT8 + *wi++) * *scales++;
@@ -88,9 +88,9 @@ inline void ExtractResults(__m256i& result, __m256i& shift_id,
 // bias weights, before continuing with any more weights.
 // u must be padded out with zeros to
 // kNumInputsPerGroup*ceil(num_in/kNumInputsPerGroup) elements.
-static void PartialMatrixDotVector64(const int8_t* wi, const double* scales,
-                                     const int8_t* u, int num_in, int num_out,
-                                     double* v) {
+static void PartialMatrixDotVector64(const int8_t *wi, const double *scales,
+                                     const int8_t *u, int num_in, int num_out,
+                                     double *v) {
   // Register containing 16-bit ones for horizontal add with 16->32 bit
   // conversion.
   __m256i ones =
@@ -108,7 +108,7 @@ static void PartialMatrixDotVector64(const int8_t* wi, const double* scales,
   // Iterate over the input (u), one registerful at a time.
   for (int j = 0; j < num_in;) {
     __m256i inputs =
-        _mm256_loadu_si256(reinterpret_cast<const __m256i*>(u + j));
+        _mm256_loadu_si256(reinterpret_cast<const __m256i *>(u + j));
     // Inputs are processed in groups of kNumInputsPerGroup, replicated
     // kNumInputGroups times.
     for (int ig = 0; ig < kNumInputGroups && j < num_in;
@@ -144,9 +144,9 @@ static void PartialMatrixDotVector64(const int8_t* wi, const double* scales,
 
 // Computes part of matrix.vector v = Wu. Computes N=32 results.
 // For details see PartialMatrixDotVector64 with N=32.
-static void PartialMatrixDotVector32(const int8_t* wi, const double* scales,
-                                     const int8_t* u, int num_in, int num_out,
-                                     double* v) {
+static void PartialMatrixDotVector32(const int8_t *wi, const double *scales,
+                                     const int8_t *u, int num_in, int num_out,
+                                     double *v) {
   // Register containing 16-bit ones for horizontal add with 16->32 bit
   // conversion.
   __m256i ones =
@@ -160,7 +160,7 @@ static void PartialMatrixDotVector32(const int8_t* wi, const double* scales,
   // Iterate over the input (u), one registerful at a time.
   for (int j = 0; j < num_in;) {
     __m256i inputs =
-        _mm256_loadu_si256(reinterpret_cast<const __m256i*>(u + j));
+        _mm256_loadu_si256(reinterpret_cast<const __m256i *>(u + j));
     // Inputs are processed in groups of kNumInputsPerGroup, replicated
     // kNumInputGroups times.
     for (int ig = 0; ig < kNumInputGroups && j < num_in;
@@ -188,9 +188,9 @@ static void PartialMatrixDotVector32(const int8_t* wi, const double* scales,
 
 // Computes part of matrix.vector v = Wu. Computes N=16 results.
 // For details see PartialMatrixDotVector64 with N=16.
-static void PartialMatrixDotVector16(const int8_t* wi, const double* scales,
-                                     const int8_t* u, int num_in, int num_out,
-                                     double* v) {
+static void PartialMatrixDotVector16(const int8_t *wi, const double *scales,
+                                     const int8_t *u, int num_in, int num_out,
+                                     double *v) {
   // Register containing 16-bit ones for horizontal add with 16->32 bit
   // conversion.
   __m256i ones =
@@ -202,7 +202,7 @@ static void PartialMatrixDotVector16(const int8_t* wi, const double* scales,
   // Iterate over the input (u), one registerful at a time.
   for (int j = 0; j < num_in;) {
     __m256i inputs =
-        _mm256_loadu_si256(reinterpret_cast<const __m256i*>(u + j));
+        _mm256_loadu_si256(reinterpret_cast<const __m256i *>(u + j));
     // Inputs are processed in groups of kNumInputsPerGroup, replicated
     // kNumInputGroups times.
     for (int ig = 0; ig < kNumInputGroups && j < num_in;
@@ -226,9 +226,9 @@ static void PartialMatrixDotVector16(const int8_t* wi, const double* scales,
 
 // Computes part of matrix.vector v = Wu. Computes N=8 results.
 // For details see PartialMatrixDotVector64 with N=8.
-static void PartialMatrixDotVector8(const int8_t* wi, const double* scales,
-                                    const int8_t* u, int num_in, int num_out,
-                                    double* v) {
+static void PartialMatrixDotVector8(const int8_t *wi, const double *scales,
+                                    const int8_t *u, int num_in, int num_out,
+                                    double *v) {
   // Register containing 16-bit ones for horizontal add with 16->32 bit
   // conversion.
   __m256i ones =
@@ -239,7 +239,7 @@ static void PartialMatrixDotVector8(const int8_t* wi, const double* scales,
   // Iterate over the input (u), one registerful at a time.
   for (int j = 0; j < num_in;) {
     __m256i inputs =
-        _mm256_loadu_si256(reinterpret_cast<const __m256i*>(u + j));
+        _mm256_loadu_si256(reinterpret_cast<const __m256i *>(u + j));
     // Inputs are processed in groups of kNumInputsPerGroup, replicated
     // kNumInputGroups times.
     for (int ig = 0; ig < kNumInputGroups && j < num_in;
@@ -258,7 +258,7 @@ static void PartialMatrixDotVector8(const int8_t* wi, const double* scales,
 }
 #else
 namespace tesseract {
-#endif  // __AVX2__
+#endif // __AVX2__
 
 IntSimdMatrixAVX2::IntSimdMatrixAVX2() {
 #ifdef __AVX2__
@@ -269,7 +269,7 @@ IntSimdMatrixAVX2::IntSimdMatrixAVX2() {
   num_input_groups_ = kNumInputGroups;
   partial_funcs_ = {PartialMatrixDotVector64, PartialMatrixDotVector32,
                     PartialMatrixDotVector16, PartialMatrixDotVector8};
-#endif  // __AVX2__
+#endif // __AVX2__
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

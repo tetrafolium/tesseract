@@ -19,61 +19,57 @@
 
 #include <stdio.h>
 
+#include "host.h" // For NearlyEqual()
 #include "ocrpara.h"
-#include "host.h"  // For NearlyEqual()
 
 ELISTIZE(PARA)
 
+using tesseract::JUSTIFICATION_CENTER;
 using tesseract::JUSTIFICATION_LEFT;
 using tesseract::JUSTIFICATION_RIGHT;
-using tesseract::JUSTIFICATION_CENTER;
 using tesseract::JUSTIFICATION_UNKNOWN;
 
 static STRING ParagraphJustificationToString(
     tesseract::ParagraphJustification justification) {
   switch (justification) {
-    case JUSTIFICATION_LEFT:
-      return "LEFT";
-    case JUSTIFICATION_RIGHT:
-      return "RIGHT";
-    case JUSTIFICATION_CENTER:
-      return "CENTER";
-    default:
-      return "UNKNOWN";
+  case JUSTIFICATION_LEFT:
+    return "LEFT";
+  case JUSTIFICATION_RIGHT:
+    return "RIGHT";
+  case JUSTIFICATION_CENTER:
+    return "CENTER";
+  default:
+    return "UNKNOWN";
   }
 }
 
-bool ParagraphModel::ValidFirstLine(int lmargin, int lindent,
-                                    int rindent, int rmargin) const {
+bool ParagraphModel::ValidFirstLine(int lmargin, int lindent, int rindent,
+                                    int rmargin) const {
   switch (justification_) {
-    case JUSTIFICATION_LEFT:
-      return NearlyEqual(lmargin + lindent, margin_ + first_indent_,
-                         tolerance_);
-    case JUSTIFICATION_RIGHT:
-      return NearlyEqual(rmargin + rindent, margin_ + first_indent_,
-                         tolerance_);
-    case JUSTIFICATION_CENTER:
-      return NearlyEqual(lindent, rindent, tolerance_ * 2);
-    default:
-      // shouldn't happen
-      return false;
+  case JUSTIFICATION_LEFT:
+    return NearlyEqual(lmargin + lindent, margin_ + first_indent_, tolerance_);
+  case JUSTIFICATION_RIGHT:
+    return NearlyEqual(rmargin + rindent, margin_ + first_indent_, tolerance_);
+  case JUSTIFICATION_CENTER:
+    return NearlyEqual(lindent, rindent, tolerance_ * 2);
+  default:
+    // shouldn't happen
+    return false;
   }
 }
 
-bool ParagraphModel::ValidBodyLine(int lmargin, int lindent,
-                                   int rindent, int rmargin) const {
+bool ParagraphModel::ValidBodyLine(int lmargin, int lindent, int rindent,
+                                   int rmargin) const {
   switch (justification_) {
-    case JUSTIFICATION_LEFT:
-      return NearlyEqual(lmargin + lindent, margin_ + body_indent_,
-                         tolerance_);
-    case JUSTIFICATION_RIGHT:
-      return NearlyEqual(rmargin + rindent, margin_ + body_indent_,
-                         tolerance_);
-    case JUSTIFICATION_CENTER:
-      return NearlyEqual(lindent, rindent, tolerance_ * 2);
-    default:
-      // shouldn't happen
-      return false;
+  case JUSTIFICATION_LEFT:
+    return NearlyEqual(lmargin + lindent, margin_ + body_indent_, tolerance_);
+  case JUSTIFICATION_RIGHT:
+    return NearlyEqual(rmargin + rindent, margin_ + body_indent_, tolerance_);
+  case JUSTIFICATION_CENTER:
+    return NearlyEqual(lindent, rindent, tolerance_ * 2);
+  default:
+    // shouldn't happen
+    return false;
   }
 }
 
@@ -86,8 +82,8 @@ bool ParagraphModel::Comparable(const ParagraphModel &other) const {
   int tolerance = (tolerance_ + other.tolerance_) / 4;
   return NearlyEqual(margin_ + first_indent_,
                      other.margin_ + other.first_indent_, tolerance) &&
-         NearlyEqual(margin_ + body_indent_,
-                     other.margin_ + other.body_indent_, tolerance);
+         NearlyEqual(margin_ + body_indent_, other.margin_ + other.body_indent_,
+                     tolerance);
 }
 
 STRING ParagraphModel::ToString() const {

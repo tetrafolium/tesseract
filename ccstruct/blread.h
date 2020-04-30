@@ -17,17 +17,17 @@
  *
  **********************************************************************/
 
-#ifndef           BLREAD_H
-#define           BLREAD_H
+#ifndef BLREAD_H
+#define BLREAD_H
 
-#include          "params.h"
-#include          "ocrblock.h"
+#include "ocrblock.h"
+#include "params.h"
 
-bool read_unlv_file(                    //print list of sides
-                     STRING name,        //basename of file
-                     inT32 xsize,        //image size
-                     inT32 ysize,        //image size
-                     BLOCK_LIST *blocks  //output list
-                    );
+bool read_unlv_file(   // print list of sides
+    STRING name,       // basename of file
+    inT32 xsize,       // image size
+    inT32 ysize,       // image size
+    BLOCK_LIST *blocks // output list
+);
 void FullPageBlock(int width, int height, BLOCK_LIST *blocks);
 #endif

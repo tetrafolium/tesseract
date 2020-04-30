@@ -36,7 +36,8 @@ const float LMPainPoints::kLooseMaxCharWhRatio = 2.5f;
 
 LMPainPointsType LMPainPoints::Deque(MATRIX_COORD *pp, float *priority) {
   for (int h = 0; h < LM_PPTYPE_NUM; ++h) {
-    if (pain_points_heaps_[h].empty()) continue;
+    if (pain_points_heaps_[h].empty())
+      continue;
     *priority = pain_points_heaps_[h].PeekTop().key;
     *pp = pain_points_heaps_[h].PeekTop().data;
     pain_points_heaps_[h].Pop(NULL);
@@ -52,14 +53,14 @@ void LMPainPoints::GenerateInitial(WERD_RES *word_res) {
     int row_end = MIN(ratings->dimension(), col + ratings->bandwidth() + 1);
     for (int row = col + 1; row < row_end; ++row) {
       MATRIX_COORD coord(col, row);
-      if (coord.Valid(*ratings) &&
-          ratings->get(col, row) != NOT_CLASSIFIED) continue;
+      if (coord.Valid(*ratings) && ratings->get(col, row) != NOT_CLASSIFIED)
+        continue;
       // Add an initial pain point if needed.
       if (ratings->Classified(col, row - 1, dict_->WildcardID()) ||
           (col + 1 < ratings->dimension() &&
-              ratings->Classified(col + 1, row, dict_->WildcardID()))) {
-        GeneratePainPoint(col, row, LM_PPTYPE_SHAPE, 0.0,
-                          true, max_char_wh_ratio_, word_res);
+           ratings->Classified(col + 1, row, dict_->WildcardID()))) {
+        GeneratePainPoint(col, row, LM_PPTYPE_SHAPE, 0.0, true,
+                          max_char_wh_ratio_, word_res);
       }
     }
   }
@@ -87,9 +88,9 @@ void LMPainPoints::GenerateFromPath(float rating_cert_scale,
   // over-joined pieces of characters, but also could be blobs from an unseen
   // font or chopped pieces of complex characters.
   while (curr_vse->parent_vse != NULL) {
-    ViterbiStateEntry* parent_vse = curr_vse->parent_vse;
-    const MATRIX_COORD& curr_cell = curr_b->matrix_cell();
-    const MATRIX_COORD& parent_cell = parent_vse->curr_b->matrix_cell();
+    ViterbiStateEntry *parent_vse = curr_vse->parent_vse;
+    const MATRIX_COORD &curr_cell = curr_b->matrix_cell();
+    const MATRIX_COORD &parent_cell = parent_vse->curr_b->matrix_cell();
     MATRIX_COORD pain_coord(parent_cell.col, curr_cell.row);
     if (!pain_coord.Valid(*word_res->ratings) ||
         !word_res->ratings->Classified(parent_cell.col, curr_cell.row,
@@ -107,17 +108,18 @@ void LMPainPoints::GenerateFromPath(float rating_cert_scale,
       float ol_dif = vse->outline_length - ol_subtr;
       // priority is set to the average rating of the path per unit of outline,
       // not counting the ratings of the pieces to be joined.
-      float priority = ol_dif > 0 ? (vse->ratings_sum-rat_subtr)/ol_dif : 0.0;
+      float priority =
+          ol_dif > 0 ? (vse->ratings_sum - rat_subtr) / ol_dif : 0.0;
       GeneratePainPoint(pain_coord.col, pain_coord.row, LM_PPTYPE_PATH,
                         priority, true, max_char_wh_ratio_, word_res);
     } else if (debug_level_ > 3) {
       tprintf("NO pain point (Classified) for col=%d row=%d type=%s\n",
               pain_coord.col, pain_coord.row,
               LMPainPointsTypeName[LM_PPTYPE_PATH]);
-      BLOB_CHOICE_IT b_it(word_res->ratings->get(pain_coord.col,
-                                                 pain_coord.row));
+      BLOB_CHOICE_IT b_it(
+          word_res->ratings->get(pain_coord.col, pain_coord.row));
       for (b_it.mark_cycle_pt(); !b_it.cycled_list(); b_it.forward()) {
-        BLOB_CHOICE* choice = b_it.data();
+        BLOB_CHOICE *choice = b_it.data();
         choice->print_full();
       }
     }
@@ -136,25 +138,24 @@ void LMPainPoints::GenerateFromAmbigs(const DANGERR &fixpt,
     const DANGERR_INFO &danger = fixpt[d];
     // Only use dangerous ambiguities.
     if (danger.dangerous) {
-      GeneratePainPoint(danger.begin, danger.end - 1,
-                        LM_PPTYPE_AMBIG, vse->cost, true,
-                        kLooseMaxCharWhRatio, word_res);
+      GeneratePainPoint(danger.begin, danger.end - 1, LM_PPTYPE_AMBIG,
+                        vse->cost, true, kLooseMaxCharWhRatio, word_res);
     }
   }
 }
 
-bool LMPainPoints::GeneratePainPoint(
-    int col, int row, LMPainPointsType pp_type, float special_priority,
-    bool ok_to_extend, float max_char_wh_ratio,
-    WERD_RES *word_res) {
+bool LMPainPoints::GeneratePainPoint(int col, int row, LMPainPointsType pp_type,
+                                     float special_priority, bool ok_to_extend,
+                                     float max_char_wh_ratio,
+                                     WERD_RES *word_res) {
   MATRIX_COORD coord(col, row);
   if (coord.Valid(*word_res->ratings) &&
       word_res->ratings->Classified(col, row, dict_->WildcardID())) {
     return false;
   }
   if (debug_level_ > 3) {
-    tprintf("Generating pain point for col=%d row=%d type=%s\n",
-            col, row, LMPainPointsTypeName[pp_type]);
+    tprintf("Generating pain point for col=%d row=%d type=%s\n", col, row,
+            LMPainPointsTypeName[pp_type]);
   }
   // Compute associate stats.
   AssociateStats associate_stats;
@@ -197,7 +198,8 @@ bool LMPainPoints::GeneratePainPoint(
     }
     return true;
   } else {
-    if (debug_level_) tprintf("Pain points heap is full\n");
+    if (debug_level_)
+      tprintf("Pain points heap is full\n");
     return false;
   }
 }
@@ -208,11 +210,10 @@ bool LMPainPoints::GeneratePainPoint(
  */
 void LMPainPoints::RemapForSplit(int index) {
   for (int i = 0; i < LM_PPTYPE_NUM; ++i) {
-    GenericVector<MatrixCoordPair>* heap = pain_points_heaps_[i].heap();
+    GenericVector<MatrixCoordPair> *heap = pain_points_heaps_[i].heap();
     for (int j = 0; j < heap->size(); ++j)
       (*heap)[j].data.MapForSplit(index);
   }
 }
 
-}  //  namespace tesseract
-
+} //  namespace tesseract

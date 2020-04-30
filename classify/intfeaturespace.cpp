@@ -23,8 +23,7 @@
 namespace tesseract {
 
 IntFeatureSpace::IntFeatureSpace()
-  : x_buckets_(0), y_buckets_(0), theta_buckets_(0) {
-}
+    : x_buckets_(0), y_buckets_(0), theta_buckets_(0) {}
 
 void IntFeatureSpace::Init(uinT8 xbuckets, uinT8 ybuckets, uinT8 thetabuckets) {
   x_buckets_ = xbuckets;
@@ -34,7 +33,7 @@ void IntFeatureSpace::Init(uinT8 xbuckets, uinT8 ybuckets, uinT8 thetabuckets) {
 
 // Serializes the feature space definition to the given file.
 // Returns false on error.
-bool IntFeatureSpace::Serialize(FILE* fp) const {
+bool IntFeatureSpace::Serialize(FILE *fp) const {
   if (fwrite(&x_buckets_, sizeof(x_buckets_), 1, fp) != 1)
     return false;
   if (fwrite(&y_buckets_, sizeof(y_buckets_), 1, fp) != 1)
@@ -47,7 +46,7 @@ bool IntFeatureSpace::Serialize(FILE* fp) const {
 // DeSerializes the feature space definition from the given file.
 // If swap is true, the data is big/little-endian swapped.
 // Returns false on error.
-bool IntFeatureSpace::DeSerialize(bool swap, FILE* fp) {
+bool IntFeatureSpace::DeSerialize(bool swap, FILE *fp) {
   if (fread(&x_buckets_, sizeof(x_buckets_), 1, fp) != 1)
     return false;
   if (fread(&y_buckets_, sizeof(y_buckets_), 1, fp) != 1)
@@ -67,9 +66,9 @@ INT_FEATURE_STRUCT IntFeatureSpace::PositionFromIndex(int index) const {
 
 // Bulk calls to Index. Maps the given array of features to a vector of
 // inT32 indices in the same order as the input.
-void IntFeatureSpace::IndexFeatures(const INT_FEATURE_STRUCT* features,
+void IntFeatureSpace::IndexFeatures(const INT_FEATURE_STRUCT *features,
                                     int num_features,
-                                    GenericVector<int>* mapped_features) const {
+                                    GenericVector<int> *mapped_features) const {
   mapped_features->truncate(0);
   for (int f = 0; f < num_features; ++f)
     mapped_features->push_back(Index(features[f]));
@@ -78,8 +77,8 @@ void IntFeatureSpace::IndexFeatures(const INT_FEATURE_STRUCT* features,
 // Bulk calls to Index. Maps the given array of features to a vector of
 // sorted inT32 indices.
 void IntFeatureSpace::IndexAndSortFeatures(
-    const INT_FEATURE_STRUCT* features, int num_features,
-    GenericVector<int>* sorted_features) const {
+    const INT_FEATURE_STRUCT *features, int num_features,
+    GenericVector<int> *sorted_features) const {
   sorted_features->truncate(0);
   for (int f = 0; f < num_features; ++f)
     sorted_features->push_back(Index(features[f]));
@@ -101,8 +100,8 @@ int IntFeatureSpace::XYToFeatureIndex(int x, int y) const {
     return -1;
   }
   feature = PositionFromIndex(index);
-  tprintf("Click at (%d, %d) ->(%d, %d), ->(%d, %d)\n",
-          x, y, feature.X, feature.Y, x - feature.X, y - feature.Y);
+  tprintf("Click at (%d, %d) ->(%d, %d), ->(%d, %d)\n", x, y, feature.X,
+          feature.Y, x - feature.X, y - feature.Y);
   // Get the relative position of x,y from the rounded feature.
   x -= feature.X;
   y -= feature.Y;
@@ -123,8 +122,7 @@ int IntFeatureSpace::XYToFeatureIndex(int x, int y) const {
 }
 
 // Returns an INT_FEATURE_STRUCT corresponding to the given bucket coords.
-INT_FEATURE_STRUCT IntFeatureSpace::PositionFromBuckets(int x,
-                                                        int y,
+INT_FEATURE_STRUCT IntFeatureSpace::PositionFromBuckets(int x, int y,
                                                         int theta) const {
   INT_FEATURE_STRUCT pos(
       (x * kIntFeatureExtent + kIntFeatureExtent / 2) / x_buckets_,
@@ -133,4 +131,4 @@ INT_FEATURE_STRUCT IntFeatureSpace::PositionFromBuckets(int x,
   return pos;
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

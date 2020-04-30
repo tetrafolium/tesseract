@@ -22,8 +22,8 @@
 #ifndef TESSERACT_CCMAIN_RESULT_ITERATOR_H_
 #define TESSERACT_CCMAIN_RESULT_ITERATOR_H_
 
-#include "platform.h"
 #include "ltrresultiterator.h"
+#include "platform.h"
 
 template <typename T> class GenericVector;
 template <typename T> class GenericVectorEqEq;
@@ -36,7 +36,7 @@ namespace tesseract {
 class Tesseract;
 
 class TESS_API ResultIterator : public LTRResultIterator {
- public:
+public:
   static ResultIterator *StartOfParagraph(const LTRResultIterator &resit);
 
   /**
@@ -78,7 +78,7 @@ class TESS_API ResultIterator : public LTRResultIterator {
    * Implement PageIterator's IsAtFinalElement correctly in a BiDi context.
    * For instance, IsAtFinalElement(RIL_PARA, RIL_WORD) returns whether we
    * point at the last word in a paragraph.  See PageIterator for full comment.
-  */
+   */
   virtual bool IsAtFinalElement(PageIteratorLevel level,
                                 PageIteratorLevel element) const;
 
@@ -91,13 +91,13 @@ class TESS_API ResultIterator : public LTRResultIterator {
   /**
    * Returns the null terminated UTF-8 encoded text string for the current
    * object at the given level. Use delete [] to free after use.
-  */
-  virtual char* GetUTF8Text(PageIteratorLevel level) const;
+   */
+  virtual char *GetUTF8Text(PageIteratorLevel level) const;
 
   /**
    * Return whether the current paragraph's dominant reading direction
    * is left-to-right (as opposed to right-to-left).
-  */
+   */
   bool ParagraphIsLtr() const;
 
   // ============= Exposed only for testing =============.
@@ -124,16 +124,16 @@ class TESS_API ResultIterator : public LTRResultIterator {
    * Left-to-Right except for an RTL phrase in words 2, 3 in an ltr paragraph:
    *     { 0, 1, kMinorRunStart, 3, 2, kMinorRunEnd, 4 }
    */
-  static void CalculateTextlineOrder(
-      bool paragraph_is_ltr,
-      const GenericVector<StrongScriptDirection> &word_dirs,
-      GenericVectorEqEq<int> *reading_order);
+  static void
+  CalculateTextlineOrder(bool paragraph_is_ltr,
+                         const GenericVector<StrongScriptDirection> &word_dirs,
+                         GenericVectorEqEq<int> *reading_order);
 
   static const int kMinorRunStart;
   static const int kMinorRunEnd;
   static const int kComplexWord;
 
- protected:
+protected:
   /**
    * We presume the data associated with the given iterator will outlive us.
    * NB: This is private because it does something that is non-obvious:
@@ -142,7 +142,7 @@ class TESS_API ResultIterator : public LTRResultIterator {
    */
   TESS_LOCAL explicit ResultIterator(const LTRResultIterator &resit);
 
- private:
+private:
   /**
    * Calculates the current paragraph's dominant writing direction.
    * Typically, members should use current_paragraph_ltr_ instead.
@@ -243,6 +243,6 @@ class TESS_API ResultIterator : public LTRResultIterator {
   bool preserve_interword_spaces_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_CCMAIN_RESULT_ITERATOR_H_
+#endif // TESSERACT_CCMAIN_RESULT_ITERATOR_H_

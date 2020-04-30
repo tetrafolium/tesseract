@@ -27,10 +27,10 @@
 #include "tlog.h"
 #include "unichar.h"
 #include "unicharset.h"
-#include "unicode/errorcode.h"  // from libicu
-#include "unicode/normlzr.h"    // from libicu
-#include "unicode/unistr.h"     // from libicu
-#include "unicode/utypes.h"     // from libicu
+#include "unicode/errorcode.h" // from libicu
+#include "unicode/normlzr.h"   // from libicu
+#include "unicode/unistr.h"    // from libicu
+#include "unicode/utypes.h"    // from libicu
 
 namespace tesseract {
 
@@ -43,13 +43,13 @@ static string EncodeAsUTF8(const char32 ch32) {
 // from. Note that this range does not contain the custom ligatures that we
 // encode in the private use area.
 const int kMinLigature = 0xfb00;
-const int kMaxLigature = 0xfb17;  // Don't put the wide Hebrew letters in.
+const int kMaxLigature = 0xfb17; // Don't put the wide Hebrew letters in.
 
 /* static */
 std::unique_ptr<LigatureTable> LigatureTable::instance_;
 
 /* static */
-LigatureTable* LigatureTable::Get() {
+LigatureTable *LigatureTable::Get() {
   if (instance_ == nullptr) {
     instance_.reset(new LigatureTable());
     instance_->Init();
@@ -57,8 +57,9 @@ LigatureTable* LigatureTable::Get() {
   return instance_.get();
 }
 
-LigatureTable::LigatureTable() : min_lig_length_(0), max_lig_length_(0),
-                                 min_norm_length_(0), max_norm_length_(0) {}
+LigatureTable::LigatureTable()
+    : min_lig_length_(0), max_lig_length_(0), min_norm_length_(0),
+      max_norm_length_(0) {}
 
 void LigatureTable::Init() {
   if (norm_to_lig_table_.empty()) {
@@ -108,7 +109,7 @@ void LigatureTable::Init() {
   }
 }
 
-string LigatureTable::RemoveLigatures(const string& str) const {
+string LigatureTable::RemoveLigatures(const string &str) const {
   string result;
   UNICHAR::const_iterator it_begin = UNICHAR::begin(str.c_str(), str.length());
   UNICHAR::const_iterator it_end = UNICHAR::end(str.c_str(), str.length());
@@ -127,7 +128,7 @@ string LigatureTable::RemoveLigatures(const string& str) const {
   return result;
 }
 
-string LigatureTable::RemoveCustomLigatures(const string& str) const {
+string LigatureTable::RemoveCustomLigatures(const string &str) const {
   string result;
   UNICHAR::const_iterator it_begin = UNICHAR::begin(str.c_str(), str.length());
   UNICHAR::const_iterator it_end = UNICHAR::end(str.c_str(), str.length());
@@ -153,8 +154,8 @@ string LigatureTable::RemoveCustomLigatures(const string& str) const {
   return result;
 }
 
-string LigatureTable::AddLigatures(const string& str,
-                                   const PangoFontInfo* font) const {
+string LigatureTable::AddLigatures(const string &str,
+                                   const PangoFontInfo *font) const {
   string result;
   int len = str.size();
   int step = 0;
@@ -171,7 +172,7 @@ string LigatureTable::AddLigatures(const string& str,
           if (font) {
             // Test for renderability.
             if (!font->CanRenderString(it->second.data(), it->second.length()))
-              continue;  // Not renderable
+              continue; // Not renderable
           }
           // Found a match so convert it.
           step = liglen;
@@ -191,4 +192,4 @@ string LigatureTable::AddLigatures(const string& str,
   return result;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

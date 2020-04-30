@@ -22,8 +22,8 @@
 #if defined(__x86_64__) || defined(__i386__) || defined(_WIN32)
 #if !defined(ANDROID_BUILD)
 #define X86_BUILD 1
-#endif  // !ANDROID_BUILD
-#endif  // x86 target
+#endif // !ANDROID_BUILD
+#endif // x86 target
 
 #if defined(X86_BUILD)
 #if defined(__GNUC__)
@@ -78,5 +78,5 @@ SIMDDetect::SIMDDetect() {
 #else
 #error "I don't know how to test for SIMD with this compiler"
 #endif
-#endif  // X86_BUILD
+#endif // X86_BUILD
 }

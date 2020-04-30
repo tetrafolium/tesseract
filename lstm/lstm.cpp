@@ -31,33 +31,31 @@
 
 // Macros for openmp code if it is available, otherwise empty macros.
 #ifdef _OPENMP
-#define PARALLEL_IF_OPENMP(__num_threads)                                  \
-  PRAGMA(omp parallel if (__num_threads > 1) num_threads(__num_threads)) { \
-    PRAGMA(omp sections nowait) {                                          \
+#define PARALLEL_IF_OPENMP(__num_threads)                                      \
+  PRAGMA(omp parallel if (__num_threads > 1) num_threads(__num_threads)) {     \
+    PRAGMA(omp sections nowait) {                                              \
       PRAGMA(omp section) {
-#define SECTION_IF_OPENMP \
-        } \
-    PRAGMA(omp section) \
-        {
+#define SECTION_IF_OPENMP                                                      \
+  }                                                                            \
+  PRAGMA(omp section) {
 
-#define END_PARALLEL_IF_OPENMP \
-        } \
-      }  /* end of sections */ \
-    }  /* end of parallel section */
+#define END_PARALLEL_IF_OPENMP                                                 \
+  }                                                                            \
+  } /* end of sections */                                                      \
+  } /* end of parallel section */
 
 // Define the portable PRAGMA macro.
-#ifdef _MSC_VER  // Different _Pragma
+#ifdef _MSC_VER // Different _Pragma
 #define PRAGMA(x) __pragma(x)
 #else
 #define PRAGMA(x) _Pragma(#x)
-#endif  // _MSC_VER
+#endif // _MSC_VER
 
-#else  // _OPENMP
+#else // _OPENMP
 #define PARALLEL_IF_OPENMP(__num_threads)
 #define SECTION_IF_OPENMP
 #define END_PARALLEL_IF_OPENMP
-#endif  // _OPENMP
-
+#endif // _OPENMP
 
 namespace tesseract {
 
@@ -67,16 +65,12 @@ const double kStateClip = 100.0;
 // Max absolute value of gate_errors (the gradients).
 const double kErrClip = 1.0f;
 
-LSTM::LSTM(const STRING& name, int ni, int ns, int no, bool two_dimensional,
+LSTM::LSTM(const STRING &name, int ni, int ns, int no, bool two_dimensional,
            NetworkType type)
-    : Network(type, name, ni, no),
-      na_(ni + ns),
-      ns_(ns),
-      nf_(0),
-      is_2d_(two_dimensional),
-      softmax_(NULL),
-      input_width_(0) {
-  if (two_dimensional) na_ += ns_;
+    : Network(type, name, ni, no), na_(ni + ns), ns_(ns), nf_(0),
+      is_2d_(two_dimensional), softmax_(NULL), input_width_(0) {
+  if (two_dimensional)
+    na_ += ns_;
   if (type_ == NT_LSTM || type_ == NT_LSTM_SUMMARY) {
     nf_ = 0;
     // networkbuilder ensures this is always true.
@@ -95,11 +89,13 @@ LSTM::~LSTM() { delete softmax_; }
 
 // Returns the shape output from the network given an input shape (which may
 // be partially unknown ie zero).
-StaticShape LSTM::OutputShape(const StaticShape& input_shape) const {
+StaticShape LSTM::OutputShape(const StaticShape &input_shape) const {
   StaticShape result = input_shape;
   result.set_depth(no_);
-  if (type_ == NT_LSTM_SUMMARY) result.set_width(1);
-  if (softmax_ != NULL) return softmax_->OutputShape(result);
+  if (type_ == NT_LSTM_SUMMARY)
+    result.set_width(1);
+  if (softmax_ != NULL)
+    return softmax_->OutputShape(result);
   return result;
 }
 
@@ -108,29 +104,34 @@ StaticShape LSTM::OutputShape(const StaticShape& input_shape) const {
 void LSTM::SetEnableTraining(TrainingState state) {
   if (state == TS_RE_ENABLE) {
     // Enable only from temp disabled.
-    if (training_ == TS_TEMP_DISABLE) training_ = TS_ENABLED;
+    if (training_ == TS_TEMP_DISABLE)
+      training_ = TS_ENABLED;
   } else if (state == TS_TEMP_DISABLE) {
     // Temp disable only from enabled.
-    if (training_ == TS_ENABLED) training_ = state;
+    if (training_ == TS_ENABLED)
+      training_ = state;
   } else {
     if (state == TS_ENABLED && training_ != TS_ENABLED) {
       for (int w = 0; w < WT_COUNT; ++w) {
-        if (w == GFS && !Is2D()) continue;
+        if (w == GFS && !Is2D())
+          continue;
         gate_weights_[w].InitBackward();
       }
     }
     training_ = state;
   }
-  if (softmax_ != NULL) softmax_->SetEnableTraining(state);
+  if (softmax_ != NULL)
+    softmax_->SetEnableTraining(state);
 }
 
 // Sets up the network for training. Initializes weights using weights of
 // scale `range` picked according to the random number generator `randomizer`.
-int LSTM::InitWeights(float range, TRand* randomizer) {
+int LSTM::InitWeights(float range, TRand *randomizer) {
   Network::SetRandomizer(randomizer);
   num_weights_ = 0;
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     num_weights_ += gate_weights_[w].InitWeightsFloat(
         ns_, na_ + 1, TestFlag(NF_ADAM), range, randomizer);
   }
@@ -142,7 +143,7 @@ int LSTM::InitWeights(float range, TRand* randomizer) {
 
 // Recursively searches the network for softmaxes with old_no outputs,
 // and remaps their outputs according to code_map. See network.h for details.
-int LSTM::RemapOutputs(int old_no, const std::vector<int>& code_map) {
+int LSTM::RemapOutputs(int old_no, const std::vector<int> &code_map) {
   if (softmax_ != NULL) {
     num_weights_ -= softmax_->num_weights();
     num_weights_ += softmax_->RemapOutputs(old_no, code_map);
@@ -153,7 +154,8 @@ int LSTM::RemapOutputs(int old_no, const std::vector<int>& code_map) {
 // Converts a float network to an int network.
 void LSTM::ConvertToInt() {
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     gate_weights_[w].ConvertToInt();
   }
   if (softmax_ != NULL) {
@@ -164,7 +166,8 @@ void LSTM::ConvertToInt() {
 // Sets up the network for training using the given weight_range.
 void LSTM::DebugWeights() {
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     STRING msg = name_;
     msg.add_str_int(" Gate weights ", w);
     gate_weights_[w].Debug2D(msg.string());
@@ -175,21 +178,27 @@ void LSTM::DebugWeights() {
 }
 
 // Writes to the given file. Returns false in case of error.
-bool LSTM::Serialize(TFile* fp) const {
-  if (!Network::Serialize(fp)) return false;
-  if (fp->FWrite(&na_, sizeof(na_), 1) != 1) return false;
+bool LSTM::Serialize(TFile *fp) const {
+  if (!Network::Serialize(fp))
+    return false;
+  if (fp->FWrite(&na_, sizeof(na_), 1) != 1)
+    return false;
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
-    if (!gate_weights_[w].Serialize(IsTraining(), fp)) return false;
+    if (w == GFS && !Is2D())
+      continue;
+    if (!gate_weights_[w].Serialize(IsTraining(), fp))
+      return false;
   }
-  if (softmax_ != NULL && !softmax_->Serialize(fp)) return false;
+  if (softmax_ != NULL && !softmax_->Serialize(fp))
+    return false;
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 
-bool LSTM::DeSerialize(TFile* fp) {
-  if (fp->FReadEndian(&na_, sizeof(na_), 1) != 1) return false;
+bool LSTM::DeSerialize(TFile *fp) {
+  if (fp->FReadEndian(&na_, sizeof(na_), 1) != 1)
+    return false;
   if (type_ == NT_LSTM_SOFTMAX) {
     nf_ = no_;
   } else if (type_ == NT_LSTM_SOFTMAX_ENCODED) {
@@ -199,8 +208,10 @@ bool LSTM::DeSerialize(TFile* fp) {
   }
   is_2d_ = false;
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
-    if (!gate_weights_[w].DeSerialize(IsTraining(), fp)) return false;
+    if (w == GFS && !Is2D())
+      continue;
+    if (!gate_weights_[w].DeSerialize(IsTraining(), fp))
+      return false;
     if (w == CI) {
       ns_ = gate_weights_[CI].NumOutputs();
       is_2d_ = na_ - nf_ == ni_ + 2 * ns_;
@@ -208,8 +219,9 @@ bool LSTM::DeSerialize(TFile* fp) {
   }
   delete softmax_;
   if (type_ == NT_LSTM_SOFTMAX || type_ == NT_LSTM_SOFTMAX_ENCODED) {
-    softmax_ = static_cast<FullyConnected*>(Network::CreateFromFile(fp));
-    if (softmax_ == nullptr) return false;
+    softmax_ = static_cast<FullyConnected *>(Network::CreateFromFile(fp));
+    if (softmax_ == nullptr)
+      return false;
   } else {
     softmax_ = nullptr;
   }
@@ -218,9 +230,9 @@ bool LSTM::DeSerialize(TFile* fp) {
 
 // Runs forward propagation of activations on the input line.
 // See NetworkCpp for a detailed discussion of the arguments.
-void LSTM::Forward(bool debug, const NetworkIO& input,
-                   const TransposedArray* input_transpose,
-                   NetworkScratch* scratch, NetworkIO* output) {
+void LSTM::Forward(bool debug, const NetworkIO &input,
+                   const TransposedArray *input_transpose,
+                   NetworkScratch *scratch, NetworkIO *output) {
   input_map_ = input.stride_map();
   input_width_ = input.Width();
   if (softmax_ != NULL)
@@ -232,7 +244,8 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
   ResizeForward(input);
   // Temporary storage of forward computation for each gate.
   NetworkScratch::FloatVec temp_lines[WT_COUNT];
-  for (int i = 0; i < WT_COUNT; ++i) temp_lines[i].Init(ns_, scratch);
+  for (int i = 0; i < WT_COUNT; ++i)
+    temp_lines[i].Init(ns_, scratch);
   // Single timestep buffers for the current/recurrent output and state.
   NetworkScratch::FloatVec curr_state, curr_output;
   curr_state.Init(ns_, scratch);
@@ -276,10 +289,11 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
     bool valid_2d = Is2D();
     if (valid_2d) {
       StrideMap::Index dim_index(src_index);
-      if (!dim_index.AddOffset(-1, FD_HEIGHT)) valid_2d = false;
+      if (!dim_index.AddOffset(-1, FD_HEIGHT))
+        valid_2d = false;
     }
     // Index of the 2-D revolving buffers (outputs, states).
-    int mod_t = Modulo(t, buf_width);      // Current timestep.
+    int mod_t = Modulo(t, buf_width); // Current timestep.
     // Setup the padded input in source.
     source_.CopyTimeStepGeneral(t, 0, ni_, input, t, 0);
     if (softmax_ != NULL) {
@@ -288,7 +302,8 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
     source_.WriteTimeStepPart(t, ni_ + nf_, ns_, curr_output);
     if (Is2D())
       source_.WriteTimeStepPart(t, ni_ + nf_ + ns_, ns_, outputs[mod_t]);
-    if (!source_.int_mode()) source_.ReadTimeStep(t, curr_input);
+    if (!source_.int_mode())
+      source_.ReadTimeStep(t, curr_input);
     // Matrix multiply the inputs with the source.
     PARALLEL_IF_OPENMP(GFS)
     // It looks inefficient to create the threads on each t iteration, but the
@@ -339,10 +354,10 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
     MultiplyVectorsInPlace(ns_, temp_lines[GF1], curr_state);
     if (Is2D()) {
       // Max-pool the forget gates (in 2-d) instead of blindly adding.
-      inT8* which_fg_col = which_fg_[t];
+      inT8 *which_fg_col = which_fg_[t];
       memset(which_fg_col, 1, ns_ * sizeof(which_fg_col[0]));
       if (valid_2d) {
-        const double* stepped_state = states[mod_t];
+        const double *stepped_state = states[mod_t];
         for (int i = 0; i < ns_; ++i) {
           if (temp_lines[GF1][i] < temp_lines[GFS][i]) {
             curr_state[i] = temp_lines[GFS][i] * stepped_state[i];
@@ -360,10 +375,12 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
       node_values_[GI].WriteTimeStep(t, temp_lines[GI]);
       node_values_[GF1].WriteTimeStep(t, temp_lines[GF1]);
       node_values_[GO].WriteTimeStep(t, temp_lines[GO]);
-      if (Is2D()) node_values_[GFS].WriteTimeStep(t, temp_lines[GFS]);
+      if (Is2D())
+        node_values_[GFS].WriteTimeStep(t, temp_lines[GFS]);
     }
     FuncMultiply<HFunc>(curr_state, temp_lines[GO], ns_, curr_output);
-    if (IsTraining()) state_.WriteTimeStep(t, curr_state);
+    if (IsTraining())
+      state_.WriteTimeStep(t, curr_state);
     if (softmax_ != NULL) {
       if (input.int_mode()) {
         int_output->WriteTimeStepPart(0, 0, ns_, curr_output);
@@ -404,15 +421,16 @@ void LSTM::Forward(bool debug, const NetworkIO& input,
   tprintf("Output:%s\n", name_.string());
   output->Print(10);
 #endif
-  if (debug) DisplayForward(*output);
+  if (debug)
+    DisplayForward(*output);
 }
 
 // Runs backward propagation of errors on the deltas line.
 // See NetworkCpp for a detailed discussion of the arguments.
-bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
-                    NetworkScratch* scratch,
-                    NetworkIO* back_deltas) {
-  if (debug) DisplayBackward(fwd_deltas);
+bool LSTM::Backward(bool debug, const NetworkIO &fwd_deltas,
+                    NetworkScratch *scratch, NetworkIO *back_deltas) {
+  if (debug)
+    DisplayBackward(fwd_deltas);
   back_deltas->ResizeToMap(fwd_deltas.int_mode(), input_map_, ni_);
   // ======Scratch space.======
   // Output errors from deltas with recurrence from sourceerr.
@@ -426,7 +444,8 @@ bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
   ZeroVector<double>(na_, curr_sourceerr);
   // Errors in the gates.
   NetworkScratch::FloatVec gate_errors[WT_COUNT];
-  for (int g = 0; g < WT_COUNT; ++g) gate_errors[g].Init(ns_, scratch);
+  for (int g = 0; g < WT_COUNT; ++g)
+    gate_errors[g].Init(ns_, scratch);
   // Rotating buffers of width buf_width allow storage of the recurrent time-
   // steps used only for true 2-D. Stores one full strip of the major direction.
   int buf_width = Is2D() ? input_map_.Size(FD_WIDTH) : 1;
@@ -478,15 +497,17 @@ bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
     if (Is2D()) {
       if (dest_index.index(FD_HEIGHT) > 0) {
         StrideMap::Index up_index(dest_index);
-        if (up_index.AddOffset(-1, FD_HEIGHT)) up_pos = up_index.t();
+        if (up_index.AddOffset(-1, FD_HEIGHT))
+          up_pos = up_index.t();
       }
       if (!dest_index.IsLast(FD_HEIGHT)) {
         StrideMap::Index down_index(dest_index);
-        if (down_index.AddOffset(1, FD_HEIGHT)) down_pos = down_index.t();
+        if (down_index.AddOffset(1, FD_HEIGHT))
+          down_pos = down_index.t();
       }
     }
     // Index of the 2-D revolving buffers (sourceerr, stateerr).
-    int mod_t = Modulo(t, buf_width);      // Current timestep.
+    int mod_t = Modulo(t, buf_width); // Current timestep.
     // Zero the state in the major direction only at the end of every row.
     if (at_last_x) {
       ZeroVector<double>(na_, curr_sourceerr);
@@ -512,18 +533,19 @@ bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
       AccumulateVector(ns_, sourceerr[mod_t] + ni_ + nf_ + ns_, outputerr);
     // Apply the 1-d forget gates.
     if (!at_last_x) {
-      const float* next_node_gf1 = node_values_[GF1].f(t + 1);
+      const float *next_node_gf1 = node_values_[GF1].f(t + 1);
       for (int i = 0; i < ns_; ++i) {
         curr_stateerr[i] *= next_node_gf1[i];
       }
     }
     if (Is2D() && t + 1 < width) {
       for (int i = 0; i < ns_; ++i) {
-        if (which_fg_[t + 1][i] != 1) curr_stateerr[i] = 0.0;
+        if (which_fg_[t + 1][i] != 1)
+          curr_stateerr[i] = 0.0;
       }
       if (down_pos >= 0) {
-        const float* right_node_gfs = node_values_[GFS].f(down_pos);
-        const double* right_stateerr = stateerr[mod_t];
+        const float *right_node_gfs = node_values_[GFS].f(down_pos);
+        const double *right_stateerr = stateerr[mod_t];
         for (int i = 0; i < ns_; ++i) {
           if (which_fg_[down_pos][i] == 2) {
             curr_stateerr[i] += right_stateerr[i] * right_node_gfs[i];
@@ -587,7 +609,8 @@ bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
       memset(gate_errors[GFS], 0, ns_ * sizeof(gate_errors[GFS][0]));
       memset(sourceerr_temps[GFS], 0, na_ * sizeof(*sourceerr_temps[GFS]));
     }
-    if (Is2D()) gate_errors_t[GFS].get()->WriteStrided(t, gate_errors[GFS]);
+    if (Is2D())
+      gate_errors_t[GFS].get()->WriteStrided(t, gate_errors[GFS]);
 
     SECTION_IF_OPENMP
     // Output gates.
@@ -624,7 +647,8 @@ bool LSTM::Backward(bool debug, const NetworkIO& fwd_deltas,
 #pragma omp parallel for num_threads(GFS) if (!Is2D())
 #endif
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     gate_weights_[w].SumOuterTransposed(*gate_errors_t[w], *source_t, false);
   }
   if (softmax_ != NULL) {
@@ -641,7 +665,8 @@ void LSTM::Update(float learning_rate, float momentum, float adam_beta,
   PrintW();
 #endif
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     gate_weights_[w].Update(learning_rate, momentum, adam_beta, num_samples);
   }
   if (softmax_ != NULL) {
@@ -655,12 +680,13 @@ void LSTM::Update(float learning_rate, float momentum, float adam_beta,
 // Sums the products of weight updates in *this and other, splitting into
 // positive (same direction) in *same and negative (different direction) in
 // *changed.
-void LSTM::CountAlternators(const Network& other, double* same,
-                            double* changed) const {
+void LSTM::CountAlternators(const Network &other, double *same,
+                            double *changed) const {
   ASSERT_HOST(other.type() == type_);
-  const LSTM* lstm = static_cast<const LSTM*>(&other);
+  const LSTM *lstm = static_cast<const LSTM *>(&other);
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     gate_weights_[w].CountAlternators(lstm->gate_weights_[w], same, changed);
   }
   if (softmax_ != NULL) {
@@ -672,7 +698,8 @@ void LSTM::CountAlternators(const Network& other, double* same,
 void LSTM::PrintW() {
   tprintf("Weight state:%s\n", name_.string());
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     tprintf("Gate %d, inputs\n", w);
     for (int i = 0; i < ni_; ++i) {
       tprintf("Row %d:", i);
@@ -698,7 +725,8 @@ void LSTM::PrintW() {
 void LSTM::PrintDW() {
   tprintf("Delta state:%s\n", name_.string());
   for (int w = 0; w < WT_COUNT; ++w) {
-    if (w == GFS && !Is2D()) continue;
+    if (w == GFS && !Is2D())
+      continue;
     tprintf("Gate %d, inputs\n", w);
     for (int i = 0; i < ni_; ++i) {
       tprintf("Row %d:", i);
@@ -721,18 +749,18 @@ void LSTM::PrintDW() {
 }
 
 // Resizes forward data to cope with an input image of the given width.
-void LSTM::ResizeForward(const NetworkIO& input) {
+void LSTM::ResizeForward(const NetworkIO &input) {
   int rounded_inputs = gate_weights_[CI].RoundInputs(na_);
   source_.Resize(input, rounded_inputs);
   which_fg_.ResizeNoInit(input.Width(), ns_);
   if (IsTraining()) {
     state_.ResizeFloat(input, ns_);
     for (int w = 0; w < WT_COUNT; ++w) {
-      if (w == GFS && !Is2D()) continue;
+      if (w == GFS && !Is2D())
+        continue;
       node_values_[w].ResizeFloat(input, ns_);
     }
   }
 }
 
-
-}  // namespace tesseract.
+} // namespace tesseract.

@@ -18,16 +18,13 @@
  **********************************************************************/
 
 #include "serialis.h"
-#include <stdio.h>
 #include "genericvector.h"
+#include <stdio.h>
 
 namespace tesseract {
 
 TFile::TFile()
-    : offset_(0),
-      data_(NULL),
-      data_is_owned_(false),
-      is_writing_(false),
+    : offset_(0), data_(NULL), data_is_owned_(false), is_writing_(false),
       swap_(false) {}
 
 TFile::~TFile() {
@@ -35,7 +32,7 @@ TFile::~TFile() {
     delete data_;
 }
 
-bool TFile::Open(const STRING& filename, FileReader reader) {
+bool TFile::Open(const STRING &filename, FileReader reader) {
   if (!data_is_owned_) {
     data_ = new GenericVector<char>;
     data_is_owned_ = true;
@@ -49,7 +46,7 @@ bool TFile::Open(const STRING& filename, FileReader reader) {
     return (*reader)(filename, data_);
 }
 
-bool TFile::Open(const char* data, int size) {
+bool TFile::Open(const char *data, int size) {
   offset_ = 0;
   if (!data_is_owned_) {
     data_ = new GenericVector<char>;
@@ -62,7 +59,7 @@ bool TFile::Open(const char* data, int size) {
   return true;
 }
 
-bool TFile::Open(FILE* fp, inT64 end_offset) {
+bool TFile::Open(FILE *fp, inT64 end_offset) {
   offset_ = 0;
   inT64 current_pos = ftell(fp);
   if (end_offset < 0) {
@@ -83,21 +80,23 @@ bool TFile::Open(FILE* fp, inT64 end_offset) {
   return static_cast<int>(fread(&(*data_)[0], 1, size, fp)) == size;
 }
 
-char* TFile::FGets(char* buffer, int buffer_size) {
+char *TFile::FGets(char *buffer, int buffer_size) {
   ASSERT_HOST(!is_writing_);
   int size = 0;
   while (size + 1 < buffer_size && offset_ < data_->size()) {
     buffer[size++] = (*data_)[offset_++];
-    if ((*data_)[offset_ - 1] == '\n') break;
+    if ((*data_)[offset_ - 1] == '\n')
+      break;
   }
-  if (size < buffer_size) buffer[size] = '\0';
+  if (size < buffer_size)
+    buffer[size] = '\0';
   return size > 0 ? buffer : NULL;
 }
 
-int TFile::FReadEndian(void* buffer, int size, int count) {
+int TFile::FReadEndian(void *buffer, int size, int count) {
   int num_read = FRead(buffer, size, count);
   if (swap_) {
-    char* char_buffer = static_cast<char*>(buffer);
+    char *char_buffer = static_cast<char *>(buffer);
     for (int i = 0; i < num_read; ++i, char_buffer += size) {
       ReverseN(char_buffer, size);
     }
@@ -105,10 +104,11 @@ int TFile::FReadEndian(void* buffer, int size, int count) {
   return num_read;
 }
 
-int TFile::FRead(void* buffer, int size, int count) {
+int TFile::FRead(void *buffer, int size, int count) {
   ASSERT_HOST(!is_writing_);
   int required_size = size * count;
-  if (required_size <= 0) return 0;
+  if (required_size <= 0)
+    return 0;
   if (data_->size() - offset_ < required_size)
     required_size = data_->size() - offset_;
   if (required_size > 0 && buffer != NULL)
@@ -122,10 +122,11 @@ void TFile::Rewind() {
   offset_ = 0;
 }
 
-void TFile::OpenWrite(GenericVector<char>* data) {
+void TFile::OpenWrite(GenericVector<char> *data) {
   offset_ = 0;
   if (data != NULL) {
-    if (data_is_owned_) delete data_;
+    if (data_is_owned_)
+      delete data_;
     data_ = data;
     data_is_owned_ = false;
   } else if (!data_is_owned_) {
@@ -137,7 +138,7 @@ void TFile::OpenWrite(GenericVector<char>* data) {
   data_->truncate(0);
 }
 
-bool TFile::CloseWrite(const STRING& filename, FileWriter writer) {
+bool TFile::CloseWrite(const STRING &filename, FileWriter writer) {
   ASSERT_HOST(is_writing_);
   if (writer == NULL)
     return SaveDataToFile(*data_, filename);
@@ -145,11 +146,12 @@ bool TFile::CloseWrite(const STRING& filename, FileWriter writer) {
     return (*writer)(*data_, filename);
 }
 
-int TFile::FWrite(const void* buffer, int size, int count) {
+int TFile::FWrite(const void *buffer, int size, int count) {
   ASSERT_HOST(is_writing_);
   int total = size * count;
-  if (total <= 0) return 0;
-  const char* buf = static_cast<const char*>(buffer);
+  if (total <= 0)
+    return 0;
+  const char *buf = static_cast<const char *>(buffer);
   // This isn't very efficient, but memory is so fast compared to disk
   // that it is relatively unimportant, and very simple.
   for (int i = 0; i < total; ++i)
@@ -157,6 +159,4 @@ int TFile::FWrite(const void* buffer, int size, int count) {
   return count;
 }
 
-
-}  // namespace tesseract.
-
+} // namespace tesseract.

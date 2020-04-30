@@ -24,17 +24,18 @@
 #include <stdio.h>
 
 #include "baseapi.h"
+#include "dict.h"
 #include "helpers.h"
 #include "strngs.h"
-#include "dict.h"
 #include "tesseractclass.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   // Parse input arguments.
   if (argc != 4 && (argc != 6 || strcmp(argv[1], "-l") != 0)) {
     printf("Usage: %s [-l lang] tessdata_dir wordlist_file"
-           " output_ambiguious_wordlist_file\n", argv[0]);
+           " output_ambiguious_wordlist_file\n",
+           argv[0]);
     return 1;
   }
   int argv_offset = 0;
@@ -68,7 +69,7 @@ int main(int argc, char** argv) {
   // Read word list and call Dict::NoDangerousAmbig() for each word
   // to record ambiguities in the output file.
   while (fgets(str, CHARS_PER_LINE, input_file) != nullptr) {
-    chomp_string(str);  // remove newline
+    chomp_string(str); // remove newline
     WERD_CHOICE word(str, dict.getUnicharset());
     dict.NoDangerousAmbig(&word, nullptr, false, nullptr);
   }

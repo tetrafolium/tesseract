@@ -20,8 +20,8 @@
 #ifndef TESSERACT_CCUTIL_INDEXMAPBIDI_H_
 #define TESSERACT_CCUTIL_INDEXMAPBIDI_H_
 
-#include <stdio.h>
 #include "genericvector.h"
+#include <stdio.h>
 
 namespace tesseract {
 
@@ -40,7 +40,7 @@ class IndexMapBiDi;
 // NOTE: there are currently no methods to setup an IndexMap on its own!
 // It must be initialized by copying from an IndexMapBiDi or by DeSerialize.
 class IndexMap {
- public:
+public:
   virtual ~IndexMap() {}
 
   // SparseToCompact takes a sparse index to an index in the compact space.
@@ -54,25 +54,21 @@ class IndexMap {
     return compact_map_[compact_index];
   }
   // The size of the sparse space.
-  virtual int SparseSize() const {
-    return sparse_size_;
-  }
+  virtual int SparseSize() const { return sparse_size_; }
   // The size of the compact space.
-  int CompactSize() const {
-    return compact_map_.size();
-  }
+  int CompactSize() const { return compact_map_.size(); }
 
   // Copy from the input.
-  void CopyFrom(const IndexMap& src);
-  void CopyFrom(const IndexMapBiDi& src);
+  void CopyFrom(const IndexMap &src);
+  void CopyFrom(const IndexMapBiDi &src);
 
   // Writes to the given file. Returns false in case of error.
-  bool Serialize(FILE* fp) const;
+  bool Serialize(FILE *fp) const;
   // Reads from the given file. Returns false in case of error.
   // If swap is true, assumes a big/little-endian swap is needed.
-  bool DeSerialize(bool swap, FILE* fp);
+  bool DeSerialize(bool swap, FILE *fp);
 
- protected:
+protected:
   // The sparse space covers integers in the range [0, sparse_size_-1].
   int sparse_size_;
   // The compact space covers integers in the range [0, compact_map_.size()-1].
@@ -100,7 +96,7 @@ class IndexMap {
 //    CompleteMerges();
 //    Allows a many-to-one mapping by merging compact space indices.
 class IndexMapBiDi : public IndexMap {
- public:
+public:
   virtual ~IndexMapBiDi() {}
 
   // Top-level init function in a single call to initialize a map to select
@@ -139,28 +135,26 @@ class IndexMapBiDi : public IndexMap {
     return sparse_map_[sparse_index];
   }
   // The size of the sparse space.
-  virtual int SparseSize() const {
-    return sparse_map_.size();
-  }
+  virtual int SparseSize() const { return sparse_map_.size(); }
 
   // Copy from the input.
-  void CopyFrom(const IndexMapBiDi& src);
+  void CopyFrom(const IndexMapBiDi &src);
 
   // Writes to the given file. Returns false in case of error.
-  bool Serialize(FILE* fp) const;
+  bool Serialize(FILE *fp) const;
   // Reads from the given file. Returns false in case of error.
   // If swap is true, assumes a big/little-endian swap is needed.
-  bool DeSerialize(bool swap, FILE* fp);
+  bool DeSerialize(bool swap, FILE *fp);
 
   // Bulk calls to SparseToCompact.
   // Maps the given array of sparse indices to an array of compact indices.
   // Assumes the input is sorted. The output indices are sorted and uniqued.
   // Return value is the number of "missed" features, being features that
   // don't map to the compact feature space.
-  int MapFeatures(const GenericVector<int>& sparse,
-                  GenericVector<int>* compact) const;
+  int MapFeatures(const GenericVector<int> &sparse,
+                  GenericVector<int> *compact) const;
 
- private:
+private:
   // Returns the master compact index for a given compact index.
   // During a multiple merge operation, several compact indices may be
   // combined, so we need to be able to find the master of all.
@@ -175,6 +169,6 @@ class IndexMapBiDi : public IndexMap {
   GenericVector<inT32> sparse_map_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_CCUTIL_INDEXMAPBIDI_H_
+#endif // TESSERACT_CCUTIL_INDEXMAPBIDI_H_

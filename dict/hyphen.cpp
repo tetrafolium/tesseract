@@ -63,4 +63,4 @@ void Dict::set_hyphen_word(const WERD_CHOICE &word,
     hyphen_word_->print("set_hyphen_word: ");
   }
 }
-}  // namespace tesseract
+} // namespace tesseract

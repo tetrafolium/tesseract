@@ -17,10 +17,10 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
 #include "unicharset.h"
+#include <stdio.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   // Print usage
   if (argc < 4) {
     printf("Usage: %s unicharset-in-1 ... unicharset-in-n unicharset-out\n",

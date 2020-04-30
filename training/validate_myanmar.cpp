@@ -2,8 +2,8 @@
 #include "errcode.h"
 #include "icuerrorcode.h"
 #include "tprintf.h"
-#include "unicode/uchar.h"    // From libicu
-#include "unicode/uscript.h"  // From libicu
+#include "unicode/uchar.h"   // From libicu
+#include "unicode/uscript.h" // From libicu
 
 namespace tesseract {
 
@@ -12,7 +12,8 @@ namespace tesseract {
 // See http://www.unicode.org/versions/Unicode9.0.0/ch16.pdf
 bool ValidateMyanmar::ConsumeGraphemeIfValid() {
   int num_codes = codes_.size();
-  if (codes_used_ == num_codes) return true;
+  if (codes_used_ == num_codes)
+    return true;
   // Other.
   if (IsMyanmarOther(codes_[codes_used_].second)) {
     UseMultiCode(1);
@@ -24,21 +25,24 @@ bool ValidateMyanmar::ConsumeGraphemeIfValid() {
       codes_[codes_used_ + 2].second == kMyanmarVirama) {
     ASSERT_HOST(!CodeOnlyToOutput());
     ASSERT_HOST(!CodeOnlyToOutput());
-    if (UseMultiCode(3)) return true;
+    if (UseMultiCode(3))
+      return true;
   }
   // Base consonant/vowel. NOTE that since everything in Myanmar appears to be
   // optional, except the base, this is the only place where invalid input can
   // be detected and false returned.
   if (IsMyanmarLetter(codes_[codes_used_].second)) {
-    if (UseMultiCode(1)) return true;
+    if (UseMultiCode(1))
+      return true;
   } else {
     if (report_errors_) {
       tprintf("Invalid start of Myanmar syllable:0x%x\n",
               codes_[codes_used_].second);
     }
-    return false;  // One of these is required.
+    return false; // One of these is required.
   }
-  if (ConsumeSubscriptIfPresent()) return true;
+  if (ConsumeSubscriptIfPresent())
+    return true;
   ConsumeOptionalSignsIfPresent();
   // What we have consumed so far is a valid syllable.
   return true;
@@ -53,7 +57,8 @@ bool ValidateMyanmar::ConsumeGraphemeIfValid() {
 // The table also allows sequences that still result in dotted circles!!
 // So with a lot of guesswork the rest have been added in a reasonable place.
 Validator::CharClass ValidateMyanmar::UnicodeToCharClass(char32 ch) const {
-  if (IsMyanmarLetter(ch)) return CharClass::kConsonant;
+  if (IsMyanmarLetter(ch))
+    return CharClass::kConsonant;
   return CharClass::kOther;
 }
 
@@ -66,7 +71,8 @@ bool ValidateMyanmar::ConsumeSubscriptIfPresent() {
       codes_[codes_used_].second == kMyanmarVirama) {
     if (IsMyanmarLetter(codes_[codes_used_ + 1].second)) {
       ASSERT_HOST(!CodeOnlyToOutput());
-      if (UseMultiCode(2)) return true;
+      if (UseMultiCode(2))
+        return true;
     }
   }
   return false;
@@ -82,17 +88,20 @@ bool ValidateMyanmar::ConsumeOptionalSignsIfPresent() {
                                       0x1081, 0x1031});
   for (char32 ch : kMedials) {
     if (codes_[codes_used_].second == ch) {
-      if (UseMultiCode(1)) return true;
+      if (UseMultiCode(1))
+        return true;
       if (ch == kMyanmarMedialYa &&
           codes_[codes_used_].second == kMyanmarAsat) {
-        if (UseMultiCode(1)) return true;
+        if (UseMultiCode(1))
+          return true;
       }
     }
   }
   // Vowel sign i, ii, ai.
   char32 ch = codes_[codes_used_].second;
   if (ch == 0x102d || ch == 0x102e || ch == 0x1032) {
-    if (UseMultiCode(1)) return true;
+    if (UseMultiCode(1))
+      return true;
   }
   // Vowel sign u, uu, and extensions.
   ch = codes_[codes_used_].second;
@@ -100,21 +109,25 @@ bool ValidateMyanmar::ConsumeOptionalSignsIfPresent() {
       ch == 0x1062 || ch == 0x1067 || ch == 0x1068 ||
       (0x1071 <= ch && ch <= 0x1074) || (0x1083 <= ch && ch <= 0x1086) ||
       ch == 0x109c || ch == 0x109d) {
-    if (UseMultiCode(1)) return true;
+    if (UseMultiCode(1))
+      return true;
   }
   // Tall aa, aa with optional asat.
   if (codes_[codes_used_].second == 0x102b ||
       codes_[codes_used_].second == 0x102c) {
-    if (UseMultiCode(1)) return true;
+    if (UseMultiCode(1))
+      return true;
     if (codes_[codes_used_].second == kMyanmarAsat) {
-      if (UseMultiCode(1)) return true;
+      if (UseMultiCode(1))
+        return true;
     }
   }
   // The following characters are allowed, all optional, and in sequence.
   const std::vector<char32> kSigns({0x1036, 0x1037});
   for (char32 ch : kSigns) {
     if (codes_[codes_used_].second == ch) {
-      if (UseMultiCode(1)) return true;
+      if (UseMultiCode(1))
+        return true;
     }
   }
   // Tone mark extensions.
@@ -123,7 +136,8 @@ bool ValidateMyanmar::ConsumeOptionalSignsIfPresent() {
       (0x1069 <= ch && ch <= 0x106d) || (0x1087 <= ch && ch <= 0x108d) ||
       ch == 0x108f || ch == 0x109a || ch == 0x109b ||
       (0xaa7b <= ch && ch <= 0xaa7d)) {
-    if (UseMultiCode(1)) return true;
+    if (UseMultiCode(1))
+      return true;
   }
   return false;
 }
@@ -157,4 +171,4 @@ bool ValidateMyanmar::IsMyanmarOther(char32 ch) {
          (0xaa74 <= ch && ch <= 0xaa79);
 }
 
-}  // namespace tesseract
+} // namespace tesseract

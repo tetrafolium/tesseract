@@ -25,14 +25,14 @@ namespace tesseract {
 
 // Runs two or more networks in series (layers) on the same input.
 class Series : public Plumbing {
- public:
+public:
   // ni_ and no_ will be set by AddToStack.
-  explicit Series(const STRING& name);
+  explicit Series(const STRING &name);
   virtual ~Series();
 
   // Returns the shape output from the network given an input shape (which may
   // be partially unknown ie zero).
-  virtual StaticShape OutputShape(const StaticShape& input_shape) const;
+  virtual StaticShape OutputShape(const StaticShape &input_shape) const;
 
   virtual STRING spec() const {
     STRING spec("[");
@@ -45,10 +45,10 @@ class Series : public Plumbing {
   // Sets up the network for training. Initializes weights using weights of
   // scale `range` picked according to the random number generator `randomizer`.
   // Returns the number of weights initialized.
-  virtual int InitWeights(float range, TRand* randomizer);
+  virtual int InitWeights(float range, TRand *randomizer);
   // Recursively searches the network for softmaxes with old_no outputs,
   // and remaps their outputs according to code_map. See network.h for details.
-  int RemapOutputs(int old_no, const std::vector<int>& code_map) override;
+  int RemapOutputs(int old_no, const std::vector<int> &code_map) override;
 
   // Sets needs_to_backprop_ to needs_backprop and returns true if
   // needs_backprop || any weights in this network so the next layer forward
@@ -69,26 +69,25 @@ class Series : public Plumbing {
 
   // Runs forward propagation of activations on the input line.
   // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
   // Runs backward propagation of errors on the deltas line.
   // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
   // Splits the series after the given index, returning the two parts and
   // deletes itself. The first part, up to network with index last_start, goes
   // into start, and the rest goes into end.
-  void SplitAt(int last_start, Series** start, Series** end);
+  void SplitAt(int last_start, Series **start, Series **end);
 
   // Appends the elements of the src series to this, removing from src and
   // deleting it.
-  void AppendSeries(Network* src);
+  void AppendSeries(Network *src);
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_LSTM_SERIES_H_
+#endif // TESSERACT_LSTM_SERIES_H_

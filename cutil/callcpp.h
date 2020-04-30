@@ -78,38 +78,33 @@ typedef enum {
   Violet,
   Wheat,
   Green_YELLOW
-} C_COL;                         /*starbase colours */
+} C_COL; /*starbase colours */
 
-void cprintf (                   //Trace printf
-const char *format, ...          //special message
+void cprintf(               // Trace printf
+    const char *format, ... // special message
 );
-ScrollView *c_create_window(                   /*create a window */
-                      const char *name,  /*name/title of window */
-                      inT16 xpos,        /*coords of window */
-                      inT16 ypos,        /*coords of window */
-                      inT16 xsize,       /*size of window */
-                      inT16 ysize,       /*size of window */
-                      double xmin,       /*scrolling limits */
-                      double xmax,       /*to stop users */
-                      double ymin,       /*getting lost in */
-                      double ymax        /*empty space */
-                     );
-void c_line_color_index(  /*set color */
-                        void *win,
-                        C_COL index);
-void c_move(  /*move pen */
-            void *win,
-            double x,
-            double y);
-void c_draw(  /*move pen */
-            void *win,
-            double x,
-            double y);
-void c_make_current(  /*move pen */
+ScrollView *c_create_window(                  /*create a window */
+                            const char *name, /*name/title of window */
+                            inT16 xpos,       /*coords of window */
+                            inT16 ypos,       /*coords of window */
+                            inT16 xsize,      /*size of window */
+                            inT16 ysize,      /*size of window */
+                            double xmin,      /*scrolling limits */
+                            double xmax,      /*to stop users */
+                            double ymin,      /*getting lost in */
+                            double ymax       /*empty space */
+);
+void c_line_color_index(/*set color */
+                        void *win, C_COL index);
+void c_move(/*move pen */
+            void *win, double x, double y);
+void c_draw(/*move pen */
+            void *win, double x, double y);
+void c_make_current(/*move pen */
                     void *win);
-void c_clear_window(  /*move pen */
+void c_clear_window(/*move pen */
                     void *win);
-char window_wait(ScrollView* win);
+char window_wait(ScrollView *win);
 void reverse32(void *ptr);
 void reverse16(void *ptr);
 

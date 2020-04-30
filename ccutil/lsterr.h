@@ -20,10 +20,9 @@
 #ifndef TESSERACT_CCUTIL_LSTERR_H_
 #define TESSERACT_CCUTIL_LSTERR_H_
 
-#include          "errcode.h"    //must be last include
+#include "errcode.h" //must be last include
 
-const ERRCODE DONT_CONSTRUCT_LIST_BY_COPY =
-"Can't create a list by assignment";
+const ERRCODE DONT_CONSTRUCT_LIST_BY_COPY = "Can't create a list by assignment";
 const ERRCODE DONT_ASSIGN_LISTS = "Can't assign to lists";
 const ERRCODE SERIALISE_LINKS = "Attempted to (de)serialise a link element";
 
@@ -40,5 +39,5 @@ const ERRCODE BAD_PARAMETER = "List parameter error";
 const ERRCODE STILL_LINKED =
     "Attempting to add an element with non NULL links, to a list";
 
-#endif  // !NDEBUG
-#endif  // TESSERACT_CCUTIL_LSTERR_H_
+#endif // !NDEBUG
+#endif // TESSERACT_CCUTIL_LSTERR_H_

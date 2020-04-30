@@ -17,21 +17,21 @@
  *
  **********************************************************************/
 
-#include          <signal.h>
+#include <signal.h>
 #ifdef __linux__
-#include          <sys/syscall.h>   // For SYS_gettid.
-#include          <unistd.h>        // For syscall itself.
+#include <sys/syscall.h> // For SYS_gettid.
+#include <unistd.h>      // For syscall itself.
 #endif
-#include          "allheaders.h"
-#include          "errcode.h"
-#include          "tprintf.h"
+#include "allheaders.h"
+#include "errcode.h"
+#include "tprintf.h"
 
 // Size of thread-id array of pixes to keep in case of crash.
 const int kMaxNumThreadPixes = 32768;
 
-Pix* global_crash_pixes[kMaxNumThreadPixes];
+Pix *global_crash_pixes[kMaxNumThreadPixes];
 
-void SavePixForCrash(int resolution, Pix* pix) {
+void SavePixForCrash(int resolution, Pix *pix) {
 #ifdef __linux__
 #ifndef ANDROID
   int thread_id = syscall(SYS_gettid) % kMaxNumThreadPixes;
@@ -40,7 +40,7 @@ void SavePixForCrash(int resolution, Pix* pix) {
 #endif
   pixDestroy(&global_crash_pixes[thread_id]);
   if (pix != NULL) {
-    Pix* clone = pixClone(pix);
+    Pix *clone = pixClone(pix);
     pixSetXRes(clone, resolution);
     pixSetYRes(clone, resolution);
     global_crash_pixes[thread_id] = clone;
@@ -71,24 +71,16 @@ void signal_exit(int signal_code) {
 #endif
 }
 
-void err_exit() {
-  ASSERT_HOST("Fatal error encountered!" == NULL);
-}
-
+void err_exit() { ASSERT_HOST("Fatal error encountered!" == NULL); }
 
 void set_global_loc_code(int loc_code) {
   // global_loc_code = loc_code;
-
 }
-
 
 void set_global_subloc_code(int loc_code) {
   // global_subloc_code = loc_code;
-
 }
-
 
 void set_global_subsubloc_code(int loc_code) {
   // global_subsubloc_code = loc_code;
-
 }

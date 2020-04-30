@@ -31,9 +31,8 @@ namespace tesseract {
 // Usually, these are expensive objects that are loaded from disk.
 // Reference counting is performed, so every Get() needs to be followed later
 // by a Free().  Actual deletion is accomplished by DeleteUnusedObjects().
-template<typename T>
-class ObjectCache {
- public:
+template <typename T> class ObjectCache {
+public:
   ObjectCache() {}
   ~ObjectCache() {
     mu_.Lock();
@@ -41,8 +40,7 @@ class ObjectCache {
       if (cache_[i].count > 0) {
         tprintf("ObjectCache(%p)::~ObjectCache(): WARNING! LEAK! object %p "
                 "still has count %d (id %s)\n",
-                this, cache_[i].object, cache_[i].count,
-                cache_[i].id.string());
+                this, cache_[i].object, cache_[i].count, cache_[i].id.string());
       } else {
         delete cache_[i].object;
         cache_[i].object = NULL;
@@ -57,8 +55,7 @@ class ObjectCache {
   // and return NULL -- further attempts to load will fail (even
   // with a different loader) until DeleteUnusedObjects() is called.
   // We delete the given loader.
-  T *Get(STRING id,
-         TessResultCallback<T *> *loader) {
+  T *Get(STRING id, TessResultCallback<T *> *loader) {
     T *retval = NULL;
     mu_.Lock();
     for (int i = 0; i < cache_.size(); i++) {
@@ -84,7 +81,8 @@ class ObjectCache {
   // Decrement the count for t.
   // Return whether we knew about the given pointer.
   bool Free(T *t) {
-    if (t == NULL) return false;
+    if (t == NULL)
+      return false;
     mu_.Lock();
     for (int i = 0; i < cache_.size(); i++) {
       if (cache_[i].object == t) {
@@ -108,18 +106,17 @@ class ObjectCache {
     mu_.Unlock();
   }
 
- private:
+private:
   struct ReferenceCount {
-    STRING id;  // A unique ID to identify the object (think path on disk)
-    T *object;  // A copy of the object in memory.  Can be delete'd.
-    int count;  // A count of the number of active users of this object.
+    STRING id; // A unique ID to identify the object (think path on disk)
+    T *object; // A copy of the object in memory.  Can be delete'd.
+    int count; // A count of the number of active users of this object.
   };
 
   CCUtilMutex mu_;
   GenericVector<ReferenceCount> cache_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-
-#endif  // TESSERACT_CCUTIL_OBJECT_CACHE_H_
+#endif // TESSERACT_CCUTIL_OBJECT_CACHE_H_

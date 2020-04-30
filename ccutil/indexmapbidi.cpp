@@ -30,35 +30,38 @@ int IndexMap::SparseToCompact(int sparse_index) const {
 }
 
 // Copy from the input.
-void IndexMap::CopyFrom(const IndexMap& src) {
+void IndexMap::CopyFrom(const IndexMap &src) {
   sparse_size_ = src.sparse_size_;
   compact_map_ = src.compact_map_;
 }
-void IndexMap::CopyFrom(const IndexMapBiDi& src) {
+void IndexMap::CopyFrom(const IndexMapBiDi &src) {
   sparse_size_ = src.SparseSize();
   compact_map_ = src.compact_map_;
 }
 
 // Writes to the given file. Returns false in case of error.
-bool IndexMap::Serialize(FILE* fp) const {
+bool IndexMap::Serialize(FILE *fp) const {
   inT32 sparse_size = sparse_size_;
-  if (fwrite(&sparse_size, sizeof(sparse_size), 1, fp) != 1) return false;
-  if (!compact_map_.Serialize(fp)) return false;
+  if (fwrite(&sparse_size, sizeof(sparse_size), 1, fp) != 1)
+    return false;
+  if (!compact_map_.Serialize(fp))
+    return false;
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 // If swap is true, assumes a big/little-endian swap is needed.
-bool IndexMap::DeSerialize(bool swap, FILE* fp) {
+bool IndexMap::DeSerialize(bool swap, FILE *fp) {
   inT32 sparse_size;
-  if (fread(&sparse_size, sizeof(sparse_size), 1, fp) != 1) return false;
+  if (fread(&sparse_size, sizeof(sparse_size), 1, fp) != 1)
+    return false;
   if (swap)
     ReverseN(&sparse_size, sizeof(sparse_size));
   sparse_size_ = sparse_size;
-  if (!compact_map_.DeSerialize(swap, fp)) return false;
+  if (!compact_map_.DeSerialize(swap, fp))
+    return false;
   return true;
 }
-
 
 // Top-level init function in a single call to initialize a map to select
 // a single contiguous subrange [start, end) of the sparse space to be mapped
@@ -109,7 +112,7 @@ void IndexMapBiDi::Setup() {
 }
 
 // Copy from the input.
-void IndexMapBiDi::CopyFrom(const IndexMapBiDi& src) {
+void IndexMapBiDi::CopyFrom(const IndexMapBiDi &src) {
   sparse_map_ = src.sparse_map_;
   compact_map_ = src.compact_map_;
   sparse_size_ = sparse_map_.size();
@@ -188,8 +191,9 @@ void IndexMapBiDi::CompleteMerges() {
 }
 
 // Writes to the given file. Returns false in case of error.
-bool IndexMapBiDi::Serialize(FILE* fp) const {
-  if (!IndexMap::Serialize(fp)) return false;
+bool IndexMapBiDi::Serialize(FILE *fp) const {
+  if (!IndexMap::Serialize(fp))
+    return false;
   // Make a vector containing the rest of the map. If the map is many-to-one
   // then each additional sparse entry needs to be stored.
   // Normally we store only the compact map to save space.
@@ -200,16 +204,19 @@ bool IndexMapBiDi::Serialize(FILE* fp) const {
       remaining_pairs.push_back(sparse_map_[i]);
     }
   }
-  if (!remaining_pairs.Serialize(fp)) return false;
+  if (!remaining_pairs.Serialize(fp))
+    return false;
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 // If swap is true, assumes a big/little-endian swap is needed.
-bool IndexMapBiDi::DeSerialize(bool swap, FILE* fp) {
-  if (!IndexMap::DeSerialize(swap, fp)) return false;
+bool IndexMapBiDi::DeSerialize(bool swap, FILE *fp) {
+  if (!IndexMap::DeSerialize(swap, fp))
+    return false;
   GenericVector<inT32> remaining_pairs;
-  if (!remaining_pairs.DeSerialize(swap, fp)) return false;
+  if (!remaining_pairs.DeSerialize(swap, fp))
+    return false;
   sparse_map_.init_to_size(sparse_size_, -1);
   for (int i = 0; i < compact_map_.size(); ++i) {
     sparse_map_[compact_map_[i]] = i;
@@ -226,8 +233,8 @@ bool IndexMapBiDi::DeSerialize(bool swap, FILE* fp) {
 // Assumes the input is sorted. The output indices are sorted and uniqued.
 // Return value is the number of "missed" features, being features that
 // don't map to the compact feature space.
-int IndexMapBiDi::MapFeatures(const GenericVector<int>& sparse,
-                              GenericVector<int>* compact) const {
+int IndexMapBiDi::MapFeatures(const GenericVector<int> &sparse,
+                              GenericVector<int> *compact) const {
   compact->truncate(0);
   int num_features = sparse.size();
   int missed_features = 0;
@@ -246,5 +253,4 @@ int IndexMapBiDi::MapFeatures(const GenericVector<int>& sparse,
   return missed_features;
 }
 
-}  // namespace tesseract.
-
+} // namespace tesseract.

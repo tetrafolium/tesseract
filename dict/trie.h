@@ -25,8 +25,8 @@
 #ifndef TRIE_H
 #define TRIE_H
 
-#include "dawg.h"
 #include "cutil.h"
+#include "dawg.h"
 #include "genericvector.h"
 
 class UNICHARSET;
@@ -41,7 +41,7 @@ class UNICHARSET;
 // It might be cleanest to change the types of most of the Trie/Dawg related
 // typedefs to int and restrict the casts to extracting these values from
 // the 64 bit EDGE_RECORD.
-typedef inT64 EDGE_INDEX;  // index of an edge in a given node
+typedef inT64 EDGE_INDEX; // index of an edge in a given node
 typedef bool *NODE_MARKER;
 typedef GenericVector<EDGE_RECORD> EDGE_VECTOR;
 
@@ -60,7 +60,7 @@ namespace tesseract {
  * which has a vector of forward and backward edges.
  */
 class Trie : public Dawg {
- public:
+public:
   enum RTLReversePolicy {
     RRP_DO_NO_REVERSE,
     RRP_REVERSE_IF_HAS_RTL,
@@ -79,8 +79,7 @@ class Trie : public Dawg {
   static const char kLowerPatternUnicode[];
   static const char kUpperPatternUnicode[];
 
-  static const char *get_reverse_policy_name(
-      RTLReversePolicy reverse_policy);
+  static const char *get_reverse_policy_name(RTLReversePolicy reverse_policy);
 
   // max_num_edges argument allows limiting the amount of memory this
   // Trie can consume (if a new word insert would cause the Trie to
@@ -92,7 +91,7 @@ class Trie : public Dawg {
     init(unicharset_size);
     num_edges_ = 0;
     deref_node_index_mask_ = ~letter_mask_;
-    new_dawg_node();  // need to allocate node 0
+    new_dawg_node(); // need to allocate node 0
     initialized_patterns_ = false;
   }
   virtual ~Trie() { nodes_.delete_data_pointers(); }
@@ -106,7 +105,8 @@ class Trie : public Dawg {
     EDGE_RECORD *edge_ptr;
     EDGE_INDEX edge_index;
     if (!edge_char_of(node_ref, NO_EDGE, FORWARD_EDGE, word_end, unichar_id,
-                      &edge_ptr, &edge_index)) return NO_EDGE;
+                      &edge_ptr, &edge_index))
+      return NO_EDGE;
     return make_edge_ref(node_ref, edge_index);
   }
 
@@ -117,7 +117,7 @@ class Trie : public Dawg {
   void unichar_ids_of(NODE_REF node, NodeChildVector *vec,
                       bool word_end) const {
     const EDGE_VECTOR &forward_edges =
-      nodes_[static_cast<int>(node)]->forward_edges;
+        nodes_[static_cast<int>(node)]->forward_edges;
     for (int i = 0; i < forward_edges.size(); ++i) {
       if (!word_end || end_of_word_from_edge_rec(forward_edges[i])) {
         vec->push_back(NodeChild(unichar_id_from_edge_rec(forward_edges[i]),
@@ -131,7 +131,8 @@ class Trie : public Dawg {
    * indicated by the given EDGE_REF.
    */
   NODE_REF next_node(EDGE_REF edge_ref) const {
-    if (edge_ref == NO_EDGE || num_edges_ == 0) return NO_EDGE;
+    if (edge_ref == NO_EDGE || num_edges_ == 0)
+      return NO_EDGE;
     return next_node_from_edge_rec(*deref_edge_ref(edge_ref));
   }
 
@@ -140,22 +141,24 @@ class Trie : public Dawg {
    * marks the end of a word.
    */
   bool end_of_word(EDGE_REF edge_ref) const {
-    if (edge_ref == NO_EDGE || num_edges_ == 0) return false;
+    if (edge_ref == NO_EDGE || num_edges_ == 0)
+      return false;
     return end_of_word_from_edge_rec(*deref_edge_ref(edge_ref));
   }
 
   /** Returns UNICHAR_ID stored in the edge indicated by the given EDGE_REF. */
   UNICHAR_ID edge_letter(EDGE_REF edge_ref) const {
-    if (edge_ref == NO_EDGE || num_edges_ == 0) return INVALID_UNICHAR_ID;
+    if (edge_ref == NO_EDGE || num_edges_ == 0)
+      return INVALID_UNICHAR_ID;
     return unichar_id_from_edge_rec(*deref_edge_ref(edge_ref));
   }
   // Sets the UNICHAR_ID in the given edge_rec to unicharset_size_, marking
   // the edge dead.
-  void KillEdge(EDGE_RECORD* edge_rec) const {
+  void KillEdge(EDGE_RECORD *edge_rec) const {
     *edge_rec &= ~letter_mask_;
     *edge_rec |= (unicharset_size_ << LETTER_START_BIT);
   }
-  bool DeadEdge(const EDGE_RECORD& edge_rec) const {
+  bool DeadEdge(const EDGE_RECORD &edge_rec) const {
     return unichar_id_from_edge_rec(edge_rec) == unicharset_size_;
   }
 
@@ -179,8 +182,7 @@ class Trie : public Dawg {
 
   // Reads a list of words from the given file.
   // Returns false on error.
-  bool read_word_list(const char *filename,
-                      GenericVector<STRING>* words);
+  bool read_word_list(const char *filename, GenericVector<STRING> *words);
   // Adds a list of words previously read using read_word_list to the trie
   // using the given unicharset and reverse_policy to convert to unichar-ids.
   // Returns false on error.
@@ -244,15 +246,16 @@ class Trie : public Dawg {
   // Returns the given EDGE_REF if the EDGE_RECORD that it points to has
   // a self loop and the given unichar_id matches the unichar_id stored in the
   // EDGE_RECORD, returns NO_EDGE otherwise.
-  virtual EDGE_REF pattern_loop_edge(EDGE_REF edge_ref,
-                                     UNICHAR_ID unichar_id,
+  virtual EDGE_REF pattern_loop_edge(EDGE_REF edge_ref, UNICHAR_ID unichar_id,
                                      bool word_end) const {
-    if (edge_ref == NO_EDGE) return NO_EDGE;
+    if (edge_ref == NO_EDGE)
+      return NO_EDGE;
     EDGE_RECORD *edge_rec = deref_edge_ref(edge_ref);
     return (marker_flag_from_edge_rec(*edge_rec) &&
             unichar_id == unichar_id_from_edge_rec(*edge_rec) &&
-            word_end == end_of_word_from_edge_rec(*edge_rec)) ?
-            edge_ref : NO_EDGE;
+            word_end == end_of_word_from_edge_rec(*edge_rec))
+               ? edge_ref
+               : NO_EDGE;
   }
 
   // Adds a word to the Trie (creates the necessary nodes and edges).
@@ -270,7 +273,7 @@ class Trie : public Dawg {
     return add_word_to_dawg(word, NULL);
   }
 
- protected:
+protected:
   // The structure of an EDGE_REF for Trie edges is as follows:
   // [LETTER_START_BIT, flag_start_bit_):
   //                             edge index in *_edges in a TRIE_NODE_RECORD
@@ -289,26 +292,28 @@ class Trie : public Dawg {
   // of the edge from the information in the given EDGE_REF.
   // This function assumes that EDGE_REF holds valid node/edge indices.
   inline EDGE_RECORD *deref_edge_ref(EDGE_REF edge_ref) const {
-    int edge_index = static_cast<int>(
-      (edge_ref & letter_mask_) >> LETTER_START_BIT);
-    int node_index = static_cast<int>(
-      (edge_ref & deref_node_index_mask_) >> flag_start_bit_);
+    int edge_index =
+        static_cast<int>((edge_ref & letter_mask_) >> LETTER_START_BIT);
+    int node_index = static_cast<int>((edge_ref & deref_node_index_mask_) >>
+                                      flag_start_bit_);
     TRIE_NODE_RECORD *node_rec = nodes_[node_index];
     return &(node_rec->forward_edges[edge_index]);
   }
   /** Constructs EDGE_REF from the given node_index and edge_index. */
   inline EDGE_REF make_edge_ref(NODE_REF node_index,
                                 EDGE_INDEX edge_index) const {
-    return ((node_index << flag_start_bit_) |
-            (edge_index << LETTER_START_BIT));
+    return ((node_index << flag_start_bit_) | (edge_index << LETTER_START_BIT));
   }
   /** Sets up this edge record to the requested values. */
   inline void link_edge(EDGE_RECORD *edge, NODE_REF nxt, bool repeats,
                         int direction, bool word_end, UNICHAR_ID unichar_id) {
     EDGE_RECORD flags = 0;
-    if (repeats) flags |= MARKER_FLAG;
-    if (word_end) flags |= WERD_END_FLAG;
-    if (direction == BACKWARD_EDGE) flags |= DIRECTION_FLAG;
+    if (repeats)
+      flags |= MARKER_FLAG;
+    if (word_end)
+      flags |= WERD_END_FLAG;
+    if (direction == BACKWARD_EDGE)
+      flags |= DIRECTION_FLAG;
     *edge = ((nxt << next_node_start_bit_) |
              (static_cast<EDGE_RECORD>(flags) << flag_start_bit_) |
              (static_cast<EDGE_RECORD>(unichar_id) << LETTER_START_BIT));
@@ -331,9 +336,10 @@ class Trie : public Dawg {
 
   // Prints the contents of the Trie.
   // At most max_num_edges will be printed for each node.
-  void print_all(const char* msg, int max_num_edges) {
+  void print_all(const char *msg, int max_num_edges) {
     tprintf("\n__________________________\n%s\n", msg);
-    for (int i = 0; i < nodes_.size(); ++i) print_node(i, max_num_edges);
+    for (int i = 0; i < nodes_.size(); ++i)
+      print_node(i, max_num_edges);
     tprintf("__________________________\n");
   }
 
@@ -341,31 +347,28 @@ class Trie : public Dawg {
   // in the node indicated by node_ref. Fills in the pointer to the
   // EDGE_RECORD and the index of the edge with the the values
   // corresponding to the edge found. Returns true if an edge was found.
-  bool edge_char_of(NODE_REF node_ref, NODE_REF next_node,
-                    int direction, bool word_end, UNICHAR_ID unichar_id,
+  bool edge_char_of(NODE_REF node_ref, NODE_REF next_node, int direction,
+                    bool word_end, UNICHAR_ID unichar_id,
                     EDGE_RECORD **edge_ptr, EDGE_INDEX *edge_index) const;
 
   // Adds an single edge linkage between node1 and node2 in the direction
   // indicated by direction argument.
   bool add_edge_linkage(NODE_REF node1, NODE_REF node2, bool repeats,
-                        int direction, bool word_end,
-                        UNICHAR_ID unichar_id);
+                        int direction, bool word_end, UNICHAR_ID unichar_id);
 
   // Adds forward edge linkage from node1 to node2 and the corresponding
   // backward edge linkage in the other direction.
-  bool add_new_edge(NODE_REF node1, NODE_REF node2,
-                    bool repeats, bool word_end, UNICHAR_ID unichar_id) {
-    return (add_edge_linkage(node1, node2, repeats, FORWARD_EDGE,
-                             word_end, unichar_id) &&
-            add_edge_linkage(node2, node1, repeats, BACKWARD_EDGE,
-                             word_end, unichar_id));
+  bool add_new_edge(NODE_REF node1, NODE_REF node2, bool repeats, bool word_end,
+                    UNICHAR_ID unichar_id) {
+    return (add_edge_linkage(node1, node2, repeats, FORWARD_EDGE, word_end,
+                             unichar_id) &&
+            add_edge_linkage(node2, node1, repeats, BACKWARD_EDGE, word_end,
+                             unichar_id));
   }
 
   // Sets the word ending flags in an already existing edge pair.
   // Returns true on success.
-  void add_word_ending(EDGE_RECORD *edge,
-                       NODE_REF the_next_node,
-                       bool repeats,
+  void add_word_ending(EDGE_RECORD *edge, NODE_REF the_next_node, bool repeats,
                        UNICHAR_ID unichar_id);
 
   // Allocates space for a new node in the Trie.
@@ -378,8 +381,8 @@ class Trie : public Dawg {
 
   // Removes forward edge linkage from node1 to node2 and the corresponding
   // backward edge linkage in the other direction.
-  void remove_edge(NODE_REF node1, NODE_REF node2,
-                   bool word_end, UNICHAR_ID unichar_id) {
+  void remove_edge(NODE_REF node1, NODE_REF node2, bool word_end,
+                   UNICHAR_ID unichar_id) {
     remove_edge_linkage(node1, node2, FORWARD_EDGE, word_end, unichar_id);
     remove_edge_linkage(node2, node1, BACKWARD_EDGE, word_end, unichar_id);
   }
@@ -395,10 +398,8 @@ class Trie : public Dawg {
   // to see if any of them can be collapsed. If so does it. Returns to the
   // caller when all edges with this letter have been reduced.
   // Returns true if further reduction is possible with this same letter.
-  bool reduce_lettered_edges(EDGE_INDEX edge_index,
-                             UNICHAR_ID unichar_id,
-                             NODE_REF node,
-                             EDGE_VECTOR* backward_edges,
+  bool reduce_lettered_edges(EDGE_INDEX edge_index, UNICHAR_ID unichar_id,
+                             NODE_REF node, EDGE_VECTOR *backward_edges,
                              NODE_MARKER reduced_nodes);
 
   /**
@@ -416,10 +417,10 @@ class Trie : public Dawg {
   UNICHAR_ID character_class_to_pattern(char ch);
 
   // Member variables
-  TRIE_NODES nodes_;              // vector of nodes in the Trie
-  uinT64 num_edges_;              // sum of all edges (forward and backward)
-  uinT64 deref_direction_mask_;   // mask for EDGE_REF to extract direction
-  uinT64 deref_node_index_mask_;  // mask for EDGE_REF to extract node index
+  TRIE_NODES nodes_;             // vector of nodes in the Trie
+  uinT64 num_edges_;             // sum of all edges (forward and backward)
+  uinT64 deref_direction_mask_;  // mask for EDGE_REF to extract direction
+  uinT64 deref_node_index_mask_; // mask for EDGE_REF to extract node index
   // Freelist of edges in the root backwards node that were previously zeroed.
   GenericVector<EDGE_INDEX> root_back_freelist_;
   // Variables for translating character class codes denoted in user patterns
@@ -432,6 +433,6 @@ class Trie : public Dawg {
   UNICHAR_ID lower_pattern_;
   UNICHAR_ID upper_pattern_;
 };
-}  // namespace tesseract
+} // namespace tesseract
 
 #endif

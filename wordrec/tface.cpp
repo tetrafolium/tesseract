@@ -21,18 +21,17 @@
 #include "chop.h"
 #include "chopper.h"
 #include "danerror.h"
+#include "featdefs.h"
 #include "globals.h"
 #include "gradechop.h"
 #include "pageres.h"
-#include "wordrec.h"
-#include "featdefs.h"
 #include "params_model.h"
+#include "wordrec.h"
 
 #include <math.h>
 #ifdef __UNIX__
 #include <unistd.h>
 #endif
-
 
 namespace tesseract {
 
@@ -46,7 +45,8 @@ namespace tesseract {
 void Wordrec::program_editup(const char *textbase,
                              TessdataManager *init_classifier,
                              TessdataManager *init_dict) {
-  if (textbase != NULL) imagefile = textbase;
+  if (textbase != NULL)
+    imagefile = textbase;
   InitFeatureDefs(&feature_defs_);
   InitAdaptiveClassifier(init_classifier);
   if (init_dict) {
@@ -63,11 +63,10 @@ void Wordrec::program_editup(const char *textbase,
  * Cleanup and exit the recog program.
  */
 int Wordrec::end_recog() {
-  program_editdown (0);
+  program_editdown(0);
 
   return (0);
 }
-
 
 /**
  * @name program_editdown
@@ -80,7 +79,6 @@ void Wordrec::program_editdown(inT32 elasped_time) {
   getDict().End();
 }
 
-
 /**
  * @name set_pass1
  *
@@ -92,7 +90,6 @@ void Wordrec::set_pass1() {
   SettupPass1();
 }
 
-
 /**
  * @name set_pass2
  *
@@ -103,7 +100,6 @@ void Wordrec::set_pass2() {
   language_model_->getParamsModel().SetPass(ParamsModel::PTRAIN_PASS2);
   SettupPass2();
 }
-
 
 /**
  * @name cc_recog
@@ -117,7 +113,6 @@ void Wordrec::cc_recog(WERD_RES *word) {
                          getDict().word_to_debug.string());
   ASSERT_HOST(word->StatesAllValid());
 }
-
 
 /**
  * @name dict_word()
@@ -137,11 +132,11 @@ int Wordrec::dict_word(const WERD_CHOICE &word) {
  */
 BLOB_CHOICE_LIST *Wordrec::call_matcher(TBLOB *tessblob) {
   // Rotate the blob for classification if necessary.
-  TBLOB* rotated_blob = tessblob->ClassifyNormalizeIfNeeded();
+  TBLOB *rotated_blob = tessblob->ClassifyNormalizeIfNeeded();
   if (rotated_blob == NULL) {
     rotated_blob = tessblob;
   }
-  BLOB_CHOICE_LIST *ratings = new BLOB_CHOICE_LIST();  // matcher result
+  BLOB_CHOICE_LIST *ratings = new BLOB_CHOICE_LIST(); // matcher result
   AdaptiveClassifier(rotated_blob, ratings);
   if (rotated_blob != tessblob) {
     delete rotated_blob;
@@ -149,5 +144,4 @@ BLOB_CHOICE_LIST *Wordrec::call_matcher(TBLOB *tessblob) {
   return ratings;
 }
 
-
-}  // namespace tesseract
+} // namespace tesseract

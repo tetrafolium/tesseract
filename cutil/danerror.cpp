@@ -18,10 +18,10 @@
 /*----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------*/
-#include "host.h"
 #include "danerror.h"
-#include "tprintf.h"
 #include "globaloc.h"
+#include "host.h"
+#include "tprintf.h"
 #ifdef __UNIX__
 #include "assert.h"
 #endif
@@ -45,4 +45,4 @@ void DoError(int Error, const char *Message) {
   }
 
   err_exit();
-}                                /* DoError */
+} /* DoError */

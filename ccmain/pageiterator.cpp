@@ -26,22 +26,13 @@
 
 namespace tesseract {
 
-PageIterator::PageIterator(PAGE_RES* page_res, Tesseract* tesseract, int scale,
+PageIterator::PageIterator(PAGE_RES *page_res, Tesseract *tesseract, int scale,
                            int scaled_yres, int rect_left, int rect_top,
                            int rect_width, int rect_height)
-    : page_res_(page_res),
-      tesseract_(tesseract),
-      word_(NULL),
-      word_length_(0),
-      blob_index_(0),
-      cblob_it_(NULL),
-      include_upper_dots_(false),
-      include_lower_dots_(false),
-      scale_(scale),
-      scaled_yres_(scaled_yres),
-      rect_left_(rect_left),
-      rect_top_(rect_top),
-      rect_width_(rect_width),
+    : page_res_(page_res), tesseract_(tesseract), word_(NULL), word_length_(0),
+      blob_index_(0), cblob_it_(NULL), include_upper_dots_(false),
+      include_lower_dots_(false), scale_(scale), scaled_yres_(scaled_yres),
+      rect_left_(rect_left), rect_top_(rect_top), rect_width_(rect_width),
       rect_height_(rect_height) {
   it_ = new PAGE_RES_IT(page_res);
   PageIterator::Begin();
@@ -57,26 +48,19 @@ PageIterator::~PageIterator() {
  * all the objects at a lower level, while maintaining an iterator to
  * objects at a higher level.
  */
-PageIterator::PageIterator(const PageIterator& src)
-    : page_res_(src.page_res_),
-      tesseract_(src.tesseract_),
-      word_(NULL),
-      word_length_(src.word_length_),
-      blob_index_(src.blob_index_),
-      cblob_it_(NULL),
-      include_upper_dots_(src.include_upper_dots_),
-      include_lower_dots_(src.include_lower_dots_),
-      scale_(src.scale_),
-      scaled_yres_(src.scaled_yres_),
-      rect_left_(src.rect_left_),
-      rect_top_(src.rect_top_),
-      rect_width_(src.rect_width_),
+PageIterator::PageIterator(const PageIterator &src)
+    : page_res_(src.page_res_), tesseract_(src.tesseract_), word_(NULL),
+      word_length_(src.word_length_), blob_index_(src.blob_index_),
+      cblob_it_(NULL), include_upper_dots_(src.include_upper_dots_),
+      include_lower_dots_(src.include_lower_dots_), scale_(src.scale_),
+      scaled_yres_(src.scaled_yres_), rect_left_(src.rect_left_),
+      rect_top_(src.rect_top_), rect_width_(src.rect_width_),
       rect_height_(src.rect_height_) {
   it_ = new PAGE_RES_IT(*src.it_);
   BeginWord(src.blob_index_);
 }
 
-const PageIterator& PageIterator::operator=(const PageIterator& src) {
+const PageIterator &PageIterator::operator=(const PageIterator &src) {
   page_res_ = src.page_res_;
   tesseract_ = src.tesseract_;
   include_upper_dots_ = src.include_upper_dots_;
@@ -93,9 +77,9 @@ const PageIterator& PageIterator::operator=(const PageIterator& src) {
   return *this;
 }
 
-bool PageIterator::PositionedAtSameWord(const PAGE_RES_IT* other) const {
+bool PageIterator::PositionedAtSameWord(const PAGE_RES_IT *other) const {
   return (it_ == NULL && it_ == other) ||
-     ((other != NULL) && (it_ != NULL) && (*it_ == *other));
+         ((other != NULL) && (it_ != NULL) && (*it_ == *other));
 }
 
 // ============= Moving around within the page ============.
@@ -107,7 +91,8 @@ void PageIterator::Begin() {
 }
 
 void PageIterator::RestartParagraph() {
-  if (it_->block() == NULL) return; // At end of the document.
+  if (it_->block() == NULL)
+    return; // At end of the document.
   PAGE_RES_IT para(page_res_);
   PAGE_RES_IT next_para(para);
   next_para.forward_paragraph();
@@ -144,33 +129,35 @@ void PageIterator::RestartRow() {
  * the appropriate language has been loaded into Tesseract.
  */
 bool PageIterator::Next(PageIteratorLevel level) {
-  if (it_->block() == NULL) return false;  // Already at the end!
+  if (it_->block() == NULL)
+    return false; // Already at the end!
   if (it_->word() == NULL)
     level = RIL_BLOCK;
 
   switch (level) {
-    case RIL_BLOCK:
-      it_->forward_block();
-      break;
-    case RIL_PARA:
-      it_->forward_paragraph();
-      break;
-    case RIL_TEXTLINE:
-      for (it_->forward_with_empties(); it_->row() == it_->prev_row();
-           it_->forward_with_empties());
-      break;
-    case RIL_WORD:
+  case RIL_BLOCK:
+    it_->forward_block();
+    break;
+  case RIL_PARA:
+    it_->forward_paragraph();
+    break;
+  case RIL_TEXTLINE:
+    for (it_->forward_with_empties(); it_->row() == it_->prev_row();
+         it_->forward_with_empties())
+      ;
+    break;
+  case RIL_WORD:
+    it_->forward_with_empties();
+    break;
+  case RIL_SYMBOL:
+    if (cblob_it_ != NULL)
+      cblob_it_->forward();
+    ++blob_index_;
+    if (blob_index_ >= word_length_)
       it_->forward_with_empties();
-      break;
-    case RIL_SYMBOL:
-      if (cblob_it_ != NULL)
-        cblob_it_->forward();
-      ++blob_index_;
-      if (blob_index_ >= word_length_)
-        it_->forward_with_empties();
-      else
-        return true;
-      break;
+    else
+      return true;
+    break;
   }
   BeginWord(0);
   return it_->block() != NULL;
@@ -182,21 +169,23 @@ bool PageIterator::Next(PageIteratorLevel level) {
  * moved to the start of a RIL_PARA.
  */
 bool PageIterator::IsAtBeginningOf(PageIteratorLevel level) const {
-  if (it_->block() == NULL) return false;  // Already at the end!
-  if (it_->word() == NULL) return true;  // In an image block.
+  if (it_->block() == NULL)
+    return false; // Already at the end!
+  if (it_->word() == NULL)
+    return true; // In an image block.
   switch (level) {
-    case RIL_BLOCK:
-      return blob_index_ == 0 && it_->block() != it_->prev_block();
-    case RIL_PARA:
-      return blob_index_ == 0 &&
-          (it_->block() != it_->prev_block() ||
-           it_->row()->row->para() != it_->prev_row()->row->para());
-    case RIL_TEXTLINE:
-      return blob_index_ == 0 && it_->row() != it_->prev_row();
-    case RIL_WORD:
-      return blob_index_ == 0;
-    case RIL_SYMBOL:
-      return true;
+  case RIL_BLOCK:
+    return blob_index_ == 0 && it_->block() != it_->prev_block();
+  case RIL_PARA:
+    return blob_index_ == 0 &&
+           (it_->block() != it_->prev_block() ||
+            it_->row()->row->para() != it_->prev_row()->row->para());
+  case RIL_TEXTLINE:
+    return blob_index_ == 0 && it_->row() != it_->prev_row();
+  case RIL_WORD:
+    return blob_index_ == 0;
+  case RIL_SYMBOL:
+    return true;
   }
   return false;
 }
@@ -207,7 +196,8 @@ bool PageIterator::IsAtBeginningOf(PageIteratorLevel level) const {
  */
 bool PageIterator::IsAtFinalElement(PageIteratorLevel level,
                                     PageIteratorLevel element) const {
-  if (Empty(element)) return true;  // Already at the end!
+  if (Empty(element))
+    return true; // Already at the end!
   // The result is true if we step forward by element and find we are
   // at the the end of the page or at beginning of *all* levels in:
   // [level, element).
@@ -216,7 +206,8 @@ bool PageIterator::IsAtFinalElement(PageIteratorLevel level,
   // word on a line, so we also have to be at the first symbol in a word.
   PageIterator next(*this);
   next.Next(element);
-  if (next.Empty(element)) return true;  // Reached the end of the page.
+  if (next.Empty(element))
+    return true; // Reached the end of the page.
   while (element > level) {
     element = static_cast<PageIteratorLevel>(element - 1);
     if (!next.IsAtBeginningOf(element))
@@ -261,34 +252,34 @@ int PageIterator::Cmp(const PageIterator &other) const {
  * See comment on coordinate system above.
  * Returns false if there is no such object at the current position.
  */
-bool PageIterator::BoundingBoxInternal(PageIteratorLevel level,
-                                       int* left, int* top,
-                                       int* right, int* bottom) const {
+bool PageIterator::BoundingBoxInternal(PageIteratorLevel level, int *left,
+                                       int *top, int *right,
+                                       int *bottom) const {
   if (Empty(level))
     return false;
   TBOX box;
   PARA *para = NULL;
   switch (level) {
-    case RIL_BLOCK:
-      box = it_->block()->block->restricted_bounding_box(include_upper_dots_,
-                                                         include_lower_dots_);
-      break;
-    case RIL_PARA:
-      para = it_->row()->row->para();
-      // explicit fall-through.
-    case RIL_TEXTLINE:
-      box = it_->row()->row->restricted_bounding_box(include_upper_dots_,
-                                                     include_lower_dots_);
-      break;
-    case RIL_WORD:
-      box = it_->word()->word->restricted_bounding_box(include_upper_dots_,
+  case RIL_BLOCK:
+    box = it_->block()->block->restricted_bounding_box(include_upper_dots_,
                                                        include_lower_dots_);
-      break;
-    case RIL_SYMBOL:
-      if (cblob_it_ == NULL)
-        box = it_->word()->box_word->BlobBox(blob_index_);
-      else
-        box = cblob_it_->data()->bounding_box();
+    break;
+  case RIL_PARA:
+    para = it_->row()->row->para();
+    // explicit fall-through.
+  case RIL_TEXTLINE:
+    box = it_->row()->row->restricted_bounding_box(include_upper_dots_,
+                                                   include_lower_dots_);
+    break;
+  case RIL_WORD:
+    box = it_->word()->word->restricted_bounding_box(include_upper_dots_,
+                                                     include_lower_dots_);
+    break;
+  case RIL_SYMBOL:
+    if (cblob_it_ == NULL)
+      box = it_->word()->box_word->BlobBox(blob_index_);
+    else
+      box = cblob_it_->data()->bounding_box();
   }
   if (level == RIL_PARA) {
     PageIterator other = *this;
@@ -321,22 +312,21 @@ bool PageIterator::BoundingBoxInternal(PageIteratorLevel level,
  * See comment on coordinate system above.
  * Returns false if there is no such object at the current position.
  */
-bool PageIterator::BoundingBox(PageIteratorLevel level,
-                               int* left, int* top,
-                               int* right, int* bottom) const {
+bool PageIterator::BoundingBox(PageIteratorLevel level, int *left, int *top,
+                               int *right, int *bottom) const {
   return BoundingBox(level, 0, left, top, right, bottom);
 }
 
 bool PageIterator::BoundingBox(PageIteratorLevel level, const int padding,
-                               int* left, int* top,
-                               int* right, int* bottom) const {
+                               int *left, int *top, int *right,
+                               int *bottom) const {
   if (!BoundingBoxInternal(level, left, top, right, bottom))
     return false;
   // Convert to the coordinate system of the original image.
-  *left = ClipToRange(*left / scale_ + rect_left_ - padding,
-                      rect_left_, rect_left_ + rect_width_);
-  *top = ClipToRange(*top / scale_ + rect_top_ - padding,
-                     rect_top_, rect_top_ + rect_height_);
+  *left = ClipToRange(*left / scale_ + rect_left_ - padding, rect_left_,
+                      rect_left_ + rect_width_);
+  *top = ClipToRange(*top / scale_ + rect_top_ - padding, rect_top_,
+                     rect_top_ + rect_height_);
   *right = ClipToRange((*right + scale_ - 1) / scale_ + rect_left_ + padding,
                        *left, rect_left_ + rect_width_);
   *bottom = ClipToRange((*bottom + scale_ - 1) / scale_ + rect_top_ + padding,
@@ -346,34 +336,36 @@ bool PageIterator::BoundingBox(PageIteratorLevel level, const int padding,
 
 /** Return that there is no such object at a given level. */
 bool PageIterator::Empty(PageIteratorLevel level) const {
-  if (it_->block() == NULL) return true;  // Already at the end!
-  if (it_->word() == NULL && level != RIL_BLOCK) return true;  // image block
+  if (it_->block() == NULL)
+    return true; // Already at the end!
+  if (it_->word() == NULL && level != RIL_BLOCK)
+    return true; // image block
   if (level == RIL_SYMBOL && blob_index_ >= word_length_)
-    return true;  // Zero length word, or already at the end of it.
+    return true; // Zero length word, or already at the end of it.
   return false;
 }
 
 /** Returns the type of the current block. See apitypes.h for PolyBlockType. */
 PolyBlockType PageIterator::BlockType() const {
   if (it_->block() == NULL || it_->block()->block == NULL)
-    return PT_UNKNOWN;  // Already at the end!
+    return PT_UNKNOWN; // Already at the end!
   if (it_->block()->block->poly_block() == NULL)
-    return PT_FLOWING_TEXT;  // No layout analysis used - assume text.
+    return PT_FLOWING_TEXT; // No layout analysis used - assume text.
   return it_->block()->block->poly_block()->isA();
 }
 
 /** Returns the polygon outline of the current block. The returned Pta must
  *  be ptaDestroy-ed after use. */
-Pta* PageIterator::BlockPolygon() const {
+Pta *PageIterator::BlockPolygon() const {
   if (it_->block() == NULL || it_->block()->block == NULL)
-    return NULL;  // Already at the end!
+    return NULL; // Already at the end!
   if (it_->block()->block->poly_block() == NULL)
-    return NULL;  // No layout analysis used - no polygon.
+    return NULL; // No layout analysis used - no polygon.
   ICOORDELT_IT it(it_->block()->block->poly_block()->points());
-  Pta* pta = ptaCreate(it.length());
+  Pta *pta = ptaCreate(it.length());
   int num_pts = 0;
   for (it.mark_cycle_pt(); !it.cycled_list(); it.forward(), ++num_pts) {
-    ICOORD* pt = it.data();
+    ICOORD *pt = it.data();
     // Convert to top-down coords within the input image.
     float x = static_cast<float>(pt->x()) / scale_ + rect_left_;
     float y = rect_top_ + rect_height_ - static_cast<float>(pt->y()) / scale_;
@@ -404,20 +396,20 @@ Pta* PageIterator::BlockPolygon() const {
  * should be good, even with xor, since the images come from the connected
  * components.
  */
-Pix* PageIterator::GetBinaryImage(PageIteratorLevel level) const {
+Pix *PageIterator::GetBinaryImage(PageIteratorLevel level) const {
   int left, top, right, bottom;
   if (!BoundingBoxInternal(level, &left, &top, &right, &bottom))
     return NULL;
   if (level == RIL_SYMBOL && cblob_it_ != NULL &&
       cblob_it_->data()->area() != 0)
     return cblob_it_->data()->render();
-  Box* box = boxCreate(left, top, right - left, bottom - top);
-  Pix* pix = pixClipRectangle(tesseract_->pix_binary(), box, NULL);
+  Box *box = boxCreate(left, top, right - left, bottom - top);
+  Pix *pix = pixClipRectangle(tesseract_->pix_binary(), box, NULL);
   boxDestroy(&box);
   if (level == RIL_BLOCK || level == RIL_PARA) {
     // Clip to the block polygon as well.
     TBOX mask_box;
-    Pix* mask = it_->block()->block->render_mask(&mask_box);
+    Pix *mask = it_->block()->block->render_mask(&mask_box);
     int mask_x = left - mask_box.left();
     int mask_y = top - (tesseract_->ImageHeight() - mask_box.top());
     // AND the mask and pix, putting the result in pix.
@@ -440,9 +432,8 @@ Pix* PageIterator::GetBinaryImage(PageIteratorLevel level) const {
  * If you do not supply an original image, you will get a binary one.
  * Use pixDestroy to delete the image after use.
  */
-Pix* PageIterator::GetImage(PageIteratorLevel level, int padding,
-                            Pix* original_img,
-                            int* left, int* top) const {
+Pix *PageIterator::GetImage(PageIteratorLevel level, int padding,
+                            Pix *original_img, int *left, int *top) const {
   int right, bottom;
   if (!BoundingBox(level, left, top, &right, &bottom))
     return NULL;
@@ -454,19 +445,19 @@ Pix* PageIterator::GetImage(PageIteratorLevel level, int padding,
   *top = MAX(*top - padding, 0);
   right = MIN(right + padding, rect_width_);
   bottom = MIN(bottom + padding, rect_height_);
-  Box* box = boxCreate(*left, *top, right - *left, bottom - *top);
-  Pix* grey_pix = pixClipRectangle(original_img, box, NULL);
+  Box *box = boxCreate(*left, *top, right - *left, bottom - *top);
+  Pix *grey_pix = pixClipRectangle(original_img, box, NULL);
   boxDestroy(&box);
   if (level == RIL_BLOCK || level == RIL_PARA) {
     // Clip to the block polygon as well.
     TBOX mask_box;
-    Pix* mask = it_->block()->block->render_mask(&mask_box);
+    Pix *mask = it_->block()->block->render_mask(&mask_box);
     // Copy the mask registered correctly into an image the size of grey_pix.
     int mask_x = *left - mask_box.left();
     int mask_y = *top - (pixGetHeight(original_img) - mask_box.top());
     int width = pixGetWidth(grey_pix);
     int height = pixGetHeight(grey_pix);
-    Pix* resized_mask = pixCreate(width, height, 1);
+    Pix *resized_mask = pixCreate(width, height, 1);
     pixRasterop(resized_mask, MAX(0, -mask_x), MAX(0, -mask_y), width, height,
                 PIX_SRC, mask, MAX(0, mask_x), MAX(0, mask_y));
     pixDestroy(&mask);
@@ -484,14 +475,14 @@ Pix* PageIterator::GetImage(PageIteratorLevel level, int padding,
  * The baseline is the line that passes through (x1, y1) and (x2, y2).
  * WARNING: with vertical text, baselines may be vertical!
  */
-bool PageIterator::Baseline(PageIteratorLevel level,
-                            int* x1, int* y1, int* x2, int* y2) const {
-  if (it_->word() == NULL) return false;  // Already at the end!
-  ROW* row = it_->row()->row;
-  WERD* word = it_->word()->word;
-  TBOX box = (level == RIL_WORD || level == RIL_SYMBOL)
-           ? word->bounding_box()
-           : row->bounding_box();
+bool PageIterator::Baseline(PageIteratorLevel level, int *x1, int *y1, int *x2,
+                            int *y2) const {
+  if (it_->word() == NULL)
+    return false; // Already at the end!
+  ROW *row = it_->row()->row;
+  WERD *word = it_->word()->word;
+  TBOX box = (level == RIL_WORD || level == RIL_SYMBOL) ? word->bounding_box()
+                                                        : row->bounding_box();
   int left = box.left();
   ICOORD startpt(left, static_cast<inT16>(row->base_line(left) + 0.5));
   int right = box.right();
@@ -510,7 +501,7 @@ void PageIterator::Orientation(tesseract::Orientation *orientation,
                                tesseract::WritingDirection *writing_direction,
                                tesseract::TextlineOrder *textline_order,
                                float *deskew_angle) const {
-  BLOCK* block = it_->block()->block;
+  BLOCK *block = it_->block()->block;
 
   // Orientation
   FCOORD up_in_image(0.0, 1.0);
@@ -532,29 +523,25 @@ void PageIterator::Orientation(tesseract::Orientation *orientation,
   // Writing direction
   bool is_vertical_text = (block->classify_rotation().x() == 0.0);
   bool right_to_left = block->right_to_left();
-  *writing_direction =
-      is_vertical_text
-          ? WRITING_DIRECTION_TOP_TO_BOTTOM
-          : (right_to_left
-                ? WRITING_DIRECTION_RIGHT_TO_LEFT
-                : WRITING_DIRECTION_LEFT_TO_RIGHT);
+  *writing_direction = is_vertical_text
+                           ? WRITING_DIRECTION_TOP_TO_BOTTOM
+                           : (right_to_left ? WRITING_DIRECTION_RIGHT_TO_LEFT
+                                            : WRITING_DIRECTION_LEFT_TO_RIGHT);
 
   // Textline Order
-  bool is_mongolian = false;  // TODO(eger): fix me
+  bool is_mongolian = false; // TODO(eger): fix me
   *textline_order = is_vertical_text
-      ? (is_mongolian
-         ? TEXTLINE_ORDER_LEFT_TO_RIGHT
-         : TEXTLINE_ORDER_RIGHT_TO_LEFT)
-      : TEXTLINE_ORDER_TOP_TO_BOTTOM;
+                        ? (is_mongolian ? TEXTLINE_ORDER_LEFT_TO_RIGHT
+                                        : TEXTLINE_ORDER_RIGHT_TO_LEFT)
+                        : TEXTLINE_ORDER_TOP_TO_BOTTOM;
 
   // Deskew angle
-  FCOORD skew = block->skew();  // true horizontal for textlines
+  FCOORD skew = block->skew(); // true horizontal for textlines
   *deskew_angle = -skew.angle();
 }
 
 void PageIterator::ParagraphInfo(tesseract::ParagraphJustification *just,
-                                 bool *is_list_item,
-                                 bool *is_crown,
+                                 bool *is_list_item, bool *is_crown,
                                  int *first_line_indent) const {
   *just = tesseract::JUSTIFICATION_UNKNOWN;
   if (!it_->row() || !it_->row()->row || !it_->row()->row->para() ||
@@ -564,8 +551,7 @@ void PageIterator::ParagraphInfo(tesseract::ParagraphJustification *just,
   PARA *para = it_->row()->row->para();
   *is_list_item = para->is_list_item;
   *is_crown = para->is_very_first_or_continuation;
-  *first_line_indent = para->model->first_indent() -
-      para->model->body_indent();
+  *first_line_indent = para->model->first_indent() - para->model->body_indent();
   *just = para->model->justification();
 }
 
@@ -574,7 +560,7 @@ void PageIterator::ParagraphInfo(tesseract::ParagraphJustification *just,
  * moves the iterator to the given offset.
  */
 void PageIterator::BeginWord(int offset) {
-  WERD_RES* word_res = it_->word();
+  WERD_RES *word_res = it_->word();
   if (word_res == NULL) {
     // This is a non-text block, so there is no word.
     word_length_ = 0;
@@ -604,7 +590,8 @@ void PageIterator::BeginWord(int offset) {
     word_ = word_res->word;
     ASSERT_HOST(word_->cblob_list() != NULL);
     word_length_ = word_->cblob_list()->length();
-    if (cblob_it_ == NULL) cblob_it_ = new C_BLOB_IT;
+    if (cblob_it_ == NULL)
+      cblob_it_ = new C_BLOB_IT;
     cblob_it_->set_to_list(word_->cblob_list());
   }
   for (blob_index_ = 0; blob_index_ < offset; ++blob_index_) {
@@ -622,4 +609,4 @@ bool PageIterator::SetWordBlamerBundle(BlamerBundle *blamer_bundle) {
   }
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

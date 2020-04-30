@@ -23,8 +23,8 @@ namespace tesseract {
 
 // Computes and returns the dot product of the n-vectors u and v.
 // Uses Intel AVX intrinsics to access the SIMD instruction set.
-double DotProductAVX(const double* u, const double* v, int n);
+double DotProductAVX(const double *u, const double *v, int n);
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_ARCH_DOTPRODUCTAVX_H_
+#endif // TESSERACT_ARCH_DOTPRODUCTAVX_H_

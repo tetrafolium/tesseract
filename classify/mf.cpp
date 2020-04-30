@@ -42,7 +42,7 @@
  * @note Exceptions: none
  * @note History: Wed May 23 18:06:38 1990, DSJ, Created.
  */
-FEATURE_SET ExtractMicros(TBLOB* Blob, const DENORM& cn_denorm) {
+FEATURE_SET ExtractMicros(TBLOB *Blob, const DENORM &cn_denorm) {
   int NumFeatures;
   MICROFEATURES Features, OldFeatures;
   FEATURE_SET FeatureSet;
@@ -52,13 +52,13 @@ FEATURE_SET ExtractMicros(TBLOB* Blob, const DENORM& cn_denorm) {
   OldFeatures = BlobMicroFeatures(Blob, cn_denorm);
   if (OldFeatures == NULL)
     return NULL;
-  NumFeatures = count (OldFeatures);
-  FeatureSet = NewFeatureSet (NumFeatures);
+  NumFeatures = count(OldFeatures);
+  FeatureSet = NewFeatureSet(NumFeatures);
 
   Features = OldFeatures;
   iterate(Features) {
-    OldFeature = (MICROFEATURE) first_node (Features);
-    Feature = NewFeature (&MicroFeatureDesc);
+    OldFeature = (MICROFEATURE)first_node(Features);
+    Feature = NewFeature(&MicroFeatureDesc);
     Feature->Params[MFDirection] = OldFeature[ORIENTATION];
     Feature->Params[MFXPosition] = OldFeature[XPOSITION];
     Feature->Params[MFYPosition] = OldFeature[YPOSITION];
@@ -80,4 +80,4 @@ FEATURE_SET ExtractMicros(TBLOB* Blob, const DENORM& cn_denorm) {
   }
   FreeMicroFeatures(OldFeatures);
   return FeatureSet;
-}                                /* ExtractMicros */
+} /* ExtractMicros */

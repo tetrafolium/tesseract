@@ -59,30 +59,30 @@ static const char kVersionFileSuffix[] = "version";
 namespace tesseract {
 
 enum TessdataType {
-  TESSDATA_LANG_CONFIG,         // 0
-  TESSDATA_UNICHARSET,          // 1
-  TESSDATA_AMBIGS,              // 2
-  TESSDATA_INTTEMP,             // 3
-  TESSDATA_PFFMTABLE,           // 4
-  TESSDATA_NORMPROTO,           // 5
-  TESSDATA_PUNC_DAWG,           // 6
-  TESSDATA_SYSTEM_DAWG,         // 7
-  TESSDATA_NUMBER_DAWG,         // 8
-  TESSDATA_FREQ_DAWG,           // 9
-  TESSDATA_FIXED_LENGTH_DAWGS,  // 10  // deprecated
-  TESSDATA_CUBE_UNICHARSET,     // 11  // deprecated
-  TESSDATA_CUBE_SYSTEM_DAWG,    // 12  // deprecated
-  TESSDATA_SHAPE_TABLE,         // 13
-  TESSDATA_BIGRAM_DAWG,         // 14
-  TESSDATA_UNAMBIG_DAWG,        // 15
-  TESSDATA_PARAMS_MODEL,        // 16
-  TESSDATA_LSTM,                // 17
-  TESSDATA_LSTM_PUNC_DAWG,      // 18
-  TESSDATA_LSTM_SYSTEM_DAWG,    // 19
-  TESSDATA_LSTM_NUMBER_DAWG,    // 20
-  TESSDATA_LSTM_UNICHARSET,     // 21
-  TESSDATA_LSTM_RECODER,        // 22
-  TESSDATA_VERSION,             // 23
+  TESSDATA_LANG_CONFIG,        // 0
+  TESSDATA_UNICHARSET,         // 1
+  TESSDATA_AMBIGS,             // 2
+  TESSDATA_INTTEMP,            // 3
+  TESSDATA_PFFMTABLE,          // 4
+  TESSDATA_NORMPROTO,          // 5
+  TESSDATA_PUNC_DAWG,          // 6
+  TESSDATA_SYSTEM_DAWG,        // 7
+  TESSDATA_NUMBER_DAWG,        // 8
+  TESSDATA_FREQ_DAWG,          // 9
+  TESSDATA_FIXED_LENGTH_DAWGS, // 10  // deprecated
+  TESSDATA_CUBE_UNICHARSET,    // 11  // deprecated
+  TESSDATA_CUBE_SYSTEM_DAWG,   // 12  // deprecated
+  TESSDATA_SHAPE_TABLE,        // 13
+  TESSDATA_BIGRAM_DAWG,        // 14
+  TESSDATA_UNAMBIG_DAWG,       // 15
+  TESSDATA_PARAMS_MODEL,       // 16
+  TESSDATA_LSTM,               // 17
+  TESSDATA_LSTM_PUNC_DAWG,     // 18
+  TESSDATA_LSTM_SYSTEM_DAWG,   // 19
+  TESSDATA_LSTM_NUMBER_DAWG,   // 20
+  TESSDATA_LSTM_UNICHARSET,    // 21
+  TESSDATA_LSTM_RECODER,       // 22
+  TESSDATA_VERSION,            // 23
 
   TESSDATA_NUM_ENTRIES
 };
@@ -92,30 +92,30 @@ enum TessdataType {
  * tessdata of type i (from TessdataType enum).
  */
 static const char *const kTessdataFileSuffixes[] = {
-    kLangConfigFileSuffix,        // 0
-    kUnicharsetFileSuffix,        // 1
-    kAmbigsFileSuffix,            // 2
-    kBuiltInTemplatesFileSuffix,  // 3
-    kBuiltInCutoffsFileSuffix,    // 4
-    kNormProtoFileSuffix,         // 5
-    kPuncDawgFileSuffix,          // 6
-    kSystemDawgFileSuffix,        // 7
-    kNumberDawgFileSuffix,        // 8
-    kFreqDawgFileSuffix,          // 9
-    kFixedLengthDawgsFileSuffix,  // 10  // deprecated
-    kCubeUnicharsetFileSuffix,    // 11  // deprecated
-    kCubeSystemDawgFileSuffix,    // 12  // deprecated
-    kShapeTableFileSuffix,        // 13
-    kBigramDawgFileSuffix,        // 14
-    kUnambigDawgFileSuffix,       // 15
-    kParamsModelFileSuffix,       // 16
-    kLSTMModelFileSuffix,         // 17
-    kLSTMPuncDawgFileSuffix,      // 18
-    kLSTMSystemDawgFileSuffix,    // 19
-    kLSTMNumberDawgFileSuffix,    // 20
-    kLSTMUnicharsetFileSuffix,    // 21
-    kLSTMRecoderFileSuffix,       // 22
-    kVersionFileSuffix,           // 23
+    kLangConfigFileSuffix,       // 0
+    kUnicharsetFileSuffix,       // 1
+    kAmbigsFileSuffix,           // 2
+    kBuiltInTemplatesFileSuffix, // 3
+    kBuiltInCutoffsFileSuffix,   // 4
+    kNormProtoFileSuffix,        // 5
+    kPuncDawgFileSuffix,         // 6
+    kSystemDawgFileSuffix,       // 7
+    kNumberDawgFileSuffix,       // 8
+    kFreqDawgFileSuffix,         // 9
+    kFixedLengthDawgsFileSuffix, // 10  // deprecated
+    kCubeUnicharsetFileSuffix,   // 11  // deprecated
+    kCubeSystemDawgFileSuffix,   // 12  // deprecated
+    kShapeTableFileSuffix,       // 13
+    kBigramDawgFileSuffix,       // 14
+    kUnambigDawgFileSuffix,      // 15
+    kParamsModelFileSuffix,      // 16
+    kLSTMModelFileSuffix,        // 17
+    kLSTMPuncDawgFileSuffix,     // 18
+    kLSTMSystemDawgFileSuffix,   // 19
+    kLSTMNumberDawgFileSuffix,   // 20
+    kLSTMUnicharsetFileSuffix,   // 21
+    kLSTMRecoderFileSuffix,      // 22
+    kVersionFileSuffix,          // 23
 };
 
 /**
@@ -127,9 +127,8 @@ static const char *const kTessdataFileSuffixes[] = {
  */
 static const int kMaxNumTessdataEntries = 1000;
 
-
 class TessdataManager {
- public:
+public:
   TessdataManager() : reader_(nullptr), is_loaded_(false), swap_(false) {
     SetVersionString(TESSERACT_VERSION_STR);
   }
@@ -208,8 +207,7 @@ class TessdataManager {
    * Writes the updated traineddata file to new_traineddata_filename.
    */
   bool OverwriteComponents(const char *new_traineddata_filename,
-                            char **component_filenames,
-                            int num_new_components);
+                           char **component_filenames, int num_new_components);
 
   /**
    * Extracts tessdata component implied by the name of the input file from
@@ -239,7 +237,7 @@ class TessdataManager {
   static bool TessdataTypeFromFileName(const char *filename,
                                        TessdataType *type);
 
- private:
+private:
   // Name of file it came from.
   STRING data_file_name_;
   // Function to load the file when we need it.
@@ -252,6 +250,6 @@ class TessdataManager {
   GenericVector<char> entries_[TESSDATA_NUM_ENTRIES];
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_CCUTIL_TESSDATAMANAGER_H_
+#endif // TESSERACT_CCUTIL_TESSDATAMANAGER_H_

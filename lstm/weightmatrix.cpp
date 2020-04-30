@@ -33,17 +33,18 @@ const int kAdamCorrectionIterations = 200000;
 const double kAdamEpsilon = 1e-8;
 
 // Copies the whole input transposed, converted to double, into *this.
-void TransposedArray::Transpose(const GENERIC_2D_ARRAY<double>& input) {
+void TransposedArray::Transpose(const GENERIC_2D_ARRAY<double> &input) {
   int width = input.dim1();
   int num_features = input.dim2();
   ResizeNoInit(num_features, width);
-  for (int t = 0; t < width; ++t) WriteStrided(t, input[t]);
+  for (int t = 0; t < width; ++t)
+    WriteStrided(t, input[t]);
 }
 
 // Sets up the network for training. Initializes weights using weights of
 // scale `range` picked according to the random number generator `randomizer`.
 int WeightMatrix::InitWeightsFloat(int no, int ni, bool use_adam,
-                                   float weight_range, TRand* randomizer) {
+                                   float weight_range, TRand *randomizer) {
   int_mode_ = false;
   wf_.Resize(no, ni, 0.0);
   if (randomizer != NULL) {
@@ -63,22 +64,24 @@ int WeightMatrix::InitWeightsFloat(int no, int ni, bool use_adam,
 // non-negative, and uses the mean (over all outputs) of the existing weights
 // for all outputs with negative code_map entries. Returns the new number of
 // weights.
-int WeightMatrix::RemapOutputs(const std::vector<int>& code_map) {
+int WeightMatrix::RemapOutputs(const std::vector<int> &code_map) {
   GENERIC_2D_ARRAY<double> old_wf(wf_);
   int old_no = wf_.dim1();
   int new_no = code_map.size();
   int ni = wf_.dim2();
   std::vector<double> means(ni, 0.0);
   for (int c = 0; c < old_no; ++c) {
-    const double* weights = wf_[c];
-    for (int i = 0; i < ni; ++i) means[i] += weights[i];
+    const double *weights = wf_[c];
+    for (int i = 0; i < ni; ++i)
+      means[i] += weights[i];
   }
-  for (double& mean : means) mean /= old_no;
+  for (double &mean : means)
+    mean /= old_no;
   wf_.ResizeNoInit(new_no, ni);
   InitBackward();
   for (int dest = 0; dest < new_no; ++dest) {
     int src = code_map[dest];
-    const double* src_data = src >= 0 ? old_wf[src] : means.data();
+    const double *src_data = src >= 0 ? old_wf[src] : means.data();
     memcpy(wf_[dest], src_data, ni * sizeof(*src_data));
   }
   return ni * new_no;
@@ -96,16 +99,18 @@ void WeightMatrix::ConvertToInt() {
   scales_.init_to_size(wi_.dim1(), 0.0);
   int dim2 = wi_.dim2();
   for (int t = 0; t < wi_.dim1(); ++t) {
-    double* f_line = wf_[t];
-    inT8* i_line = wi_[t];
+    double *f_line = wf_[t];
+    inT8 *i_line = wi_[t];
     double max_abs = 0.0;
     for (int f = 0; f < dim2; ++f) {
       double abs_val = fabs(f_line[f]);
-      if (abs_val > max_abs) max_abs = abs_val;
+      if (abs_val > max_abs)
+        max_abs = abs_val;
     }
     double scale = max_abs / MAX_INT8;
     scales_[t] = scale;
-    if (scale == 0.0) scale = 1.0;
+    if (scale == 0.0)
+      scale = 1.0;
     for (int f = 0; f < dim2; ++f) {
       i_line[f] = IntCastRounded(f_line[f] / scale);
     }
@@ -113,7 +118,8 @@ void WeightMatrix::ConvertToInt() {
   wf_.Resize(1, 1, 0.0);
   int_mode_ = true;
   multiplier_.reset(IntSimdMatrix::GetFastestMultiplier());
-  if (multiplier_ != nullptr) multiplier_->Init(wi_);
+  if (multiplier_ != nullptr)
+    multiplier_->Init(wi_);
 }
 
 // Allocates any needed memory for running Backward, and zeroes the deltas,
@@ -124,7 +130,8 @@ void WeightMatrix::InitBackward() {
   dw_.Resize(no, ni, 0.0);
   updates_.Resize(no, ni, 0.0);
   wf_t_.Transpose(wf_);
-  if (use_adam_) dw_sq_sum_.Resize(no, ni, 0.0);
+  if (use_adam_)
+    dw_sq_sum_.Resize(no, ni, 0.0);
 }
 
 // Flag on mode to indicate that this weightmatrix uses inT8.
@@ -137,42 +144,56 @@ const int kAdamFlag = 4;
 const int kDoubleFlag = 128;
 
 // Writes to the given file. Returns false in case of error.
-bool WeightMatrix::Serialize(bool training, TFile* fp) const {
+bool WeightMatrix::Serialize(bool training, TFile *fp) const {
   // For backward compatibility, add kDoubleFlag to mode to indicate the doubles
   // format, without errs, so we can detect and read old format weight matrices.
   uinT8 mode =
       (int_mode_ ? kInt8Flag : 0) | (use_adam_ ? kAdamFlag : 0) | kDoubleFlag;
-  if (fp->FWrite(&mode, sizeof(mode), 1) != 1) return false;
+  if (fp->FWrite(&mode, sizeof(mode), 1) != 1)
+    return false;
   if (int_mode_) {
-    if (!wi_.Serialize(fp)) return false;
-    if (!scales_.Serialize(fp)) return false;
+    if (!wi_.Serialize(fp))
+      return false;
+    if (!scales_.Serialize(fp))
+      return false;
   } else {
-    if (!wf_.Serialize(fp)) return false;
-    if (training && !updates_.Serialize(fp)) return false;
-    if (training && use_adam_ && !dw_sq_sum_.Serialize(fp)) return false;
+    if (!wf_.Serialize(fp))
+      return false;
+    if (training && !updates_.Serialize(fp))
+      return false;
+    if (training && use_adam_ && !dw_sq_sum_.Serialize(fp))
+      return false;
   }
   return true;
 }
 
 // Reads from the given file. Returns false in case of error.
 
-bool WeightMatrix::DeSerialize(bool training, TFile* fp) {
+bool WeightMatrix::DeSerialize(bool training, TFile *fp) {
   uinT8 mode = 0;
-  if (fp->FRead(&mode, sizeof(mode), 1) != 1) return false;
+  if (fp->FRead(&mode, sizeof(mode), 1) != 1)
+    return false;
   int_mode_ = (mode & kInt8Flag) != 0;
   use_adam_ = (mode & kAdamFlag) != 0;
-  if ((mode & kDoubleFlag) == 0) return DeSerializeOld(training, fp);
+  if ((mode & kDoubleFlag) == 0)
+    return DeSerializeOld(training, fp);
   if (int_mode_) {
-    if (!wi_.DeSerialize(fp)) return false;
-    if (!scales_.DeSerialize(fp)) return false;
+    if (!wi_.DeSerialize(fp))
+      return false;
+    if (!scales_.DeSerialize(fp))
+      return false;
     multiplier_.reset(IntSimdMatrix::GetFastestMultiplier());
-    if (multiplier_ != nullptr) multiplier_->Init(wi_);
+    if (multiplier_ != nullptr)
+      multiplier_->Init(wi_);
   } else {
-    if (!wf_.DeSerialize(fp)) return false;
+    if (!wf_.DeSerialize(fp))
+      return false;
     if (training) {
       InitBackward();
-      if (!updates_.DeSerialize(fp)) return false;
-      if (use_adam_ && !dw_sq_sum_.DeSerialize(fp)) return false;
+      if (!updates_.DeSerialize(fp))
+        return false;
+      if (use_adam_ && !dw_sq_sum_.DeSerialize(fp))
+        return false;
     }
   }
   return true;
@@ -180,24 +201,30 @@ bool WeightMatrix::DeSerialize(bool training, TFile* fp) {
 
 // As DeSerialize, but reads an old (float) format WeightMatrix for
 // backward compatibility.
-bool WeightMatrix::DeSerializeOld(bool training, TFile* fp) {
+bool WeightMatrix::DeSerializeOld(bool training, TFile *fp) {
   GENERIC_2D_ARRAY<float> float_array;
   if (int_mode_) {
-    if (!wi_.DeSerialize(fp)) return false;
+    if (!wi_.DeSerialize(fp))
+      return false;
     GenericVector<float> old_scales;
-    if (!old_scales.DeSerialize(fp)) return false;
+    if (!old_scales.DeSerialize(fp))
+      return false;
     scales_.resize_no_init(old_scales.size());
-    for (int i = 0; i < old_scales.size(); ++i) scales_[i] = old_scales[i];
+    for (int i = 0; i < old_scales.size(); ++i)
+      scales_[i] = old_scales[i];
   } else {
-    if (!float_array.DeSerialize(fp)) return false;
+    if (!float_array.DeSerialize(fp))
+      return false;
     FloatToDouble(float_array, &wf_);
   }
   if (training) {
     InitBackward();
-    if (!float_array.DeSerialize(fp)) return false;
+    if (!float_array.DeSerialize(fp))
+      return false;
     FloatToDouble(float_array, &updates_);
     // Errs was only used in int training, which is now dead.
-    if (!float_array.DeSerialize(fp)) return false;
+    if (!float_array.DeSerialize(fp))
+      return false;
   }
   return true;
 }
@@ -207,12 +234,12 @@ bool WeightMatrix::DeSerializeOld(bool training, TFile* fp) {
 // u is imagined to have an extra element at the end with value 1, to
 // implement the bias, but it doesn't actually have it.
 // Asserts that the call matches what we have.
-void WeightMatrix::MatrixDotVector(const double* u, double* v) const {
+void WeightMatrix::MatrixDotVector(const double *u, double *v) const {
   ASSERT_HOST(!int_mode_);
   MatrixDotVectorInternal(wf_, true, false, u, v);
 }
 
-void WeightMatrix::MatrixDotVector(const inT8* u, double* v) const {
+void WeightMatrix::MatrixDotVector(const inT8 *u, double *v) const {
   ASSERT_HOST(int_mode_);
   ASSERT_HOST(multiplier_ != nullptr);
   multiplier_->MatrixDotVector(wi_, scales_, u, v);
@@ -220,11 +247,11 @@ void WeightMatrix::MatrixDotVector(const inT8* u, double* v) const {
 
 // MatrixDotVector for peep weights, MultiplyAccumulate adds the
 // component-wise products of *this[0] and v to inout.
-void WeightMatrix::MultiplyAccumulate(const double* v, double* inout) {
+void WeightMatrix::MultiplyAccumulate(const double *v, double *inout) {
   ASSERT_HOST(!int_mode_);
   ASSERT_HOST(wf_.dim1() == 1);
   int n = wf_.dim2();
-  const double* u = wf_[0];
+  const double *u = wf_[0];
   for (int i = 0; i < n; ++i) {
     inout[i] += u[i] * v[i];
   }
@@ -234,7 +261,7 @@ void WeightMatrix::MultiplyAccumulate(const double* v, double* inout) {
 // u is of size W.dim1() and the output v is of size W.dim2() - 1.
 // The last result is discarded, as v is assumed to have an imaginary
 // last value of 1, as with MatrixDotVector.
-void WeightMatrix::VectorDotMatrix(const double* u, double* v) const {
+void WeightMatrix::VectorDotMatrix(const double *u, double *v) const {
   ASSERT_HOST(!int_mode_);
   MatrixDotVectorInternal(wf_t_, false, true, u, v);
 }
@@ -244,8 +271,8 @@ void WeightMatrix::VectorDotMatrix(const double* u, double* v) const {
 // inputs.
 // Note that (matching MatrixDotVector) v[last][] is missing, presumed 1.0.
 // Runs parallel if requested. Note that u and v must be transposed.
-void WeightMatrix::SumOuterTransposed(const TransposedArray& u,
-                                      const TransposedArray& v,
+void WeightMatrix::SumOuterTransposed(const TransposedArray &u,
+                                      const TransposedArray &v,
                                       bool in_parallel) {
   ASSERT_HOST(!int_mode_);
   int num_outputs = dw_.dim1();
@@ -259,14 +286,15 @@ void WeightMatrix::SumOuterTransposed(const TransposedArray& u,
 #pragma omp parallel for num_threads(4) if (in_parallel)
 #endif
   for (int i = 0; i < num_outputs; ++i) {
-    double* dwi = dw_[i];
-    const double* ui = u[i];
+    double *dwi = dw_[i];
+    const double *ui = u[i];
     for (int j = 0; j < num_inputs; ++j) {
       dwi[j] = DotProduct(ui, v[j], num_samples);
     }
     // The last element of v is missing, presumed 1.0f.
     double total = 0.0;
-    for (int k = 0; k < num_samples; ++k) total += ui[k];
+    for (int k = 0; k < num_samples; ++k)
+      total += ui[k];
     dwi[num_inputs] = total;
   }
 }
@@ -290,14 +318,16 @@ void WeightMatrix::Update(double learning_rate, double momentum,
   } else {
     dw_ *= learning_rate;
     updates_ += dw_;
-    if (momentum > 0.0) wf_ += updates_;
-    if (momentum >= 0.0) updates_ *= momentum;
+    if (momentum > 0.0)
+      wf_ += updates_;
+    if (momentum >= 0.0)
+      updates_ *= momentum;
   }
   wf_t_.Transpose(wf_);
 }
 
 // Adds the dw_ in other to the dw_ is *this.
-void WeightMatrix::AddDeltas(const WeightMatrix& other) {
+void WeightMatrix::AddDeltas(const WeightMatrix &other) {
   ASSERT_HOST(dw_.dim1() == other.dw_.dim1());
   ASSERT_HOST(dw_.dim2() == other.dw_.dim2());
   dw_ += other.dw_;
@@ -306,15 +336,15 @@ void WeightMatrix::AddDeltas(const WeightMatrix& other) {
 // Sums the products of weight updates in *this and other, splitting into
 // positive (same direction) in *same and negative (different direction) in
 // *changed.
-void WeightMatrix::CountAlternators(const WeightMatrix& other, double* same,
-                                    double* changed) const {
+void WeightMatrix::CountAlternators(const WeightMatrix &other, double *same,
+                                    double *changed) const {
   int num_outputs = updates_.dim1();
   int num_inputs = updates_.dim2();
   ASSERT_HOST(num_outputs == other.updates_.dim1());
   ASSERT_HOST(num_inputs == other.updates_.dim2());
   for (int i = 0; i < num_outputs; ++i) {
-    const double* this_i = updates_[i];
-    const double* other_i = other.updates_[i];
+    const double *this_i = updates_[i];
+    const double *other_i = other.updates_[i];
     for (int j = 0; j < num_inputs; ++j) {
       double product = this_i[j] * other_i[j];
       if (product < 0.0)
@@ -328,7 +358,7 @@ void WeightMatrix::CountAlternators(const WeightMatrix& other, double* same,
 // Helper computes an integer histogram bucket for a weight and adds it
 // to the histogram.
 const int kHistogramBuckets = 16;
-static void HistogramWeight(double weight, STATS* histogram) {
+static void HistogramWeight(double weight, STATS *histogram) {
   int bucket = kHistogramBuckets - 1;
   if (weight != 0.0) {
     double logval = -log2(fabs(weight));
@@ -337,7 +367,7 @@ static void HistogramWeight(double weight, STATS* histogram) {
   histogram->add(bucket, 1);
 }
 
-void WeightMatrix::Debug2D(const char* msg) {
+void WeightMatrix::Debug2D(const char *msg) {
   STATS histogram(0, kHistogramBuckets);
   if (int_mode_) {
     for (int i = 0; i < wi_.dim1(); ++i) {
@@ -358,7 +388,7 @@ void WeightMatrix::Debug2D(const char* msg) {
 
 // Computes and returns the dot product of the two n-vectors u and v.
 /* static */
-double WeightMatrix::DotProduct(const double* u, const double* v, int n) {
+double WeightMatrix::DotProduct(const double *u, const double *v, int n) {
   // Note: because the order of addition is different among the 3 DotProduct
   // functions, the results can (and do) vary slightly (although they agree
   // to within about 4e-15). This produces different results when running
@@ -368,25 +398,29 @@ double WeightMatrix::DotProduct(const double* u, const double* v, int n) {
   // is about 8% faster than sse. This suggests that the time is memory
   // bandwidth constrained and could benefit from holding the reused vector
   // in AVX registers.
-  if (SIMDDetect::IsAVXAvailable()) return DotProductAVX(u, v, n);
-  if (SIMDDetect::IsSSEAvailable()) return DotProductSSE(u, v, n);
+  if (SIMDDetect::IsAVXAvailable())
+    return DotProductAVX(u, v, n);
+  if (SIMDDetect::IsSSEAvailable())
+    return DotProductSSE(u, v, n);
   double total = 0.0;
-  for (int k = 0; k < n; ++k) total += u[k] * v[k];
+  for (int k = 0; k < n; ++k)
+    total += u[k] * v[k];
   return total;
 }
 
 // Utility function converts an array of float to the corresponding array
 // of double.
 /* static */
-void WeightMatrix::FloatToDouble(const GENERIC_2D_ARRAY<float>& wf,
-                                 GENERIC_2D_ARRAY<double>* wd) {
+void WeightMatrix::FloatToDouble(const GENERIC_2D_ARRAY<float> &wf,
+                                 GENERIC_2D_ARRAY<double> *wd) {
   int dim1 = wf.dim1();
   int dim2 = wf.dim2();
   wd->ResizeNoInit(dim1, dim2);
   for (int i = 0; i < dim1; ++i) {
-    const float* wfi = wf[i];
-    double* wdi = (*wd)[i];
-    for (int j = 0; j < dim2; ++j) wdi[j] = static_cast<double>(wfi[j]);
+    const float *wfi = wf[i];
+    double *wdi = (*wd)[i];
+    for (int j = 0; j < dim2; ++j)
+      wdi[j] = static_cast<double>(wfi[j]);
   }
 }
 
@@ -398,18 +432,19 @@ void WeightMatrix::FloatToDouble(const GENERIC_2D_ARRAY<float>& wf,
 // If skip_bias_back, we are actullay performing the backwards product on a
 // transposed matrix, so we need to drop the v output corresponding to the last
 // element in dim1.
-void WeightMatrix::MatrixDotVectorInternal(const GENERIC_2D_ARRAY<double>& w,
+void WeightMatrix::MatrixDotVectorInternal(const GENERIC_2D_ARRAY<double> &w,
                                            bool add_bias_fwd,
-                                           bool skip_bias_back, const double* u,
-                                           double* v) {
+                                           bool skip_bias_back, const double *u,
+                                           double *v) {
   int num_results = w.dim1() - skip_bias_back;
   int extent = w.dim2() - add_bias_fwd;
   for (int i = 0; i < num_results; ++i) {
-    const double* wi = w[i];
+    const double *wi = w[i];
     double total = DotProduct(wi, u, extent);
-    if (add_bias_fwd) total += wi[extent];  // The bias value.
+    if (add_bias_fwd)
+      total += wi[extent]; // The bias value.
     v[i] = total;
   }
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

@@ -47,18 +47,18 @@ void ParamsModel::Print() {
 
 void ParamsModel::Copy(const ParamsModel &other_model) {
   for (int p = 0; p < PTRAIN_NUM_PASSES; ++p) {
-    weights_vec_[p] = other_model.weights_for_pass(
-        static_cast<PassEnum>(p));
+    weights_vec_[p] = other_model.weights_for_pass(static_cast<PassEnum>(p));
   }
 }
 
 // Given a (modifiable) line, parse out a key / value pair.
 // Return true on success.
-bool ParamsModel::ParseLine(char *line, char** key, float *val) {
+bool ParamsModel::ParseLine(char *line, char **key, float *val) {
   if (line[0] == '#')
     return false;
   int end_of_key = 0;
-  while (line[end_of_key] && !isspace(line[end_of_key])) end_of_key++;
+  while (line[end_of_key] && !isspace(line[end_of_key]))
+    end_of_key++;
   if (!line[end_of_key]) {
     tprintf("ParamsModel::Incomplete line %s\n", line);
     return false;
@@ -80,14 +80,15 @@ float ParamsModel::ComputeCost(const float features[]) const {
   for (int f = 0; f < PTRAIN_NUM_FEATURE_TYPES; ++f) {
     unnorm_score += weights_vec_[pass_][f] * features[f];
   }
-  return ClipToRange(-unnorm_score / kScoreScaleFactor,
-                     kMinFinalCost, kMaxFinalCost);
+  return ClipToRange(-unnorm_score / kScoreScaleFactor, kMinFinalCost,
+                     kMaxFinalCost);
 }
 
 bool ParamsModel::Equivalent(const ParamsModel &that) const {
   float epsilon = 0.0001;
   for (int p = 0; p < PTRAIN_NUM_PASSES; ++p) {
-    if (weights_vec_[p].size() != that.weights_vec_[p].size()) return false;
+    if (weights_vec_[p].size() != that.weights_vec_[p].size())
+      return false;
     for (int i = 0; i < weights_vec_[p].size(); i++) {
       if (weights_vec_[p][i] != that.weights_vec_[p][i] &&
           fabs(weights_vec_[p][i] - that.weights_vec_[p][i]) > epsilon)
@@ -97,9 +98,7 @@ bool ParamsModel::Equivalent(const ParamsModel &that) const {
   return true;
 }
 
-bool ParamsModel::LoadFromFile(
-    const char *lang,
-    const char *full_path) {
+bool ParamsModel::LoadFromFile(const char *lang, const char *full_path) {
   TFile fp;
   if (!fp.Open(full_path, nullptr)) {
     tprintf("Error opening file %s\n", full_path);
@@ -159,8 +158,8 @@ bool ParamsModel::SaveToFile(const char *full_path) const {
   }
   bool all_good = true;
   for (int i = 0; i < weights.size(); i++) {
-    if (fprintf(fp, "%s %f\n", kParamsTrainingFeatureTypeName[i], weights[i])
-        < 0) {
+    if (fprintf(fp, "%s %f\n", kParamsTrainingFeatureTypeName[i], weights[i]) <
+        0) {
       all_good = false;
     }
   }
@@ -168,4 +167,4 @@ bool ParamsModel::SaveToFile(const char *full_path) const {
   return all_good;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

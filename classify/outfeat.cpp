@@ -51,24 +51,24 @@ FEATURE_SET Classify::ExtractOutlineFeatures(TBLOB *Blob) {
   FEATURE_SET FeatureSet;
   FLOAT32 XScale, YScale;
 
-  FeatureSet = NewFeatureSet (MAX_OUTLINE_FEATURES);
+  FeatureSet = NewFeatureSet(MAX_OUTLINE_FEATURES);
   if (Blob == NULL)
     return (FeatureSet);
 
-  Outlines = ConvertBlob (Blob);
+  Outlines = ConvertBlob(Blob);
 
   NormalizeOutlines(Outlines, &XScale, &YScale);
   RemainingOutlines = Outlines;
   iterate(RemainingOutlines) {
-    Outline = (MFOUTLINE) first_node (RemainingOutlines);
+    Outline = (MFOUTLINE)first_node(RemainingOutlines);
     ConvertToOutlineFeatures(Outline, FeatureSet);
   }
   if (classify_norm_method == baseline)
     NormalizeOutlineX(FeatureSet);
   FreeOutlines(Outlines);
   return (FeatureSet);
-}                                /* ExtractOutlineFeatures */
-}  // namespace tesseract
+} /* ExtractOutlineFeatures */
+} // namespace tesseract
 
 /*----------------------------------------------------------------------------
               Private Code
@@ -90,8 +90,7 @@ FEATURE_SET Classify::ExtractOutlineFeatures(TBLOB *Blob) {
  * @note Exceptions: none
  * @note History: 11/13/90, DSJ, Created.
  */
-void AddOutlineFeatureToSet(FPOINT *Start,
-                            FPOINT *End,
+void AddOutlineFeatureToSet(FPOINT *Start, FPOINT *End,
                             FEATURE_SET FeatureSet) {
   FEATURE Feature;
 
@@ -102,8 +101,7 @@ void AddOutlineFeatureToSet(FPOINT *Start,
   Feature->Params[OutlineFeatLength] = DistanceBetween(*Start, *End);
   AddFeature(FeatureSet, Feature);
 
-}                                /* AddOutlineFeatureToSet */
-
+} /* AddOutlineFeatureToSet */
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -125,7 +123,7 @@ void ConvertToOutlineFeatures(MFOUTLINE Outline, FEATURE_SET FeatureSet) {
   FPOINT FeatureStart;
   FPOINT FeatureEnd;
 
-  if (DegenerateOutline (Outline))
+  if (DegenerateOutline(Outline))
     return;
 
   First = Outline;
@@ -143,10 +141,8 @@ void ConvertToOutlineFeatures(MFOUTLINE Outline, FEATURE_SET FeatureSet) {
       FeatureEnd = PointAt(Next)->Point;
       AddOutlineFeatureToSet(&FeatureStart, &FeatureEnd, FeatureSet);
     }
-  }
-  while (Next != First);
-}                                /* ConvertToOutlineFeatures */
-
+  } while (Next != First);
+} /* ConvertToOutlineFeatures */
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -183,4 +179,4 @@ void NormalizeOutlineX(FEATURE_SET FeatureSet) {
     Feature = FeatureSet->Features[i];
     Feature->Params[OutlineFeatX] -= Origin;
   }
-}                                /* NormalizeOutlineX */
+} /* NormalizeOutlineX */

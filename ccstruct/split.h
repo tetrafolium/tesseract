@@ -36,7 +36,7 @@
 ----------------------------------------------------------------------*/
 struct SPLIT {
   SPLIT() : point1(NULL), point2(NULL) {}
-  SPLIT(EDGEPT* pt1, EDGEPT* pt2) : point1(pt1), point2(pt2) {}
+  SPLIT(EDGEPT *pt1, EDGEPT *pt2) : point1(pt1), point2(pt2) {}
 
   // Returns the bounding box of all the points in the split.
   TBOX bounding_box() const;
@@ -53,20 +53,20 @@ struct SPLIT {
 
   // Returns true if the given EDGEPT is used by this SPLIT, checking only
   // the EDGEPT pointer, not the coordinates.
-  bool UsesPoint(const EDGEPT* point) const {
+  bool UsesPoint(const EDGEPT *point) const {
     return point1 == point || point2 == point;
   }
   // Returns true if the other SPLIT has any position shared with *this.
-  bool SharesPosition(const SPLIT& other) const {
+  bool SharesPosition(const SPLIT &other) const {
     return point1->EqualPos(*other.point1) || point1->EqualPos(*other.point2) ||
            point2->EqualPos(*other.point1) || point2->EqualPos(*other.point2);
   }
   // Returns true if both points are contained within the blob.
-  bool ContainedByBlob(const TBLOB& blob) const {
+  bool ContainedByBlob(const TBLOB &blob) const {
     return blob.Contains(point1->pos) && blob.Contains(point2->pos);
   }
   // Returns true if both points are contained within the outline.
-  bool ContainedByOutline(const TESSLINE& outline) const {
+  bool ContainedByOutline(const TESSLINE &outline) const {
     return outline.Contains(point1->pos) && outline.Contains(point2->pos);
   }
   // Compute a split priority based on the bounding boxes of the parts.
@@ -77,7 +77,7 @@ struct SPLIT {
                      double width_change_knob) const;
   // Returns true if *this SPLIT appears OK in the sense that it does not cross
   // any outlines and does not chop off any ridiculously small pieces.
-  bool IsHealthy(const TBLOB& blob, int min_points, int min_area) const;
+  bool IsHealthy(const TBLOB &blob, int min_points, int min_area) const;
   // Returns true if the split generates a small chunk in terms of either area
   // or number of points.
   bool IsLittleChunk(int min_points, int min_area) const;
@@ -85,18 +85,18 @@ struct SPLIT {
   void Print() const;
 #ifndef GRAPHICS_DISABLED
   // Draws the split in the given window.
-  void Mark(ScrollView* window) const;
+  void Mark(ScrollView *window) const;
 #endif
 
   // Creates two outlines out of one by splitting the original one in half.
   // Inserts the resulting outlines into the given list.
-  void SplitOutlineList(TESSLINE* outlines) const;
+  void SplitOutlineList(TESSLINE *outlines) const;
   // Makes a split between these two edge points, but does not affect the
   // outlines to which they belong.
   void SplitOutline() const;
   // Undoes the effect of SplitOutlineList, correcting the outlines for undoing
   // the split, but possibly leaving some duplicate outlines.
-  void UnsplitOutlineList(TBLOB* blob) const;
+  void UnsplitOutlineList(TBLOB *blob) const;
   // Removes the split that was put between these two points.
   void UnsplitOutlines() const;
 
