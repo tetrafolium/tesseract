@@ -4,11 +4,9 @@ inspecode:
     auto-fix: true
     thresholds: { num-issues: 518 }
 
-  #clang-format:     ### for C++
-  #  auto-fix: true
-  #  thresholds: { num-issues: 573 }
-  #    # 573 issues           on SaaS       (clang 9.0.0)
-  #    # Aborted unexpectedly on Enterprise (clang 7.0.1) tractrix/codelift#1747
+  clang-format:     ### for C++
+    auto-fix: true
+    thresholds: { num-issues: 573 }
 
   cpd:              ### for C++
     options: [ --skip-lexical-errors ]
