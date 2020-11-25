@@ -43,11 +43,11 @@
  */
 
 ScrollView* create_edges_window(ICOORD page_tr) {
-  ScrollView* image_win;              //image window
+    ScrollView* image_win;              //image window
 
-                                 //create the window
-  image_win = new ScrollView (IMAGE_WIN_NAME, IMAGE_XPOS, IMAGE_YPOS, 0, 0, page_tr.x (),  page_tr.y ());
-  return image_win;              //window
+    //create the window
+    image_win = new ScrollView (IMAGE_WIN_NAME, IMAGE_XPOS, IMAGE_YPOS, 0, 0, page_tr.x (),  page_tr.y ());
+    return image_win;              //window
 }
 
 
@@ -63,21 +63,21 @@ ScrollView* create_edges_window(ICOORD page_tr) {
 void draw_raw_edge(ScrollView* fd,
                    CRACKEDGE *start,
                    ScrollView::Color colour) {
-  CRACKEDGE *edgept;             //current point
+    CRACKEDGE *edgept;             //current point
 
-  fd->Pen(colour);
-  edgept = start;
-  fd->SetCursor(edgept->pos.x (), edgept->pos.y ());
-  do {
-    do
-    edgept = edgept->next;
-                                 //merge straight lines
-    while (edgept != start && edgept->prev->stepx == edgept->stepx && edgept->prev->stepy == edgept->stepy);
+    fd->Pen(colour);
+    edgept = start;
+    fd->SetCursor(edgept->pos.x (), edgept->pos.y ());
+    do {
+        do
+            edgept = edgept->next;
+        //merge straight lines
+        while (edgept != start && edgept->prev->stepx == edgept->stepx && edgept->prev->stepy == edgept->stepy);
 
-                                 //draw lines
-  fd->DrawTo(edgept->pos.x (), edgept->pos.y ());
-  }
-  while (edgept != start);
+        //draw lines
+        fd->DrawTo(edgept->pos.x (), edgept->pos.y ());
+    }
+    while (edgept != start);
 }
 
 #endif  // GRAPHICS_DISABLED

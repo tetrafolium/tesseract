@@ -26,7 +26,7 @@
 #define LENGTH_COMPRESSION  (10.0)
 
 typedef enum {
-  CharNormY, CharNormLength, CharNormRx, CharNormRy
+    CharNormY, CharNormLength, CharNormRx, CharNormRy
 } NORM_PARAM_NAME;
 
 /**----------------------------------------------------------------------------

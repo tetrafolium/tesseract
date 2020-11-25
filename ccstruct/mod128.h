@@ -28,57 +28,57 @@
 
 class DLLSYM DIR128
 {
-  public:
+public:
     DIR128() {
     }                            //empty constructor
 
     DIR128(                //constructor
-           inT16 value) {  //value to assign
-      value %= MODULUS;          //modulo arithmetic
-      if (value < 0)
-        value += MODULUS;        //done properly
-      dir = (inT8) value;
+        inT16 value) {  //value to assign
+        value %= MODULUS;          //modulo arithmetic
+        if (value < 0)
+            value += MODULUS;        //done properly
+        dir = (inT8) value;
     }
     DIR128(const FCOORD fc);  //quantize vector
 
     DIR128 & operator= (         //assign of inT16
-    inT16 value) {               //value to assign
-      value %= MODULUS;          //modulo arithmetic
-      if (value < 0)
-        value += MODULUS;        //done properly
-      dir = (inT8) value;
-      return *this;
+        inT16 value) {               //value to assign
+        value %= MODULUS;          //modulo arithmetic
+        if (value < 0)
+            value += MODULUS;        //done properly
+        dir = (inT8) value;
+        return *this;
     }
     inT8 operator- (             //subtraction
-      const DIR128 & minus) const//for signed result
+        const DIR128 & minus) const//for signed result
     {
-                                 //result
-      inT16 result = dir - minus.dir;
+        //result
+        inT16 result = dir - minus.dir;
 
-      if (result > MODULUS / 2)
-        result -= MODULUS;       //get in range
-      else if (result < -MODULUS / 2)
-        result += MODULUS;
-      return (inT8) result;
+        if (result > MODULUS / 2)
+            result -= MODULUS;       //get in range
+        else if (result < -MODULUS / 2)
+            result += MODULUS;
+        return (inT8) result;
     }
     DIR128 operator+ (           //addition
-      const DIR128 & add) const  //of itself
+        const DIR128 & add) const  //of itself
     {
-      DIR128 result;             //sum
+        DIR128 result;             //sum
 
-      result = dir + add.dir;    //let = do the work
-      return result;
+        result = dir + add.dir;    //let = do the work
+        return result;
     }
     DIR128 & operator+= (        //same as +
-    const DIR128 & add) {
-      *this = dir + add.dir;     //let = do the work
-      return *this;
+        const DIR128 & add) {
+        *this = dir + add.dir;     //let = do the work
+        return *this;
     }
     inT8 get_dir() const {  //access function
-      return dir;
+        return dir;
     }
 
-  private:
+private:
     inT8 dir;                    //a direction
 };
 #endif

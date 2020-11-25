@@ -38,54 +38,54 @@ const ERRCODE BADERRACTION = "Illegal error action";
  *
  **********************************************************************/
 void ERRCODE::error(             // handle error
-const char *caller,              // name of caller
-TessErrorLogCode action,         // action to take
-const char *format, ...          // special message
+    const char *caller,              // name of caller
+    TessErrorLogCode action,         // action to take
+    const char *format, ...          // special message
 ) const {
-  va_list args;                  // variable args
-  char msg[MAX_MSG];
-  char *msgptr = msg;
+    va_list args;                  // variable args
+    char msg[MAX_MSG];
+    char *msgptr = msg;
 
-  if (caller != NULL)
-                                 //name of caller
-    msgptr += sprintf (msgptr, "%s:", caller);
-                                 //actual message
-  msgptr += sprintf (msgptr, "Error:%s", message);
-  if (format != NULL) {
-    msgptr += sprintf (msgptr, ":");
-    va_start(args, format);  //variable list
-    #ifdef _WIN32
-                                 //print remainder
-    msgptr += _vsnprintf (msgptr, MAX_MSG - 2 - (msgptr - msg), format, args);
-    msg[MAX_MSG - 2] = '\0';     //ensure termination
-    strcat (msg, "\n");
-    #else
-                                 //print remainder
-    msgptr += vsprintf (msgptr, format, args);
-                                 //no specific
-    msgptr += sprintf (msgptr, "\n");
-    #endif
-    va_end(args);
-  }
-  else
-                                 //no specific
-    msgptr += sprintf (msgptr, "\n");
+    if (caller != NULL)
+        //name of caller
+        msgptr += sprintf (msgptr, "%s:", caller);
+    //actual message
+    msgptr += sprintf (msgptr, "Error:%s", message);
+    if (format != NULL) {
+        msgptr += sprintf (msgptr, ":");
+        va_start(args, format);  //variable list
+#ifdef _WIN32
+        //print remainder
+        msgptr += _vsnprintf (msgptr, MAX_MSG - 2 - (msgptr - msg), format, args);
+        msg[MAX_MSG - 2] = '\0';     //ensure termination
+        strcat (msg, "\n");
+#else
+        //print remainder
+        msgptr += vsprintf (msgptr, format, args);
+        //no specific
+        msgptr += sprintf (msgptr, "\n");
+#endif
+        va_end(args);
+    }
+    else
+        //no specific
+        msgptr += sprintf (msgptr, "\n");
 
-  // %s is needed here so msg is printed correctly!
-  fprintf(stderr, "%s", msg);
+    // %s is needed here so msg is printed correctly!
+    fprintf(stderr, "%s", msg);
 
-  int* p = NULL;
-  switch (action) {
+    int* p = NULL;
+    switch (action) {
     case DBG:
     case TESSLOG:
-      return;                    //report only
+        return;                    //report only
     case TESSEXIT:
-      //err_exit();
+    //err_exit();
     case ABORT:
-      // Create a deliberate segv as the stack trace is more useful that way.
-      if (!*p)
-        abort();
+        // Create a deliberate segv as the stack trace is more useful that way.
+        if (!*p)
+            abort();
     default:
-      BADERRACTION.error ("error", ABORT, NULL);
-  }
+        BADERRACTION.error ("error", ABORT, NULL);
+    }
 }

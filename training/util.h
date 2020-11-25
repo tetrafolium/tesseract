@@ -30,28 +30,28 @@
 // StringHash is the hashing functor needed by the stl hash map.
 #ifndef COMPILER_MSVC
 struct StringHash {
-  size_t operator()(const string& s) const {
-    size_t hash_code = 0;
-    const char* str = s.c_str();
-    for (int ch = 0; str[ch] != 0; ++ch) {
-      hash_code += str[ch] << (ch % 24);
+    size_t operator()(const string& s) const {
+        size_t hash_code = 0;
+        const char* str = s.c_str();
+        for (int ch = 0; str[ch] != 0; ++ch) {
+            hash_code += str[ch] << (ch % 24);
+        }
+        return hash_code;
     }
-    return hash_code;
-  }
 };
 #else  // COMPILER_MSVC
 struct StringHash : public stdext::hash_compare <string> {
-  size_t operator()(const string& s) const {
-    size_t hash_code = 0;
-    const char* str = s.c_str();
-    for (int ch = 0; str[ch] != 0; ++ch) {
-      hash_code += str[ch] << (ch % 24);
+    size_t operator()(const string& s) const {
+        size_t hash_code = 0;
+        const char* str = s.c_str();
+        for (int ch = 0; str[ch] != 0; ++ch) {
+            hash_code += str[ch] << (ch % 24);
+        }
+        return hash_code;
     }
-    return hash_code;
-  }
-  bool operator()(const string& s1, const string& s2) const {
-    return s1 == s2;
-  }
+    bool operator()(const string& s1, const string& s2) const {
+        return s1 == s2;
+    }
 };
 #endif  // !COMPILER_MSVC
 

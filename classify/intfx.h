@@ -33,13 +33,13 @@ class TrainingSample;
 }
 
 struct INT_FX_RESULT_STRUCT {
-  inT32 Length;                  // total length of all outlines
-  inT16 Xmean, Ymean;            // center of mass of all outlines
-  inT16 Rx, Ry;                  // radius of gyration
-  inT16 NumBL, NumCN;            // number of features extracted
-  inT16 Width;                   // Width of blob in BLN coords.
-  uinT8 YBottom;                 // Bottom of blob in BLN coords.
-  uinT8 YTop;                    // Top of blob in BLN coords.
+    inT32 Length;                  // total length of all outlines
+    inT16 Xmean, Ymean;            // center of mass of all outlines
+    inT16 Rx, Ry;                  // radius of gyration
+    inT16 NumBL, NumCN;            // number of features extracted
+    inT16 Width;                   // Width of blob in BLN coords.
+    uinT8 YBottom;                 // Bottom of blob in BLN coords.
+    uinT8 YTop;                    // Top of blob in BLN coords.
 };
 
 // The standard feature length
@@ -55,14 +55,14 @@ void InitIntegerFX();
 FCOORD FeatureDirection(uinT8 theta);
 
 namespace tesseract {
-  // Generates a TrainingSample from a TBLOB. Extracts features and sets
-  // the bounding box, so classifiers that operate on the image can work.
-  // TODO(rays) BlobToTrainingSample must remain a global function until
-  // the FlexFx and FeatureDescription code can be removed and LearnBlob
-  // made a member of Classify.
-  TrainingSample* BlobToTrainingSample(
-      const TBLOB& blob, bool nonlinear_norm, INT_FX_RESULT_STRUCT* fx_info,
-      GenericVector<INT_FEATURE_STRUCT>* bl_features);
+// Generates a TrainingSample from a TBLOB. Extracts features and sets
+// the bounding box, so classifiers that operate on the image can work.
+// TODO(rays) BlobToTrainingSample must remain a global function until
+// the FlexFx and FeatureDescription code can be removed and LearnBlob
+// made a member of Classify.
+TrainingSample* BlobToTrainingSample(
+    const TBLOB& blob, bool nonlinear_norm, INT_FX_RESULT_STRUCT* fx_info,
+    GenericVector<INT_FEATURE_STRUCT>* bl_features);
 }
 
 // Deprecated! Prefer tesseract::Classify::ExtractFeatures instead.

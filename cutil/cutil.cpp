@@ -55,19 +55,19 @@ Import original HP distribution
  **********************************************************************/
 long long_rand(long limit) {
 #if RAND_MAX < 0x1000000
-  static long seed;
+    static long seed;
 
-  long num;
-  num = (long) rand () << 16;
-  num |= rand () & 0xffff;
-  seed ^= num;
-  long result = num % limit;
-  while (result < 0) {
-    result += limit;
-  }
-  return result;
+    long num;
+    num = (long) rand () << 16;
+    num |= rand () & 0xffff;
+    seed ^= num;
+    long result = num % limit;
+    while (result < 0) {
+        result += limit;
+    }
+    return result;
 #else
-  return (long)((double)limit * rand()/(RAND_MAX + 1.0));
+    return (long)((double)limit * rand()/(RAND_MAX + 1.0));
 #endif
 }
 
@@ -80,21 +80,21 @@ long long_rand(long limit) {
  *  opened then call the error routine.
  **********************************************************************/
 FILE *open_file(const char *filename, const char *mode) {
-  FILE *thisfile = NULL;
-  if ((thisfile = fopen (filename, mode)) == NULL) {
-    tprintf ("Could not open file, %s\n", filename);
-    exit (1);
-  }
-  return (thisfile);
+    FILE *thisfile = NULL;
+    if ((thisfile = fopen (filename, mode)) == NULL) {
+        tprintf ("Could not open file, %s\n", filename);
+        exit (1);
+    }
+    return (thisfile);
 }
 
 /// Check whether the file exists
 bool exists_file(const char *filename) {
-  bool exists = false;
-  FILE *f = NULL;
-  if ((f = fopen(filename, "rb")) != NULL) {
-    fclose(f);
-    exists = true;
-  }
-  return exists;
+    bool exists = false;
+    FILE *f = NULL;
+    if ((f = fopen(filename, "rb")) != NULL) {
+        fclose(f);
+        exists = true;
+    }
+    return exists;
 }

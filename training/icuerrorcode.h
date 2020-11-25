@@ -42,24 +42,24 @@
 namespace tesseract {
 
 class IcuErrorCode : public icu::ErrorCode {
- public:
-  IcuErrorCode() {}
-  virtual ~IcuErrorCode() {
-    if (isFailure()) {
-      handleFailure();
+public:
+    IcuErrorCode() {}
+    virtual ~IcuErrorCode() {
+        if (isFailure()) {
+            handleFailure();
+        }
     }
-  }
 
- protected:
-  virtual void handleFailure() const {
-    tprintf("ICU ERROR: %s", errorName());
-    exit(errorCode);
-  }
+protected:
+    virtual void handleFailure() const {
+        tprintf("ICU ERROR: %s", errorName());
+        exit(errorCode);
+    }
 
- private:
-  // Disallow implicit copying of object.
-  IcuErrorCode(const IcuErrorCode&);
-  void operator=(const IcuErrorCode&);
+private:
+    // Disallow implicit copying of object.
+    IcuErrorCode(const IcuErrorCode&);
+    void operator=(const IcuErrorCode&);
 };
 
 }  // namespace tesseract

@@ -41,28 +41,28 @@ typedef BIT_VECTOR *CONFIGS;
 
 typedef struct
 {
-  FLOAT32 A;
-  FLOAT32 B;
-  FLOAT32 C;
-  FLOAT32 X;
-  FLOAT32 Y;
-  FLOAT32 Angle;
-  FLOAT32 Length;
+    FLOAT32 A;
+    FLOAT32 B;
+    FLOAT32 C;
+    FLOAT32 X;
+    FLOAT32 Y;
+    FLOAT32 Angle;
+    FLOAT32 Length;
 } PROTO_STRUCT;
 typedef PROTO_STRUCT *PROTO;
 
 struct CLASS_STRUCT {
-  CLASS_STRUCT()
-    : NumProtos(0), MaxNumProtos(0), Prototypes(NULL),
-      NumConfigs(0), MaxNumConfigs(0), Configurations(NULL) {
-  }
-  inT16 NumProtos;
-  inT16 MaxNumProtos;
-  PROTO Prototypes;
-  inT16 NumConfigs;
-  inT16 MaxNumConfigs;
-  CONFIGS Configurations;
-  UnicityTableEqEq<int> font_set;
+    CLASS_STRUCT()
+        : NumProtos(0), MaxNumProtos(0), Prototypes(NULL),
+          NumConfigs(0), MaxNumConfigs(0), Configurations(NULL) {
+    }
+    inT16 NumProtos;
+    inT16 MaxNumProtos;
+    PROTO Prototypes;
+    inT16 NumConfigs;
+    inT16 MaxNumConfigs;
+    CONFIGS Configurations;
+    UnicityTableEqEq<int> font_set;
 };
 typedef CLASS_STRUCT *CLASS_TYPE;
 typedef CLASS_STRUCT *CLASSES;

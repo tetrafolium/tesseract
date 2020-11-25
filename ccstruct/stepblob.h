@@ -29,7 +29,7 @@ ELISTIZEH(C_BLOB)
 
 class C_BLOB:public ELIST_LINK
 {
-  public:
+public:
     C_BLOB() {
     }
     explicit C_BLOB(C_OUTLINE_LIST *outline_list);
@@ -62,7 +62,7 @@ class C_BLOB:public ELIST_LINK
     static C_BLOB* FakeBlob(const TBOX& box);
 
     C_OUTLINE_LIST *out_list() {  //get outline list
-      return &outlines;
+        return &outlines;
     }
 
     TBOX bounding_box() const;  // compute bounding box
@@ -70,7 +70,7 @@ class C_BLOB:public ELIST_LINK
     inT32 perimeter();  // Total perimeter of outlines and 1st level children.
     inT32 outer_area();  //compute area
     inT32 count_transitions(                   //count maxima
-                            inT32 threshold);  //size threshold
+        inT32 threshold);  //size threshold
 
     void move(const ICOORD vec);  // repostion blob by vector
     void rotate(const FCOORD& rotation);  // Rotate by given vector.
@@ -89,11 +89,11 @@ class C_BLOB:public ELIST_LINK
     // pixDestroy after use.
     Pix* render_outline();
 
-    #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
     void plot(                       //draw one
-              ScrollView* window,         //window to draw in
-              ScrollView::Color blob_colour,    //for outer bits
-              ScrollView::Color child_colour);  //for holes
+        ScrollView* window,         //window to draw in
+        ScrollView::Color blob_colour,    //for outer bits
+        ScrollView::Color child_colour);  //for holes
     // Draws the blob in the given colour, and child_colour, normalized
     // using the given denorm, making use of sub-pixel accurate information
     // if available.
@@ -101,30 +101,30 @@ class C_BLOB:public ELIST_LINK
                      ScrollView::Color blob_colour,
                      ScrollView::Color child_colour,
                      ScrollView* window);
-    #endif  // GRAPHICS_DISABLED
+#endif  // GRAPHICS_DISABLED
 
     C_BLOB& operator= (const C_BLOB & source) {
-      if (!outlines.empty ())
-        outlines.clear();
-      outlines.deep_copy(&source.outlines, &C_OUTLINE::deep_copy);
-      return *this;
+        if (!outlines.empty ())
+            outlines.clear();
+        outlines.deep_copy(&source.outlines, &C_OUTLINE::deep_copy);
+        return *this;
     }
 
     static C_BLOB* deep_copy(const C_BLOB* src) {
-      C_BLOB* blob = new C_BLOB;
-      *blob = *src;
-      return blob;
+        C_BLOB* blob = new C_BLOB;
+        *blob = *src;
+        return blob;
     }
 
     static int SortByXMiddle(const void *v1, const void *v2) {
-      const C_BLOB* blob1 = *static_cast<const C_BLOB* const*>(v1);
-      const C_BLOB* blob2 = *static_cast<const C_BLOB* const*>(v2);
-      return blob1->bounding_box().x_middle() -
-             blob2->bounding_box().x_middle();
+        const C_BLOB* blob1 = *static_cast<const C_BLOB* const*>(v1);
+        const C_BLOB* blob2 = *static_cast<const C_BLOB* const*>(v2);
+        return blob1->bounding_box().x_middle() -
+               blob2->bounding_box().x_middle();
     }
 
 
-  private:
+private:
     C_OUTLINE_LIST outlines;     //master elements
 };
 

@@ -21,12 +21,12 @@
 #include "gettimeofday.h"
 
 int gettimeofday(struct timeval *tp, struct timezone *tzp) {
-  l_int32 sec, usec;
-  if (tp == NULL)
-    return -1;
+    l_int32 sec, usec;
+    if (tp == NULL)
+        return -1;
 
-  l_getCurrentTime(&sec, &usec);
-  tp->tv_sec = sec;
-  tp->tv_usec = usec;
-  return 0;
+    l_getCurrentTime(&sec, &usec);
+    tp->tv_sec = sec;
+    tp->tv_usec = usec;
+    return 0;
 }

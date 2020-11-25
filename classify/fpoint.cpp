@@ -28,9 +28,9 @@
 ----------------------------------------------------------------------------*/
 
 FLOAT32 DistanceBetween(FPOINT A, FPOINT B) {
-  double xd = XDelta(A, B);
-  double yd = YDelta(A, B);
-  return sqrt(static_cast<double>(xd * xd + yd * yd));
+    double xd = XDelta(A, B);
+    double yd = YDelta(A, B);
+    return sqrt(static_cast<double>(xd * xd + yd * yd));
 }
 
 /**
@@ -48,14 +48,14 @@ FLOAT32 DistanceBetween(FPOINT A, FPOINT B) {
 FLOAT32 NormalizedAngleFrom(FPOINT *Point1,
                             FPOINT *Point2,
                             FLOAT32 FullScale) {
-  FLOAT32 Angle;
-  FLOAT32 NumRadsInCircle = 2.0 * PI;
+    FLOAT32 Angle;
+    FLOAT32 NumRadsInCircle = 2.0 * PI;
 
-  Angle = AngleFrom (*Point1, *Point2);
-  if (Angle < 0.0)
-    Angle += NumRadsInCircle;
-  Angle *= FullScale / NumRadsInCircle;
-  if (Angle < 0.0 || Angle >= FullScale)
-    Angle = 0.0;
-  return (Angle);
+    Angle = AngleFrom (*Point1, *Point2);
+    if (Angle < 0.0)
+        Angle += NumRadsInCircle;
+    Angle *= FullScale / NumRadsInCircle;
+    if (Angle < 0.0 || Angle >= FullScale)
+        Angle = 0.0;
+    return (Angle);
 }

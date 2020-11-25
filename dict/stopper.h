@@ -32,16 +32,16 @@ class WERD_CHOICE;
 typedef uinT8 BLOB_WIDTH;
 
 struct DANGERR_INFO {
-  DANGERR_INFO() :
-    begin(-1), end(-1), dangerous(false), correct_is_ngram(false),
-    leftmost(INVALID_UNICHAR_ID) {}
-  DANGERR_INFO(int b, int e, bool d, bool n, UNICHAR_ID l) :
-    begin(b), end(e), dangerous(d), correct_is_ngram(n), leftmost(l) {}
-  int begin;
-  int end;
-  bool dangerous;
-  bool correct_is_ngram;
-  UNICHAR_ID leftmost;   // in the replacement, what's the leftmost character?
+    DANGERR_INFO() :
+        begin(-1), end(-1), dangerous(false), correct_is_ngram(false),
+        leftmost(INVALID_UNICHAR_ID) {}
+    DANGERR_INFO(int b, int e, bool d, bool n, UNICHAR_ID l) :
+        begin(b), end(e), dangerous(d), correct_is_ngram(n), leftmost(l) {}
+    int begin;
+    int end;
+    bool dangerous;
+    bool correct_is_ngram;
+    UNICHAR_ID leftmost;   // in the replacement, what's the leftmost character?
 };
 
 typedef GenericVector<DANGERR_INFO> DANGERR;

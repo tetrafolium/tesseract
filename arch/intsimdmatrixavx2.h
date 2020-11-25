@@ -24,8 +24,8 @@ namespace tesseract {
 
 // AVX2 implementation of IntSimdMatrix.
 class IntSimdMatrixAVX2 : public IntSimdMatrix {
- public:
-  IntSimdMatrixAVX2();
+public:
+    IntSimdMatrixAVX2();
 };
 
 }  // namespace tesseract

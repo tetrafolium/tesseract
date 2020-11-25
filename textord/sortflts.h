@@ -24,18 +24,18 @@
 
 class SORTED_FLOAT:public ELIST_LINK
 {
-  friend class SORTED_FLOATS;
+    friend class SORTED_FLOATS;
 
-  public:
+public:
     SORTED_FLOAT() {
     }                            //empty constructor
     SORTED_FLOAT(              //create one
-                 float value,  //value of entry
-                 inT32 key) {  //reference
-      entry = value;
-      address = key;
+        float value,  //value of entry
+        inT32 key) {  //reference
+        entry = value;
+        address = key;
     }
-  private:
+private:
     float entry;                 //value of float
     inT32 address;               //key
 };
@@ -43,10 +43,10 @@ class SORTED_FLOAT:public ELIST_LINK
 ELISTIZEH (SORTED_FLOAT)
 class SORTED_FLOATS
 {
-  public:
+public:
     /** empty constructor */
     SORTED_FLOATS() {
-      it.set_to_list (&list);
+        it.set_to_list (&list);
     }
     /**
      * add sample
@@ -66,7 +66,7 @@ class SORTED_FLOATS
      */
     float operator[] (inT32 index);
 
-  private:
+private:
     SORTED_FLOAT_LIST list;      //list of floats
     SORTED_FLOAT_IT it;          //iterator built-in
 };

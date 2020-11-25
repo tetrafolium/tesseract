@@ -28,70 +28,72 @@ const int kDictDebugLevel = 1;
 
 tesseract::Dawg *LoadSquishedDawg(const UNICHARSET &unicharset,
                                   const char *filename) {
-  const int kDictDebugLevel = 1;
-  tesseract::TFile dawg_file;
-  if (!dawg_file.Open(filename, nullptr)) {
-    tprintf("Could not open %s for reading.\n", filename);
-    return nullptr;
-  }
-  tprintf("Loading word list from %s\n", filename);
-  tesseract::SquishedDawg *retval = new tesseract::SquishedDawg(
-      tesseract::DAWG_TYPE_WORD, "eng", SYSTEM_DAWG_PERM, kDictDebugLevel);
-  if (!retval->Load(&dawg_file)) {
-    tprintf("Could not read %s\n", filename);
-    delete retval;
-    return nullptr;
-  }
-  tprintf("Word list loaded.\n");
-  return retval;
+    const int kDictDebugLevel = 1;
+    tesseract::TFile dawg_file;
+    if (!dawg_file.Open(filename, nullptr)) {
+        tprintf("Could not open %s for reading.\n", filename);
+        return nullptr;
+    }
+    tprintf("Loading word list from %s\n", filename);
+    tesseract::SquishedDawg *retval = new tesseract::SquishedDawg(
+        tesseract::DAWG_TYPE_WORD, "eng", SYSTEM_DAWG_PERM, kDictDebugLevel);
+    if (!retval->Load(&dawg_file)) {
+        tprintf("Could not read %s\n", filename);
+        delete retval;
+        return nullptr;
+    }
+    tprintf("Word list loaded.\n");
+    return retval;
 }
 
 class WordOutputter {
- public:
-  WordOutputter(FILE *file) : file_(file) {}
-  void output_word(const char *word) { fprintf(file_, "%s\n", word); }
- private:
-  FILE *file_;
+public:
+    WordOutputter(FILE *file) : file_(file) {}
+    void output_word(const char *word) {
+        fprintf(file_, "%s\n", word);
+    }
+private:
+    FILE *file_;
 };
 
 // returns 0 if successful.
 int WriteDawgAsWordlist(const UNICHARSET &unicharset,
                         const tesseract::Dawg *dawg,
                         const char *outfile_name) {
-  FILE *out = fopen(outfile_name, "wb");
-  if (out == nullptr) {
-    tprintf("Could not open %s for writing.\n", outfile_name);
-    return 1;
-  }
-  WordOutputter outputter(out);
-  TessCallback1<const char *> *print_word_cb =
-      NewPermanentTessCallback(&outputter, &WordOutputter::output_word);
-  dawg->iterate_words(unicharset, print_word_cb);
-  delete print_word_cb;
-  return fclose(out);
+    FILE *out = fopen(outfile_name, "wb");
+    if (out == nullptr) {
+        tprintf("Could not open %s for writing.\n", outfile_name);
+        return 1;
+    }
+    WordOutputter outputter(out);
+    TessCallback1<const char *> *print_word_cb =
+        NewPermanentTessCallback(&outputter, &WordOutputter::output_word);
+    dawg->iterate_words(unicharset, print_word_cb);
+    delete print_word_cb;
+    return fclose(out);
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 4) {
-    tprintf("Print all the words in a given dawg.\n");
-    tprintf("Usage: %s <unicharset> <dawgfile> <wordlistfile>\n",
-            argv[0]);
-    return 1;
-  }
-  const char *unicharset_file = argv[1];
-  const char *dawg_file = argv[2];
-  const char *wordlist_file = argv[3];
-  UNICHARSET unicharset;
-  if (!unicharset.load_from_file(unicharset_file)) {
-    tprintf("Error loading unicharset from %s.\n", unicharset_file);
-    return 1;
-  }
-  tesseract::Dawg *dict = LoadSquishedDawg(unicharset, dawg_file);
-  if (dict == nullptr) {
-    tprintf("Error loading dictionary from %s.\n", dawg_file);
-    return 1;
-  }
-  int retval = WriteDawgAsWordlist(unicharset, dict, wordlist_file);
-  delete dict;
-  return retval;
+    if (argc != 4) {
+        tprintf("Print all the words in a given dawg.\n");
+        tprintf("Usage: %s <unicharset> <dawgfile> <wordlistfile>\n",
+                argv[0]);
+        return 1;
+    }
+    const char *unicharset_file = argv[1];
+    const char *dawg_file = argv[2];
+    const char *wordlist_file = argv[3];
+    UNICHARSET unicharset;
+    if (!unicharset.load_from_file(unicharset_file)) {
+        tprintf("Error loading unicharset from %s.\n", unicharset_file);
+        return 1;
+    }
+    tesseract::Dawg *dict = LoadSquishedDawg(unicharset, dawg_file);
+    if (dict == nullptr) {
+        tprintf("Error loading dictionary from %s.\n", dawg_file);
+        return 1;
+    }
+    int retval = WriteDawgAsWordlist(unicharset, dict, wordlist_file);
+    delete dict;
+    return retval;
 }

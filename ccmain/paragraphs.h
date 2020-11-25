@@ -38,43 +38,43 @@ class MutableIterator;
 // so that we can easily test paragraph detection independent of the rest of
 // Tesseract.
 class RowInfo {
- public:
-  // Constant data derived from Tesseract output.
-  STRING text;        // the full UTF-8 text of the line.
-  bool ltr;           // whether the majority of the text is left-to-right
-                      // TODO(eger) make this more fine-grained.
+public:
+    // Constant data derived from Tesseract output.
+    STRING text;        // the full UTF-8 text of the line.
+    bool ltr;           // whether the majority of the text is left-to-right
+    // TODO(eger) make this more fine-grained.
 
-  bool has_leaders;   // does the line contain leader dots (.....)?
-  bool has_drop_cap;  // does the line have a drop cap?
-  int pix_ldistance;  // distance to the left pblock boundary in pixels
-  int pix_rdistance;  // distance to the right pblock boundary in pixels
-  float pix_xheight;  // guessed xheight for the line
-  int average_interword_space; // average space between words in pixels.
+    bool has_leaders;   // does the line contain leader dots (.....)?
+    bool has_drop_cap;  // does the line have a drop cap?
+    int pix_ldistance;  // distance to the left pblock boundary in pixels
+    int pix_rdistance;  // distance to the right pblock boundary in pixels
+    float pix_xheight;  // guessed xheight for the line
+    int average_interword_space; // average space between words in pixels.
 
-  int num_words;
-  TBOX lword_box;     // in normalized (horiz text rows) space
-  TBOX rword_box;     // in normalized (horiz text rows) space
+    int num_words;
+    TBOX lword_box;     // in normalized (horiz text rows) space
+    TBOX rword_box;     // in normalized (horiz text rows) space
 
-  STRING lword_text;   // the UTF-8 text of the leftmost werd
-  STRING rword_text;   // the UTF-8 text of the rightmost werd
+    STRING lword_text;   // the UTF-8 text of the leftmost werd
+    STRING rword_text;   // the UTF-8 text of the rightmost werd
 
-  //   The text of a paragraph typically starts with the start of an idea and
-  // ends with the end of an idea.  Here we define paragraph as something that
-  // may have a first line indent and a body indent which may be different.
-  // Typical words that start an idea are:
-  //   1. Words in western scripts that start with
-  //      a capital letter, for example "The"
-  //   2. Bulleted or numbered list items, for
-  //      example "2."
-  // Typical words which end an idea are words ending in punctuation marks. In
-  // this vocabulary, each list item is represented as a paragraph.
-  bool lword_indicates_list_item;
-  bool lword_likely_starts_idea;
-  bool lword_likely_ends_idea;
+    //   The text of a paragraph typically starts with the start of an idea and
+    // ends with the end of an idea.  Here we define paragraph as something that
+    // may have a first line indent and a body indent which may be different.
+    // Typical words that start an idea are:
+    //   1. Words in western scripts that start with
+    //      a capital letter, for example "The"
+    //   2. Bulleted or numbered list items, for
+    //      example "2."
+    // Typical words which end an idea are words ending in punctuation marks. In
+    // this vocabulary, each list item is represented as a paragraph.
+    bool lword_indicates_list_item;
+    bool lword_likely_starts_idea;
+    bool lword_likely_ends_idea;
 
-  bool rword_indicates_list_item;
-  bool rword_likely_starts_idea;
-  bool rword_likely_ends_idea;
+    bool rword_indicates_list_item;
+    bool rword_likely_starts_idea;
+    bool rword_likely_ends_idea;
 };
 
 // Main entry point for Paragraph Detection Algorithm.

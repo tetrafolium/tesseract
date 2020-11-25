@@ -37,19 +37,19 @@ correctly if circular parameters outside the specified range are used.
 */
 
 struct KDNODE {
-  FLOAT32 *Key;                  /**< search key */
-  void *Data;                    /**< data that corresponds to key */
-  FLOAT32 BranchPoint;           /**< needed to make deletes work efficiently */
-  FLOAT32 LeftBranch;            /**< used to optimize search pruning */
-  FLOAT32 RightBranch;           /**< used to optimize search pruning */
-  struct KDNODE *Left;           /**< ptrs for KD tree structure */
-  struct KDNODE *Right;
+    FLOAT32 *Key;                  /**< search key */
+    void *Data;                    /**< data that corresponds to key */
+    FLOAT32 BranchPoint;           /**< needed to make deletes work efficiently */
+    FLOAT32 LeftBranch;            /**< used to optimize search pruning */
+    FLOAT32 RightBranch;           /**< used to optimize search pruning */
+    struct KDNODE *Left;           /**< ptrs for KD tree structure */
+    struct KDNODE *Right;
 };
 
 struct KDTREE {
-  inT16 KeySize;                 /* number of dimensions in the tree */
-  KDNODE Root;                   /* Root.Left points to actual root node */
-  PARAM_DESC KeyDesc[1];         /* description of each dimension */
+    inT16 KeySize;                 /* number of dimensions in the tree */
+    KDNODE Root;                   /* Root.Left points to actual root node */
+    PARAM_DESC KeyDesc[1];         /* description of each dimension */
 };
 
 /*----------------------------------------------------------------------------

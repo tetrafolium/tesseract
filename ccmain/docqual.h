@@ -24,10 +24,10 @@
 
 enum GARBAGE_LEVEL
 {
-  G_NEVER_CRUNCH,
-  G_OK,
-  G_DODGY,
-  G_TERRIBLE
+    G_NEVER_CRUNCH,
+    G_OK,
+    G_DODGY,
+    G_TERRIBLE
 };
 
 inT16 word_blob_quality(WERD_RES *word, ROW *row);

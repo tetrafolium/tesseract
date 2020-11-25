@@ -30,40 +30,40 @@
 
 class OL_BUCKETS
 {
-  public:
+public:
     OL_BUCKETS(               //constructor
-               ICOORD bleft,  //corners
-               ICOORD tright);
+        ICOORD bleft,  //corners
+        ICOORD tright);
 
     ~OL_BUCKETS () {             //cleanup
-      delete[]buckets;
+        delete[]buckets;
     }
     C_OUTLINE_LIST *operator () (//array access
-      inT16 x,                   //image coords
-      inT16 y);
-                                 //first non-empty bucket
+        inT16 x,                   //image coords
+        inT16 y);
+    //first non-empty bucket
     C_OUTLINE_LIST *start_scan() {
-      for (index = 0; buckets[index].empty () && index < bxdim * bydim - 1;
-        index++);
-      return &buckets[index];
+        for (index = 0; buckets[index].empty () && index < bxdim * bydim - 1;
+                index++);
+        return &buckets[index];
     }
-                                 //next non-empty bucket
+    //next non-empty bucket
     C_OUTLINE_LIST *scan_next() {
-      for (; buckets[index].empty () && index < bxdim * bydim - 1; index++);
-      return &buckets[index];
+        for (; buckets[index].empty () && index < bxdim * bydim - 1; index++);
+        return &buckets[index];
     }
     inT32 count_children(                     //recursive sum
-                         C_OUTLINE *outline,  //parent outline
-                         inT32 max_count);    // max output
+        C_OUTLINE *outline,  //parent outline
+        inT32 max_count);    // max output
     inT32 outline_complexity(                 // new version of count_children
-                         C_OUTLINE *outline,  // parent outline
-                         inT32 max_count,     // max output
-                         inT16 depth);        // level of recursion
+        C_OUTLINE *outline,  // parent outline
+        inT32 max_count,     // max output
+        inT16 depth);        // level of recursion
     void extract_children(                     //single level get
-                          C_OUTLINE *outline,  //parent outline
-                          C_OUTLINE_IT *it);   //destination iterator
+        C_OUTLINE *outline,  //parent outline
+        C_OUTLINE_IT *it);   //destination iterator
 
-  private:
+private:
     C_OUTLINE_LIST * buckets;    //array of buckets
     inT16 bxdim;                 //size of array
     inT16 bydim;
@@ -75,21 +75,21 @@ class OL_BUCKETS
 void extract_edges(Pix* pix,        // thresholded image
                    BLOCK* block);   // block to scan
 void outlines_to_blobs(               //find blobs
-                       BLOCK *block,  //block to scan
-                       ICOORD bleft,  //block box //outlines in block
-                       ICOORD tright,
-                       C_OUTLINE_LIST *outlines);
+    BLOCK *block,  //block to scan
+    ICOORD bleft,  //block box //outlines in block
+    ICOORD tright,
+    C_OUTLINE_LIST *outlines);
 void fill_buckets(                           //find blobs
-                  C_OUTLINE_LIST *outlines,  //outlines in block
-                  OL_BUCKETS *buckets        //output buckets
-                 );
+    C_OUTLINE_LIST *outlines,  //outlines in block
+    OL_BUCKETS *buckets        //output buckets
+);
 void empty_buckets(                     //find blobs
-                   BLOCK *block,        //block to scan
-                   OL_BUCKETS *buckets  //output buckets
-                  );
+    BLOCK *block,        //block to scan
+    OL_BUCKETS *buckets  //output buckets
+);
 BOOL8 capture_children(                       //find children
-                       OL_BUCKETS *buckets,   //bucket sort clanss
-                       C_BLOB_IT *reject_it,  //dead grandchildren
-                       C_OUTLINE_IT *blob_it  //output outlines
-                      );
+    OL_BUCKETS *buckets,   //bucket sort clanss
+    C_BLOB_IT *reject_it,  //dead grandchildren
+    C_OUTLINE_IT *blob_it  //output outlines
+);
 #endif

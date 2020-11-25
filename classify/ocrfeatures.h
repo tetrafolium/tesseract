@@ -44,32 +44,32 @@ struct INT_FX_RESULT_STRUCT;
 // parameters are required to be the first parameters in the feature.
 
 struct PARAM_DESC {
-  inT8 Circular;                   // TRUE if dimension wraps around
-  inT8 NonEssential;               // TRUE if dimension not used in searches
-  FLOAT32 Min;                     // low end of range for circular dimensions
-  FLOAT32 Max;                     // high end of range for circular dimensions
-  FLOAT32 Range;                   // Max - Min
-  FLOAT32 HalfRange;               // (Max - Min)/2
-  FLOAT32 MidRange;                // (Max + Min)/2
+    inT8 Circular;                   // TRUE if dimension wraps around
+    inT8 NonEssential;               // TRUE if dimension not used in searches
+    FLOAT32 Min;                     // low end of range for circular dimensions
+    FLOAT32 Max;                     // high end of range for circular dimensions
+    FLOAT32 Range;                   // Max - Min
+    FLOAT32 HalfRange;               // (Max - Min)/2
+    FLOAT32 MidRange;                // (Max + Min)/2
 };
 
 struct FEATURE_DESC_STRUCT {
-  uinT16 NumParams;                // total # of params
-  const char *ShortName;           // short name for feature
-  const PARAM_DESC *ParamDesc;     // array - one per param
+    uinT16 NumParams;                // total # of params
+    const char *ShortName;           // short name for feature
+    const PARAM_DESC *ParamDesc;     // array - one per param
 };
 typedef FEATURE_DESC_STRUCT *FEATURE_DESC;
 
 struct FEATURE_STRUCT {
-  const FEATURE_DESC_STRUCT *Type;  // points to description of feature type
-  FLOAT32 Params[1];                // variable size array - params for feature
+    const FEATURE_DESC_STRUCT *Type;  // points to description of feature type
+    FLOAT32 Params[1];                // variable size array - params for feature
 };
 typedef FEATURE_STRUCT *FEATURE;
 
 struct FEATURE_SET_STRUCT {
-  uinT16 NumFeatures;            // number of features in set
-  uinT16 MaxNumFeatures;         // maximum size of feature set
-  FEATURE Features[1];           // variable size array of features
+    uinT16 NumFeatures;            // number of features in set
+    uinT16 MaxNumFeatures;         // maximum size of feature set
+    FEATURE Features[1];           // variable size array of features
 };
 typedef FEATURE_SET_STRUCT *FEATURE_SET;
 

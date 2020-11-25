@@ -36,43 +36,43 @@ class PangoFontInfo;  // defined in pango_font_info.h
 typedef std::unordered_map<string, string, StringHash> LigHash;
 
 class LigatureTable {
- public:
-  // Get a static instance of this class.
-  static LigatureTable* Get();
+public:
+    // Get a static instance of this class.
+    static LigatureTable* Get();
 
-  // Convert the utf8 string so that ligaturizable sequences, such as "fi" get
-  // replaced by the (utf8 code for) appropriate ligature characters. Only do so
-  // if the corresponding ligature character is renderable in the current font.
-  string AddLigatures(const string& str, const PangoFontInfo* font) const;
-  // Remove all ligatures.
-  string RemoveLigatures(const string& str) const;
-  // Remove only custom ligatures (eg. "ct") encoded in the private-use-area.
-  string RemoveCustomLigatures(const string& str) const;
+    // Convert the utf8 string so that ligaturizable sequences, such as "fi" get
+    // replaced by the (utf8 code for) appropriate ligature characters. Only do so
+    // if the corresponding ligature character is renderable in the current font.
+    string AddLigatures(const string& str, const PangoFontInfo* font) const;
+    // Remove all ligatures.
+    string RemoveLigatures(const string& str) const;
+    // Remove only custom ligatures (eg. "ct") encoded in the private-use-area.
+    string RemoveCustomLigatures(const string& str) const;
 
-  const LigHash& norm_to_lig_table() const {
-    return norm_to_lig_table_;
-  }
-  const LigHash& lig_to_norm_table() const {
-    return lig_to_norm_table_;
-  }
+    const LigHash& norm_to_lig_table() const {
+        return norm_to_lig_table_;
+    }
+    const LigHash& lig_to_norm_table() const {
+        return lig_to_norm_table_;
+    }
 
- protected:
-  LigatureTable();
-  // Initialize the hash tables mapping between ligature strings and the
-  // corresponding ligature characters.
-  void Init();
+protected:
+    LigatureTable();
+    // Initialize the hash tables mapping between ligature strings and the
+    // corresponding ligature characters.
+    void Init();
 
-  static std::unique_ptr<LigatureTable> instance_;
-  LigHash norm_to_lig_table_;
-  LigHash lig_to_norm_table_;
-  int min_lig_length_;
-  int max_lig_length_;
-  int min_norm_length_;
-  int max_norm_length_;
+    static std::unique_ptr<LigatureTable> instance_;
+    LigHash norm_to_lig_table_;
+    LigHash lig_to_norm_table_;
+    int min_lig_length_;
+    int max_lig_length_;
+    int min_norm_length_;
+    int max_norm_length_;
 
- private:
-  LigatureTable(const LigatureTable&);
-  void operator=(const LigatureTable&);
+private:
+    LigatureTable(const LigatureTable&);
+    void operator=(const LigatureTable&);
 };
 
 }  // namespace tesseract

@@ -34,37 +34,37 @@ class TrainingSample;
 // only works for the static classifier and only works if the ShapeTable
 // in classify is not NULL.
 class TessClassifier : public ShapeClassifier {
- public:
-  TessClassifier(bool pruner_only, tesseract::Classify* classify)
-    : pruner_only_(pruner_only), classify_(classify) {}
-  virtual ~TessClassifier() {}
+public:
+    TessClassifier(bool pruner_only, tesseract::Classify* classify)
+        : pruner_only_(pruner_only), classify_(classify) {}
+    virtual ~TessClassifier() {}
 
-  // Classifies the given [training] sample, writing to results.
-  // See ShapeClassifier for a full description.
-  virtual int UnicharClassifySample(const TrainingSample& sample, Pix* page_pix,
-                                    int debug, UNICHAR_ID keep_this,
-                                    GenericVector<UnicharRating>* results);
-  // Provides access to the ShapeTable that this classifier works with.
-  virtual const ShapeTable* GetShapeTable() const;
-  // Provides access to the UNICHARSET that this classifier works with.
-  // Only needs to be overridden if GetShapeTable() can return NULL.
-  virtual const UNICHARSET& GetUnicharset() const;
+    // Classifies the given [training] sample, writing to results.
+    // See ShapeClassifier for a full description.
+    virtual int UnicharClassifySample(const TrainingSample& sample, Pix* page_pix,
+                                      int debug, UNICHAR_ID keep_this,
+                                      GenericVector<UnicharRating>* results);
+    // Provides access to the ShapeTable that this classifier works with.
+    virtual const ShapeTable* GetShapeTable() const;
+    // Provides access to the UNICHARSET that this classifier works with.
+    // Only needs to be overridden if GetShapeTable() can return NULL.
+    virtual const UNICHARSET& GetUnicharset() const;
 
-  // Displays classification as the given shape_id. Creates as many windows
-  // as it feels fit, using index as a guide for placement. Adds any created
-  // windows to the windows output and returns a new index that may be used
-  // by any subsequent classifiers. Caller waits for the user to view and
-  // then destroys the windows by clearing the vector.
-  virtual int DisplayClassifyAs(const TrainingSample& sample, Pix* page_pix,
-                                int unichar_id, int index,
-                                PointerVector<ScrollView>* windows);
+    // Displays classification as the given shape_id. Creates as many windows
+    // as it feels fit, using index as a guide for placement. Adds any created
+    // windows to the windows output and returns a new index that may be used
+    // by any subsequent classifiers. Caller waits for the user to view and
+    // then destroys the windows by clearing the vector.
+    virtual int DisplayClassifyAs(const TrainingSample& sample, Pix* page_pix,
+                                  int unichar_id, int index,
+                                  PointerVector<ScrollView>* windows);
 
- private:
-  // Indicates that this classifier is to use just the ClassPruner, or the
-  // full classifier if false.
-  bool pruner_only_;
-  // Borrowed pointer to the actual Tesseract classifier.
-  tesseract::Classify* classify_;
+private:
+    // Indicates that this classifier is to use just the ClassPruner, or the
+    // full classifier if false.
+    bool pruner_only_;
+    // Borrowed pointer to the actual Tesseract classifier.
+    tesseract::Classify* classify_;
 };
 
 

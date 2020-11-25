@@ -31,8 +31,8 @@ struct PARA;
 
 class ROW:public ELIST_LINK
 {
-  friend void tweak_row_baseline(ROW *, double, double);
-  public:
+    friend void tweak_row_baseline(ROW *, double, double);
+public:
     ROW() {
     }                            //empty constructor
     ROW(                    //constructor
@@ -50,97 +50,97 @@ class ROW:public ELIST_LINK
         inT16 space);  //word gap
 
     WERD_LIST *word_list() {  //get words
-      return &words;
+        return &words;
     }
 
     float base_line(                     //compute baseline
-                    float xpos) const {  //at the position
-                                 //get spline value
-      return (float) baseline.y (xpos);
+        float xpos) const {  //at the position
+        //get spline value
+        return (float) baseline.y (xpos);
     }
     float x_height() const {  //return x height
-      return xheight;
+        return xheight;
     }
     void set_x_height(float new_xheight) {  // set x height
-      xheight = new_xheight;
+        xheight = new_xheight;
     }
     inT32 kern() const {  //return kerning
-      return kerning;
+        return kerning;
     }
     float body_size() const {  //return body size
-      return bodysize;
+        return bodysize;
     }
     void set_body_size(float new_size) {  // set body size
-      bodysize = new_size;
+        bodysize = new_size;
     }
     inT32 space() const {  //return spacing
-      return spacing;
+        return spacing;
     }
     float ascenders() const {  //return size
-      return ascrise;
+        return ascrise;
     }
     float descenders() const {  //return size
-      return descdrop;
+        return descdrop;
     }
     TBOX bounding_box() const {  //return bounding box
-      return bound_box;
+        return bound_box;
     }
     // Returns the bounding box including the desired combination of upper and
     // lower noise/diacritic elements.
     TBOX restricted_bounding_box(bool upper_dots, bool lower_dots) const;
 
     void set_lmargin(inT16 lmargin) {
-      lmargin_ = lmargin;
+        lmargin_ = lmargin;
     }
     void set_rmargin(inT16 rmargin) {
-      rmargin_ = rmargin;
+        rmargin_ = rmargin;
     }
     inT16 lmargin() const {
-      return lmargin_;
+        return lmargin_;
     }
     inT16 rmargin() const {
-      return rmargin_;
+        return rmargin_;
     }
 
     void set_has_drop_cap(bool has) {
-      has_drop_cap_ = has;
+        has_drop_cap_ = has;
     }
     bool has_drop_cap() const {
-      return has_drop_cap_;
+        return has_drop_cap_;
     }
 
     void set_para(PARA *p) {
-      para_ = p;
+        para_ = p;
     }
     PARA *para() const {
-      return para_;
+        return para_;
     }
 
     void recalc_bounding_box();  //recalculate BB
 
     void move(                    // reposition row
-              const ICOORD vec);  // by vector
+        const ICOORD vec);  // by vector
 
     void print(            //print
-               FILE *fp);  //file to print on
+        FILE *fp);  //file to print on
 
-    #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
     void plot(                 //draw one
-              ScrollView* window,   //window to draw in
-              ScrollView::Color colour);  //uniform colour
+        ScrollView* window,   //window to draw in
+        ScrollView::Color colour);  //uniform colour
     void plot(                 //draw one
-              ScrollView* window);  //in rainbow colours
+        ScrollView* window);  //in rainbow colours
 
     void plot_baseline(                  //draw the baseline
-                       ScrollView* window,    //window to draw in
-                       ScrollView::Color colour) {  //colour to draw
-                                 //draw it
-      baseline.plot (window, colour);
+        ScrollView* window,    //window to draw in
+        ScrollView::Color colour) {  //colour to draw
+        //draw it
+        baseline.plot (window, colour);
     }
-    #endif  // GRAPHICS_DISABLED
+#endif  // GRAPHICS_DISABLED
     ROW& operator= (const ROW & source);
 
-  private:
+private:
     inT32 kerning;               //inter char gap
     inT32 spacing;               //inter word gap
     TBOX bound_box;              //bounding box
@@ -148,7 +148,7 @@ class ROW:public ELIST_LINK
     float ascrise;               //size of ascenders
     float descdrop;              //-size of descenders
     float bodysize;              //CJK character size. (equals to
-                                 //xheight+ascrise by default)
+    //xheight+ascrise by default)
     WERD_LIST words;             //words
     QSPLINE baseline;            //baseline spline
 

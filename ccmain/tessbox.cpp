@@ -37,26 +37,26 @@
 
 namespace tesseract {
 void Tesseract::tess_segment_pass_n(int pass_n, WERD_RES *word) {
-  int saved_enable_assoc = 0;
-  int saved_chop_enable = 0;
+    int saved_enable_assoc = 0;
+    int saved_chop_enable = 0;
 
-  if (word->word->flag(W_DONT_CHOP)) {
-    saved_enable_assoc = wordrec_enable_assoc;
-    saved_chop_enable = chop_enable;
-    wordrec_enable_assoc.set_value(0);
-    chop_enable.set_value(0);
-  }
-  if (pass_n == 1)
-    set_pass1();
-  else
-    set_pass2();
-  recog_word(word);
-  if (word->best_choice == NULL)
-    word->SetupFake(*word->uch_set);
-  if (word->word->flag(W_DONT_CHOP)) {
-    wordrec_enable_assoc.set_value(saved_enable_assoc);
-    chop_enable.set_value(saved_chop_enable);
-  }
+    if (word->word->flag(W_DONT_CHOP)) {
+        saved_enable_assoc = wordrec_enable_assoc;
+        saved_chop_enable = chop_enable;
+        wordrec_enable_assoc.set_value(0);
+        chop_enable.set_value(0);
+    }
+    if (pass_n == 1)
+        set_pass1();
+    else
+        set_pass2();
+    recog_word(word);
+    if (word->best_choice == NULL)
+        word->SetupFake(*word->uch_set);
+    if (word->word->flag(W_DONT_CHOP)) {
+        wordrec_enable_assoc.set_value(saved_enable_assoc);
+        chop_enable.set_value(saved_chop_enable);
+    }
 }
 
 /**
@@ -67,7 +67,7 @@ void Tesseract::tess_segment_pass_n(int pass_n, WERD_RES *word) {
  * @param raw_choice before context
  */
 bool Tesseract::tess_acceptable_word(WERD_RES* word) {
-  return getDict().AcceptableResult(word);
+    return getDict().AcceptableResult(word);
 }
 
 
@@ -77,6 +77,6 @@ bool Tesseract::tess_acceptable_word(WERD_RES* word) {
  * Add the given word to the document dictionary
  */
 void Tesseract::tess_add_doc_word(WERD_CHOICE *word_choice) {
-  getDict().add_document_word(*word_choice);
+    getDict().add_document_word(*word_choice);
 }
 }  // namespace tesseract

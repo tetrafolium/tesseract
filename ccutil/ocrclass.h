@@ -80,16 +80,16 @@ typedef struct {                  /*single character */
 // characters sets will need to handle extended characters appropriately, but
 // *all* code needs to be prepared to receive UTF8 coded characters for
 // characters such as bullet and fancy quotes.
-  uinT16 char_code;              /*character itself */
-  inT16 left;                    /*of char (-1) */
-  inT16 right;                   /*of char (-1) */
-  inT16 top;                     /*of char (-1) */
-  inT16 bottom;                  /*of char (-1) */
-  inT16 font_index;              /*what font (0) */
-  uinT8 confidence;              /*0=perfect, 100=reject (0/100) */
-  uinT8 point_size;              /*of char, 72=i inch, (10) */
-  inT8 blanks;                   /*no of spaces before this char (1) */
-  uinT8 formatting;              /*char formatting (0) */
+    uinT16 char_code;              /*character itself */
+    inT16 left;                    /*of char (-1) */
+    inT16 right;                   /*of char (-1) */
+    inT16 top;                     /*of char (-1) */
+    inT16 bottom;                  /*of char (-1) */
+    inT16 font_index;              /*what font (0) */
+    uinT8 confidence;              /*0=perfect, 100=reject (0/100) */
+    uinT8 point_size;              /*of char, 72=i inch, (10) */
+    inT8 blanks;                   /*no of spaces before this char (1) */
+    uinT8 formatting;              /*char formatting (0) */
 } EANYCODE_CHAR;                 /*single character */
 
 /**********************************************************************
@@ -113,55 +113,55 @@ typedef bool (*PROGRESS_FUNC)(int progress, int left, int right, int top,
                               int bottom);
 
 class ETEXT_DESC {             // output header
- public:
-  inT16 count;     /// chars in this buffer(0)
-  inT16 progress;  /// percent complete increasing (0-100)
-  /** Progress monitor covers word recognition and it does not cover layout
-  * analysis.
-  * See Ray comment in https://github.com/tesseract-ocr/tesseract/pull/27 */
-  inT8 more_to_come;                /// true if not last
-  volatile inT8 ocr_alive;          /// ocr sets to 1, HP 0
-  inT8 err_code;                    /// for errcode use
-  CANCEL_FUNC cancel;               /// returns true to cancel
-  PROGRESS_FUNC progress_callback;  /// called whenever progress increases
-  void* cancel_this;                /// this or other data for cancel
-  struct timeval end_time;          /// Time to stop. Expected to be set only
-                                    /// by call to set_deadline_msecs().
-  EANYCODE_CHAR text[1];            /// character data
+public:
+    inT16 count;     /// chars in this buffer(0)
+    inT16 progress;  /// percent complete increasing (0-100)
+    /** Progress monitor covers word recognition and it does not cover layout
+    * analysis.
+    * See Ray comment in https://github.com/tesseract-ocr/tesseract/pull/27 */
+    inT8 more_to_come;                /// true if not last
+    volatile inT8 ocr_alive;          /// ocr sets to 1, HP 0
+    inT8 err_code;                    /// for errcode use
+    CANCEL_FUNC cancel;               /// returns true to cancel
+    PROGRESS_FUNC progress_callback;  /// called whenever progress increases
+    void* cancel_this;                /// this or other data for cancel
+    struct timeval end_time;          /// Time to stop. Expected to be set only
+    /// by call to set_deadline_msecs().
+    EANYCODE_CHAR text[1];            /// character data
 
-  ETEXT_DESC()
-      : count(0),
-        progress(0),
-        more_to_come(0),
-        ocr_alive(0),
-        err_code(0),
-        cancel(NULL),
-        progress_callback(NULL),
-        cancel_this(NULL) {
-    end_time.tv_sec = 0;
-    end_time.tv_usec = 0;
-  }
-
-  // Sets the end time to be deadline_msecs milliseconds from now.
-  void set_deadline_msecs(inT32 deadline_msecs) {
-    gettimeofday(&end_time, NULL);
-    inT32 deadline_secs = deadline_msecs / 1000;
-    end_time.tv_sec += deadline_secs;
-    end_time.tv_usec += (deadline_msecs -  deadline_secs * 1000) * 1000;
-    if (end_time.tv_usec > 1000000) {
-      end_time.tv_usec -= 1000000;
-      ++end_time.tv_sec;
+    ETEXT_DESC()
+        : count(0),
+          progress(0),
+          more_to_come(0),
+          ocr_alive(0),
+          err_code(0),
+          cancel(NULL),
+          progress_callback(NULL),
+          cancel_this(NULL) {
+        end_time.tv_sec = 0;
+        end_time.tv_usec = 0;
     }
-  }
 
-  // Returns false if we've not passed the end_time, or have not set a deadline.
-  bool deadline_exceeded() const {
-    if (end_time.tv_sec == 0 && end_time.tv_usec == 0) return false;
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    return (now.tv_sec > end_time.tv_sec || (now.tv_sec == end_time.tv_sec &&
-                                             now.tv_usec > end_time.tv_usec));
-  }
+    // Sets the end time to be deadline_msecs milliseconds from now.
+    void set_deadline_msecs(inT32 deadline_msecs) {
+        gettimeofday(&end_time, NULL);
+        inT32 deadline_secs = deadline_msecs / 1000;
+        end_time.tv_sec += deadline_secs;
+        end_time.tv_usec += (deadline_msecs -  deadline_secs * 1000) * 1000;
+        if (end_time.tv_usec > 1000000) {
+            end_time.tv_usec -= 1000000;
+            ++end_time.tv_sec;
+        }
+    }
+
+    // Returns false if we've not passed the end_time, or have not set a deadline.
+    bool deadline_exceeded() const {
+        if (end_time.tv_sec == 0 && end_time.tv_usec == 0) return false;
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        return (now.tv_sec > end_time.tv_sec || (now.tv_sec == end_time.tv_sec &&
+                now.tv_usec > end_time.tv_usec));
+    }
 };
 
 #endif  // CCUTIL_OCRCLASS_H_

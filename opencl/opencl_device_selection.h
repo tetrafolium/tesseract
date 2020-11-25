@@ -29,17 +29,17 @@
 
 // device type
 typedef enum {
-  DS_DEVICE_NATIVE_CPU = 0,
-  DS_DEVICE_OPENCL_DEVICE
+    DS_DEVICE_NATIVE_CPU = 0,
+    DS_DEVICE_OPENCL_DEVICE
 } ds_device_type;
 
 typedef struct {
-  ds_device_type  type;
-  cl_device_id    oclDeviceID;
-  char*           oclDeviceName;
-  char*           oclDriverVersion;
-  // a pointer to the score data, the content/format is application defined.
-  void*           score;
+    ds_device_type  type;
+    cl_device_id    oclDeviceID;
+    char*           oclDeviceName;
+    char*           oclDriverVersion;
+    // a pointer to the score data, the content/format is application defined.
+    void*           score;
 } ds_device;
 
 #endif  // USE_OPENCL

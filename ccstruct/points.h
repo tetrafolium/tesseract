@@ -29,20 +29,20 @@ class FCOORD;
 ///integer coordinate
 class ICOORD
 {
-  friend class FCOORD;
+    friend class FCOORD;
 
-  public:
+public:
     ///empty constructor
     ICOORD() {
-      xcoord = ycoord = 0;       //default zero
+        xcoord = ycoord = 0;       //default zero
     }
     ///constructor
     ///@param xin x value
     ///@param yin y value
     ICOORD(inT16 xin,
            inT16 yin) {
-      xcoord = xin;
-      ycoord = yin;
+        xcoord = xin;
+        ycoord = yin;
     }
     ///destructor
     ~ICOORD () {
@@ -50,20 +50,20 @@ class ICOORD
 
     ///access function
     inT16 x() const {
-      return xcoord;
+        return xcoord;
     }
     ///access_function
     inT16 y() const {
-      return ycoord;
+        return ycoord;
     }
 
     ///rewrite function
     void set_x(inT16 xin) {
-      xcoord = xin;              //write new value
+        xcoord = xin;              //write new value
     }
     ///rewrite function
     void set_y(inT16 yin) {  //value to set
-      ycoord = yin;
+        ycoord = yin;
     }
 
     /// Set from the given x,y, shrinking the vector to fit if needed.
@@ -71,40 +71,40 @@ class ICOORD
 
     ///find sq length
     float sqlength() const {
-      return (float) (xcoord * xcoord + ycoord * ycoord);
+        return (float) (xcoord * xcoord + ycoord * ycoord);
     }
 
     ///find length
     float length() const {
-      return (float) sqrt (sqlength ());
+        return (float) sqrt (sqlength ());
     }
 
     ///sq dist between pts
     float pt_to_pt_sqdist(const ICOORD &pt) const {
-      ICOORD gap;
+        ICOORD gap;
 
-      gap.xcoord = xcoord - pt.xcoord;
-      gap.ycoord = ycoord - pt.ycoord;
-      return gap.sqlength ();
+        gap.xcoord = xcoord - pt.xcoord;
+        gap.ycoord = ycoord - pt.ycoord;
+        return gap.sqlength ();
     }
 
     ///Distance between pts
     float pt_to_pt_dist(const ICOORD &pt) const {
-      return (float) sqrt (pt_to_pt_sqdist (pt));
+        return (float) sqrt (pt_to_pt_sqdist (pt));
     }
 
     ///find angle
     float angle() const {
-      return (float) atan2 ((double) ycoord, (double) xcoord);
+        return (float) atan2 ((double) ycoord, (double) xcoord);
     }
 
     ///test equality
     BOOL8 operator== (const ICOORD & other) const {
-      return xcoord == other.xcoord && ycoord == other.ycoord;
+        return xcoord == other.xcoord && ycoord == other.ycoord;
     }
     ///test inequality
     BOOL8 operator!= (const ICOORD & other) const {
-      return xcoord != other.xcoord || ycoord != other.ycoord;
+        return xcoord != other.xcoord || ycoord != other.ycoord;
     }
     ///rotate 90 deg anti
     friend ICOORD operator! (const ICOORD &);
@@ -153,17 +153,17 @@ class ICOORD
     // If swap is true, assumes a big/little-endian swap is needed.
     bool DeSerialize(bool swap, FILE* fp);
 
-  protected:
+protected:
     inT16 xcoord;                //< x value
     inT16 ycoord;                //< y value
 };
 
 class DLLSYM ICOORDELT:public ELIST_LINK, public ICOORD
-                                 //embedded coord list
+//embedded coord list
 {
-  public:
+public:
     ///empty constructor
-    ICOORDELT() {  
+    ICOORDELT() {
     }
     ///constructor from ICOORD
     ICOORDELT (ICOORD icoord):ICOORD (icoord) {
@@ -173,14 +173,14 @@ class DLLSYM ICOORDELT:public ELIST_LINK, public ICOORD
     ///@param yin y value
     ICOORDELT(inT16 xin,
               inT16 yin) {
-      xcoord = xin;
-      ycoord = yin;
+        xcoord = xin;
+        ycoord = yin;
     }
 
     static ICOORDELT* deep_copy(const ICOORDELT* src) {
-      ICOORDELT* elt = new ICOORDELT;
-      *elt = *src;
-      return elt;
+        ICOORDELT* elt = new ICOORDELT;
+        *elt = *src;
+        return elt;
     }
 
 };
@@ -188,7 +188,7 @@ class DLLSYM ICOORDELT:public ELIST_LINK, public ICOORD
 ELISTIZEH (ICOORDELT)
 class DLLSYM FCOORD
 {
-  public:
+public:
     ///empty constructor
     FCOORD() {
     }
@@ -197,57 +197,57 @@ class DLLSYM FCOORD
     ///@param yvalue y value
     FCOORD(float xvalue,
            float yvalue) {
-      xcoord = xvalue;           //set coords
-      ycoord = yvalue;
+        xcoord = xvalue;           //set coords
+        ycoord = yvalue;
     }
     FCOORD(                  //make from ICOORD
-           ICOORD icoord) {  //coords to set
-      xcoord = icoord.xcoord;
-      ycoord = icoord.ycoord;
+        ICOORD icoord) {  //coords to set
+        xcoord = icoord.xcoord;
+        ycoord = icoord.ycoord;
     }
 
     float x() const {  //get coords
-      return xcoord;
+        return xcoord;
     }
     float y() const {
-      return ycoord;
+        return ycoord;
     }
     ///rewrite function
     void set_x(float xin) {
-      xcoord = xin;              //write new value
+        xcoord = xin;              //write new value
     }
     ///rewrite function
     void set_y(float yin) {  //value to set
-      ycoord = yin;
+        ycoord = yin;
     }
 
     ///find sq length
     float sqlength() const {
-      return xcoord * xcoord + ycoord * ycoord;
+        return xcoord * xcoord + ycoord * ycoord;
     }
 
     ///find length
     float length() const {
-      return (float) sqrt (sqlength ());
+        return (float) sqrt (sqlength ());
     }
 
     ///sq dist between pts
     float pt_to_pt_sqdist(const FCOORD &pt) const {
-      FCOORD gap;
+        FCOORD gap;
 
-      gap.xcoord = xcoord - pt.xcoord;
-      gap.ycoord = ycoord - pt.ycoord;
-      return gap.sqlength ();
+        gap.xcoord = xcoord - pt.xcoord;
+        gap.ycoord = ycoord - pt.ycoord;
+        return gap.sqlength ();
     }
 
     ///Distance between pts
     float pt_to_pt_dist(const FCOORD &pt) const {
-      return (float) sqrt (pt_to_pt_sqdist (pt));
+        return (float) sqrt (pt_to_pt_sqdist (pt));
     }
 
     ///find angle
     float angle() const {
-      return (float) atan2 (ycoord, xcoord);
+        return (float) atan2 (ycoord, xcoord);
     }
     // Returns the standard feature direction corresponding to this.
     // See binary_angle_plus_pi below for a description of the direction.
@@ -274,11 +274,11 @@ class DLLSYM FCOORD
 
     ///test equality
     BOOL8 operator== (const FCOORD & other) {
-      return xcoord == other.xcoord && ycoord == other.ycoord;
+        return xcoord == other.xcoord && ycoord == other.ycoord;
     }
     ///test inequality
     BOOL8 operator!= (const FCOORD & other) {
-      return xcoord != other.xcoord || ycoord != other.ycoord;
+        return xcoord != other.xcoord || ycoord != other.ycoord;
     }
     ///rotate 90 deg anti
     friend FCOORD operator! (const FCOORD &);
@@ -314,7 +314,7 @@ class DLLSYM FCOORD
     ///divide
     friend FCOORD & operator/= (FCOORD &, float);
 
-  private:
+private:
     float xcoord;                //2 floating coords
     float ycoord;
 };

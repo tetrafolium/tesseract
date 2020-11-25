@@ -105,20 +105,20 @@ DefineFeature(OutlineFeatDesc, 3, 1, "of", OutlineFeatParams)
 
 // MUST be kept in-sync with ExtractorDefs in fxdefs.cpp.
 static const FEATURE_DESC_STRUCT *DescDefs[NUM_FEATURE_TYPES] = {
-  &MicroFeatureDesc,
-  &CharNormDesc,
-  &IntFeatDesc,
-  &GeoFeatDesc
+    &MicroFeatureDesc,
+    &CharNormDesc,
+    &IntFeatDesc,
+    &GeoFeatDesc
 };
 
 /*-----------------------------------------------------------------------------
               Public Code
 -----------------------------------------------------------------------------*/
 void InitFeatureDefs(FEATURE_DEFS_STRUCT *featuredefs) {
-  featuredefs->NumFeatureTypes = NUM_FEATURE_TYPES;
-  for (int i = 0; i < NUM_FEATURE_TYPES; ++i) {
-    featuredefs->FeatureDesc[i] = DescDefs[i];
-  }
+    featuredefs->NumFeatureTypes = NUM_FEATURE_TYPES;
+    for (int i = 0; i < NUM_FEATURE_TYPES; ++i) {
+        featuredefs->FeatureDesc[i] = DescDefs[i];
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -128,18 +128,18 @@ void InitFeatureDefs(FEATURE_DEFS_STRUCT *featuredefs) {
  *
  * @param CharDesc character description to be deallocated
  *
- * Globals: 
+ * Globals:
  * - none
  *
  * @note Exceptions: none
  * @note History: Wed May 23 13:52:19 1990, DSJ, Created.
  */
 void FreeCharDescription(CHAR_DESC CharDesc) {
-  if (CharDesc) {
-    for (size_t i = 0; i < CharDesc->NumFeatureSets; i++)
-      FreeFeatureSet (CharDesc->FeatureSets[i]);
-    Efree(CharDesc);
-  }
+    if (CharDesc) {
+        for (size_t i = 0; i < CharDesc->NumFeatureSets; i++)
+            FreeFeatureSet (CharDesc->FeatureSets[i]);
+        Efree(CharDesc);
+    }
 }                                /* FreeCharDescription */
 
 
@@ -148,7 +148,7 @@ void FreeCharDescription(CHAR_DESC CharDesc) {
  * Allocate a new character description, initialize its
  * feature sets to be empty, and return it.
  *
- * Globals: 
+ * Globals:
  * - none
  *
  * @return New character description structure.
@@ -156,14 +156,14 @@ void FreeCharDescription(CHAR_DESC CharDesc) {
  * @note History: Wed May 23 15:27:10 1990, DSJ, Created.
  */
 CHAR_DESC NewCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs) {
-  CHAR_DESC CharDesc;
-  CharDesc = (CHAR_DESC) Emalloc (sizeof (CHAR_DESC_STRUCT));
-  CharDesc->NumFeatureSets = FeatureDefs.NumFeatureTypes;
+    CHAR_DESC CharDesc;
+    CharDesc = (CHAR_DESC) Emalloc (sizeof (CHAR_DESC_STRUCT));
+    CharDesc->NumFeatureSets = FeatureDefs.NumFeatureTypes;
 
-  for (size_t i = 0; i < CharDesc->NumFeatureSets; i++)
-    CharDesc->FeatureSets[i] = NULL;
+    for (size_t i = 0; i < CharDesc->NumFeatureSets; i++)
+        CharDesc->FeatureSets[i] = NULL;
 
-  return (CharDesc);
+    return (CharDesc);
 
 }                                /* NewCharDescription */
 
@@ -188,45 +188,45 @@ CHAR_DESC NewCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs) {
  */
 void WriteCharDescription(const FEATURE_DEFS_STRUCT& FeatureDefs,
                           CHAR_DESC CharDesc, STRING* str) {
-  int NumSetsToWrite = 0;
+    int NumSetsToWrite = 0;
 
-  for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++)
-    if (CharDesc->FeatureSets[Type])
-      NumSetsToWrite++;
+    for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++)
+        if (CharDesc->FeatureSets[Type])
+            NumSetsToWrite++;
 
-  str->add_str_int(" ", NumSetsToWrite);
-  *str += "\n";
-  for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++) {
-    if (CharDesc->FeatureSets[Type]) {
-      *str += FeatureDefs.FeatureDesc[Type]->ShortName;
-      *str += " ";
-      WriteFeatureSet(CharDesc->FeatureSets[Type], str);
+    str->add_str_int(" ", NumSetsToWrite);
+    *str += "\n";
+    for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++) {
+        if (CharDesc->FeatureSets[Type]) {
+            *str += FeatureDefs.FeatureDesc[Type]->ShortName;
+            *str += " ";
+            WriteFeatureSet(CharDesc->FeatureSets[Type], str);
+        }
     }
-  }
 }                                /* WriteCharDescription */
 
 // Return whether all of the fields of the given feature set
 // are well defined (not inf or nan).
 bool ValidCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs,
                           CHAR_DESC CharDesc) {
-  bool anything_written = false;
-  bool well_formed = true;
-  for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++) {
-    if (CharDesc->FeatureSets[Type]) {
-      for (int i = 0; i < CharDesc->FeatureSets[Type]->NumFeatures; i++) {
-        FEATURE feat = CharDesc->FeatureSets[Type]->Features[i];
-        for (int p = 0; p < feat->Type->NumParams; p++) {
-          if (isnan(feat->Params[p]) || isinf(feat->Params[p]))
-            well_formed = false;
-          else
-            anything_written = true;
+    bool anything_written = false;
+    bool well_formed = true;
+    for (size_t Type = 0; Type < CharDesc->NumFeatureSets; Type++) {
+        if (CharDesc->FeatureSets[Type]) {
+            for (int i = 0; i < CharDesc->FeatureSets[Type]->NumFeatures; i++) {
+                FEATURE feat = CharDesc->FeatureSets[Type]->Features[i];
+                for (int p = 0; p < feat->Type->NumParams; p++) {
+                    if (isnan(feat->Params[p]) || isinf(feat->Params[p]))
+                        well_formed = false;
+                    else
+                        anything_written = true;
+                }
+            }
+        } else {
+            return false;
         }
-      }
-    } else {
-      return false;
     }
-  }
-  return anything_written && well_formed;
+    return anything_written && well_formed;
 }                                /* ValidCharDescription */
 
 /*---------------------------------------------------------------------------*/
@@ -241,35 +241,35 @@ bool ValidCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs,
              ...
    @endverbatim
  *
- * Globals: 
+ * Globals:
  * - none
- * 
+ *
  * @param FeatureDefs    definitions of feature types/extractors
  * @param File open text file to read character description from
  * @return Character description read from File.
- * @note Exceptions: 
+ * @note Exceptions:
  * - ILLEGAL_NUM_SETS
  * @note History: Wed May 23 17:32:48 1990, DSJ, Created.
  */
 CHAR_DESC ReadCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs,
                               FILE *File) {
-  int NumSetsToRead;
-  char ShortName[FEAT_NAME_SIZE];
-  CHAR_DESC CharDesc;
-  int Type;
+    int NumSetsToRead;
+    char ShortName[FEAT_NAME_SIZE];
+    CHAR_DESC CharDesc;
+    int Type;
 
-  if (tfscanf(File, "%d", &NumSetsToRead) != 1 ||
-    NumSetsToRead < 0 || NumSetsToRead > FeatureDefs.NumFeatureTypes)
-    DoError (ILLEGAL_NUM_SETS, "Illegal number of feature sets");
+    if (tfscanf(File, "%d", &NumSetsToRead) != 1 ||
+            NumSetsToRead < 0 || NumSetsToRead > FeatureDefs.NumFeatureTypes)
+        DoError (ILLEGAL_NUM_SETS, "Illegal number of feature sets");
 
-  CharDesc = NewCharDescription(FeatureDefs);
-  for (; NumSetsToRead > 0; NumSetsToRead--) {
-    tfscanf(File, "%s", ShortName);
-    Type = ShortNameToFeatureType(FeatureDefs, ShortName);
-    CharDesc->FeatureSets[Type] =
-      ReadFeatureSet (File, FeatureDefs.FeatureDesc[Type]);
-  }
-  return (CharDesc);
+    CharDesc = NewCharDescription(FeatureDefs);
+    for (; NumSetsToRead > 0; NumSetsToRead--) {
+        tfscanf(File, "%s", ShortName);
+        Type = ShortNameToFeatureType(FeatureDefs, ShortName);
+        CharDesc->FeatureSets[Type] =
+            ReadFeatureSet (File, FeatureDefs.FeatureDesc[Type]);
+    }
+    return (CharDesc);
 
 }                                // ReadCharDescription
 
@@ -292,12 +292,12 @@ CHAR_DESC ReadCharDescription(const FEATURE_DEFS_STRUCT &FeatureDefs,
  */
 uint32_t ShortNameToFeatureType(const FEATURE_DEFS_STRUCT &FeatureDefs,
                                 const char *ShortName) {
-  int i;
+    int i;
 
-  for (i = 0; i < FeatureDefs.NumFeatureTypes; i++)
-    if (!strcmp ((FeatureDefs.FeatureDesc[i]->ShortName), ShortName))
-      return static_cast<uint32_t>(i);
-  DoError (ILLEGAL_SHORT_NAME, "Illegal short name for a feature");
-  return 0;
+    for (i = 0; i < FeatureDefs.NumFeatureTypes; i++)
+        if (!strcmp ((FeatureDefs.FeatureDesc[i]->ShortName), ShortName))
+            return static_cast<uint32_t>(i);
+    DoError (ILLEGAL_SHORT_NAME, "Illegal short name for a feature");
+    return 0;
 
 }                                // ShortNameToFeatureType

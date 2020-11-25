@@ -26,10 +26,10 @@
 namespace tesseract {
 
 class CUtil : public CCUtil {
- public:
-  CUtil();
-  ~CUtil();
-  void read_variables(const char *filename, bool global_only);
+public:
+    CUtil();
+    ~CUtil();
+    void read_variables(const char *filename, bool global_only);
 };
 
 }  // namespace tesseract

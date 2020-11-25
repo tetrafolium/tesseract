@@ -29,36 +29,36 @@
 
 enum WERD_FLAGS
 {
-  W_SEGMENTED,                   //< correctly segmented
-  W_ITALIC,                      //< italic text
-  W_BOLD,                        //< bold text
-  W_BOL,                         //< start of line
-  W_EOL,                         //< end of line
-  W_NORMALIZED,                  //< flags
-  W_SCRIPT_HAS_XHEIGHT,          //< x-height concept makes sense.
-  W_SCRIPT_IS_LATIN,             //< Special case latin for y. splitting.
-  W_DONT_CHOP,                   //< fixed pitch chopped
-  W_REP_CHAR,                    //< repeated character
-  W_FUZZY_SP,                    //< fuzzy space
-  W_FUZZY_NON,                   //< fuzzy nonspace
-  W_INVERSE                      //< white on black
+    W_SEGMENTED,                   //< correctly segmented
+    W_ITALIC,                      //< italic text
+    W_BOLD,                        //< bold text
+    W_BOL,                         //< start of line
+    W_EOL,                         //< end of line
+    W_NORMALIZED,                  //< flags
+    W_SCRIPT_HAS_XHEIGHT,          //< x-height concept makes sense.
+    W_SCRIPT_IS_LATIN,             //< Special case latin for y. splitting.
+    W_DONT_CHOP,                   //< fixed pitch chopped
+    W_REP_CHAR,                    //< repeated character
+    W_FUZZY_SP,                    //< fuzzy space
+    W_FUZZY_NON,                   //< fuzzy nonspace
+    W_INVERSE                      //< white on black
 };
 
 enum DISPLAY_FLAGS
 {
-  /* Display flags bit number allocations */
-  DF_BOX,                        //< Bounding box
-  DF_TEXT,                       //< Correct ascii
-  DF_POLYGONAL,                  //< Polyg approx
-  DF_EDGE_STEP,                  //< Edge steps
-  DF_BN_POLYGONAL,               //< BL normalisd polyapx
-  DF_BLAMER                      //< Blamer information
+    /* Display flags bit number allocations */
+    DF_BOX,                        //< Bounding box
+    DF_TEXT,                       //< Correct ascii
+    DF_POLYGONAL,                  //< Polyg approx
+    DF_EDGE_STEP,                  //< Edge steps
+    DF_BN_POLYGONAL,               //< BL normalisd polyapx
+    DF_BLAMER                      //< Blamer information
 };
 
 class ROW;                       //forward decl
 
 class WERD : public ELIST2_LINK {
-  public:
+public:
     WERD() {}
     // WERD constructed with:
     //   blob_list - blobs of the word (we take this list's contents)
@@ -93,25 +93,25 @@ class WERD : public ELIST2_LINK {
 
     // Accessors for reject / DUFF blobs in various formats
     C_BLOB_LIST *rej_cblob_list() {  // compact format
-      return &rej_cblobs;
+        return &rej_cblobs;
     }
 
     // Accessors for good blobs in various formats.
     C_BLOB_LIST *cblob_list() {  // get compact blobs
-      return &cblobs;
+        return &cblobs;
     }
 
     uinT8 space() {  // access function
-      return blanks;
+        return blanks;
     }
     void set_blanks(uinT8 new_blanks) {
-      blanks = new_blanks;
+        blanks = new_blanks;
     }
     int script_id() const {
-      return script_id_;
+        return script_id_;
     }
     void set_script_id(int id) {
-      script_id_ = id;
+        script_id_ = id;
     }
 
     // Returns the (default) bounding box including all the dots.
@@ -122,15 +122,25 @@ class WERD : public ELIST2_LINK {
     // Returns the bounding box of only the good blobs.
     TBOX true_bounding_box() const;
 
-    const char *text() const { return correct.string(); }
-    void set_text(const char *new_text) { correct = new_text; }
+    const char *text() const {
+        return correct.string();
+    }
+    void set_text(const char *new_text) {
+        correct = new_text;
+    }
 
-    BOOL8 flag(WERD_FLAGS mask) const { return flags.bit(mask); }
-    void set_flag(WERD_FLAGS mask, BOOL8 value) { flags.set_bit(mask, value); }
+    BOOL8 flag(WERD_FLAGS mask) const {
+        return flags.bit(mask);
+    }
+    void set_flag(WERD_FLAGS mask, BOOL8 value) {
+        flags.set_bit(mask, value);
+    }
 
-    BOOL8 display_flag(uinT8 flag) const { return disp_flags.bit(flag); }
+    BOOL8 display_flag(uinT8 flag) const {
+        return disp_flags.bit(flag);
+    }
     void set_display_flag(uinT8 flag, BOOL8 value) {
-      disp_flags.set_bit(flag, value);
+        disp_flags.set_bit(flag, value);
     }
 
     WERD *shallow_copy();  // shallow copy word
@@ -147,7 +157,7 @@ class WERD : public ELIST2_LINK {
     // tprintf word metadata (but not blob innards)
     void print();
 
-    #ifndef GRAPHICS_DISABLED
+#ifndef GRAPHICS_DISABLED
     // plot word on window in a uniform colour
     void plot(ScrollView *window, ScrollView::Color colour);
 
@@ -159,7 +169,7 @@ class WERD : public ELIST2_LINK {
 
     // plot rejected blobs in a rainbow of colours
     void plot_rej_blobs(ScrollView *window);
-    #endif  // GRAPHICS_DISABLED
+#endif  // GRAPHICS_DISABLED
 
     // Removes noise from the word by moving small outlines to the rej_cblobs
     // list, based on the size_threshold.
@@ -181,7 +191,7 @@ class WERD : public ELIST2_LINK {
                              const GenericVector<C_OUTLINE *> &outlines,
                              bool *make_next_word_fuzzy);
 
- private:
+private:
     uinT8 blanks;                // no of blanks
     uinT8 dummy;                 // padding
     BITS16 flags;                // flags about word

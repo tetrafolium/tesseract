@@ -36,21 +36,21 @@
 
 void complete_edge(CRACKEDGE *start,  //start of loop
                    C_OUTLINE_IT* outline_it) {
-  ScrollView::Color colour;                 //colour to draw in
-  inT16 looplength;              //steps in loop
-  ICOORD botleft;                //bounding box
-  ICOORD topright;
-  C_OUTLINE *outline;            //new outline
+    ScrollView::Color colour;                 //colour to draw in
+    inT16 looplength;              //steps in loop
+    ICOORD botleft;                //bounding box
+    ICOORD topright;
+    C_OUTLINE *outline;            //new outline
 
-                                 //check length etc.
-  colour = check_path_legal (start);
+    //check length etc.
+    colour = check_path_legal (start);
 
-  if (colour == ScrollView::RED || colour == ScrollView::BLUE) {
-    looplength = loop_bounding_box (start, botleft, topright);
-    outline = new C_OUTLINE (start, botleft, topright, looplength);
-                                 //add to list
-    outline_it->add_after_then_move (outline);
-  }
+    if (colour == ScrollView::RED || colour == ScrollView::BLUE) {
+        looplength = loop_bounding_box (start, botleft, topright);
+        outline = new C_OUTLINE (start, botleft, topright, looplength);
+        //add to list
+        outline_it->add_after_then_move (outline);
+    }
 }
 
 
@@ -65,49 +65,49 @@ void complete_edge(CRACKEDGE *start,  //start of loop
  **********************************************************************/
 
 ScrollView::Color check_path_legal(                  //certify outline
-                        CRACKEDGE *start  //start of loop
-                       ) {
-  int lastchain;              //last chain code
-  int chaindiff;               //chain code diff
-  inT32 length;                  //length of loop
-  inT32 chainsum;                //sum of chain diffs
-  CRACKEDGE *edgept;             //current point
-  const ERRCODE ED_ILLEGAL_SUM = "Illegal sum of chain codes";
+    CRACKEDGE *start  //start of loop
+) {
+    int lastchain;              //last chain code
+    int chaindiff;               //chain code diff
+    inT32 length;                  //length of loop
+    inT32 chainsum;                //sum of chain diffs
+    CRACKEDGE *edgept;             //current point
+    const ERRCODE ED_ILLEGAL_SUM = "Illegal sum of chain codes";
 
-  length = 0;
-  chainsum = 0;                  //sum of chain codes
-  edgept = start;
-  lastchain = edgept->prev->stepdir; //previous chain code
-  do {
-    length++;
-    if (edgept->stepdir != lastchain) {
-                                 //chain code difference
-      chaindiff = edgept->stepdir - lastchain;
-      if (chaindiff > 2)
-        chaindiff -= 4;
-      else if (chaindiff < -2)
-        chaindiff += 4;
-      chainsum += chaindiff;     //sum differences
-      lastchain = edgept->stepdir;
+    length = 0;
+    chainsum = 0;                  //sum of chain codes
+    edgept = start;
+    lastchain = edgept->prev->stepdir; //previous chain code
+    do {
+        length++;
+        if (edgept->stepdir != lastchain) {
+            //chain code difference
+            chaindiff = edgept->stepdir - lastchain;
+            if (chaindiff > 2)
+                chaindiff -= 4;
+            else if (chaindiff < -2)
+                chaindiff += 4;
+            chainsum += chaindiff;     //sum differences
+            lastchain = edgept->stepdir;
+        }
+        edgept = edgept->next;
     }
-    edgept = edgept->next;
-  }
-  while (edgept != start && length < C_OUTLINE::kMaxOutlineLength);
+    while (edgept != start && length < C_OUTLINE::kMaxOutlineLength);
 
-  if ((chainsum != 4 && chainsum != -4)
-  || edgept != start || length < MINEDGELENGTH) {
-    if (edgept != start) {
-     return ScrollView::YELLOW;
-    } else if (length < MINEDGELENGTH) {
-     return ScrollView::MAGENTA;
-    } else {
-      ED_ILLEGAL_SUM.error ("check_path_legal", TESSLOG, "chainsum=%d",
-        chainsum);
-      return ScrollView::GREEN;
+    if ((chainsum != 4 && chainsum != -4)
+            || edgept != start || length < MINEDGELENGTH) {
+        if (edgept != start) {
+            return ScrollView::YELLOW;
+        } else if (length < MINEDGELENGTH) {
+            return ScrollView::MAGENTA;
+        } else {
+            ED_ILLEGAL_SUM.error ("check_path_legal", TESSLOG, "chainsum=%d",
+                                  chainsum);
+            return ScrollView::GREEN;
+        }
     }
-  }
-                                 //colour on inside
-  return chainsum < 0 ? ScrollView::BLUE : ScrollView::RED;
+    //colour on inside
+    return chainsum < 0 ? ScrollView::BLUE : ScrollView::RED;
 }
 
 /**********************************************************************
@@ -117,43 +117,43 @@ ScrollView::Color check_path_legal(                  //certify outline
  **********************************************************************/
 
 inT16 loop_bounding_box(                    //get bounding box
-                        CRACKEDGE *&start,  //edge loop
-                        ICOORD &botleft,    //bounding box
-                        ICOORD &topright) {
-  inT16 length;                  //length of loop
-  inT16 leftmost;                //on top row
-  CRACKEDGE *edgept;             //current point
-  CRACKEDGE *realstart;          //topleft start
+    CRACKEDGE *&start,  //edge loop
+    ICOORD &botleft,    //bounding box
+    ICOORD &topright) {
+    inT16 length;                  //length of loop
+    inT16 leftmost;                //on top row
+    CRACKEDGE *edgept;             //current point
+    CRACKEDGE *realstart;          //topleft start
 
-  edgept = start;
-  realstart = start;
-  botleft = topright = ICOORD (edgept->pos.x (), edgept->pos.y ());
-  leftmost = edgept->pos.x ();
-  length = 0;                    //coutn length
-  do {
-    edgept = edgept->next;
-    if (edgept->pos.x () < botleft.x ())
-                                 //get bounding box
-      botleft.set_x (edgept->pos.x ());
-    else if (edgept->pos.x () > topright.x ())
-      topright.set_x (edgept->pos.x ());
-    if (edgept->pos.y () < botleft.y ())
-                                 //get bounding box
-      botleft.set_y (edgept->pos.y ());
-    else if (edgept->pos.y () > topright.y ()) {
-      realstart = edgept;
-      leftmost = edgept->pos.x ();
-      topright.set_y (edgept->pos.y ());
+    edgept = start;
+    realstart = start;
+    botleft = topright = ICOORD (edgept->pos.x (), edgept->pos.y ());
+    leftmost = edgept->pos.x ();
+    length = 0;                    //coutn length
+    do {
+        edgept = edgept->next;
+        if (edgept->pos.x () < botleft.x ())
+            //get bounding box
+            botleft.set_x (edgept->pos.x ());
+        else if (edgept->pos.x () > topright.x ())
+            topright.set_x (edgept->pos.x ());
+        if (edgept->pos.y () < botleft.y ())
+            //get bounding box
+            botleft.set_y (edgept->pos.y ());
+        else if (edgept->pos.y () > topright.y ()) {
+            realstart = edgept;
+            leftmost = edgept->pos.x ();
+            topright.set_y (edgept->pos.y ());
+        }
+        else if (edgept->pos.y () == topright.y ()
+                 && edgept->pos.x () < leftmost) {
+            //leftmost on line
+            leftmost = edgept->pos.x ();
+            realstart = edgept;
+        }
+        length++;                    //count elements
     }
-    else if (edgept->pos.y () == topright.y ()
-    && edgept->pos.x () < leftmost) {
-                                 //leftmost on line
-      leftmost = edgept->pos.x ();
-      realstart = edgept;
-    }
-    length++;                    //count elements
-  }
-  while (edgept != start);
-  start = realstart;             //shift it to topleft
-  return length;
+    while (edgept != start);
+    start = realstart;             //shift it to topleft
+    return length;
 }

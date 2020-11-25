@@ -49,18 +49,18 @@ namespace tesseract {
  *   100  =  "no way jay"
  **********************************************************************/
 PRIORITY Wordrec::grade_split_length(register SPLIT *split) {
-  PRIORITY grade;
-  float split_length;
+    PRIORITY grade;
+    float split_length;
 
-  split_length =
-      split->point1->WeightedDistance(*split->point2, chop_x_y_weight);
+    split_length =
+        split->point1->WeightedDistance(*split->point2, chop_x_y_weight);
 
-  if (split_length <= 0)
-    grade = 0;
-  else
-    grade = sqrt (split_length) * chop_split_dist_knob;
+    if (split_length <= 0)
+        grade = 0;
+    else
+        grade = sqrt (split_length) * chop_split_dist_knob;
 
-  return (MAX (0.0, grade));
+    return (MAX (0.0, grade));
 }
 
 
@@ -72,18 +72,18 @@ PRIORITY Wordrec::grade_split_length(register SPLIT *split) {
  *   100  =  "no way jay"
  **********************************************************************/
 PRIORITY Wordrec::grade_sharpness(register SPLIT *split) {
-  PRIORITY grade;
+    PRIORITY grade;
 
-  grade = point_priority (split->point1) + point_priority (split->point2);
+    grade = point_priority (split->point1) + point_priority (split->point2);
 
-  if (grade < -360.0)
-    grade = 0;
-  else
-    grade += 360.0;
+    if (grade < -360.0)
+        grade = 0;
+    else
+        grade += 360.0;
 
-  grade *= chop_sharpness_knob;       /* Values 0 to -360 */
+    grade *= chop_sharpness_knob;       /* Values 0 to -360 */
 
-  return (grade);
+    return (grade);
 }
 
 

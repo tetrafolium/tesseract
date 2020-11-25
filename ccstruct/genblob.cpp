@@ -28,11 +28,11 @@
  **********************************************************************/
 
 int c_blob_comparator(                     // sort blobs
-                      const void *blob1p,  // ptr to ptr to blob1
-                      const void *blob2p   // ptr to ptr to blob2
-                     ) {
-  C_BLOB *blob1 = *(C_BLOB **) blob1p;
-  C_BLOB *blob2 = *(C_BLOB **) blob2p;
+    const void *blob1p,  // ptr to ptr to blob1
+    const void *blob2p   // ptr to ptr to blob2
+) {
+    C_BLOB *blob1 = *(C_BLOB **) blob1p;
+    C_BLOB *blob2 = *(C_BLOB **) blob2p;
 
-  return blob1->bounding_box ().left () - blob2->bounding_box ().left ();
+    return blob1->bounding_box ().left () - blob2->bounding_box ().left ();
 }

@@ -25,61 +25,61 @@ namespace tesseract {
 
 // Runs multiple networks in parallel, interlacing their outputs.
 class Parallel : public Plumbing {
- public:
-  // ni_ and no_ will be set by AddToStack.
-  Parallel(const STRING& name, NetworkType type);
-  virtual ~Parallel();
+public:
+    // ni_ and no_ will be set by AddToStack.
+    Parallel(const STRING& name, NetworkType type);
+    virtual ~Parallel();
 
-  // Returns the shape output from the network given an input shape (which may
-  // be partially unknown ie zero).
-  virtual StaticShape OutputShape(const StaticShape& input_shape) const;
+    // Returns the shape output from the network given an input shape (which may
+    // be partially unknown ie zero).
+    virtual StaticShape OutputShape(const StaticShape& input_shape) const;
 
-  virtual STRING spec() const {
-    STRING spec;
-    if (type_ == NT_PAR_2D_LSTM) {
-      // We have 4 LSTMs operating in parallel here, so the size of each is
-      // the number of outputs/4.
-      spec.add_str_int("L2xy", no_ / 4);
-    } else if (type_ == NT_PAR_RL_LSTM) {
-      // We have 2 LSTMs operating in parallel here, so the size of each is
-      // the number of outputs/2.
-      if (stack_[0]->type() == NT_LSTM_SUMMARY)
-        spec.add_str_int("Lbxs", no_ / 2);
-      else
-        spec.add_str_int("Lbx", no_ / 2);
-    } else {
-      if (type_ == NT_REPLICATED) {
-        spec.add_str_int("R", stack_.size());
-        spec += "(";
-        spec += stack_[0]->spec();
-      } else {
-        spec = "(";
-        for (int i = 0; i < stack_.size(); ++i) spec += stack_[i]->spec();
-      }
-      spec += ")";
+    virtual STRING spec() const {
+        STRING spec;
+        if (type_ == NT_PAR_2D_LSTM) {
+            // We have 4 LSTMs operating in parallel here, so the size of each is
+            // the number of outputs/4.
+            spec.add_str_int("L2xy", no_ / 4);
+        } else if (type_ == NT_PAR_RL_LSTM) {
+            // We have 2 LSTMs operating in parallel here, so the size of each is
+            // the number of outputs/2.
+            if (stack_[0]->type() == NT_LSTM_SUMMARY)
+                spec.add_str_int("Lbxs", no_ / 2);
+            else
+                spec.add_str_int("Lbx", no_ / 2);
+        } else {
+            if (type_ == NT_REPLICATED) {
+                spec.add_str_int("R", stack_.size());
+                spec += "(";
+                spec += stack_[0]->spec();
+            } else {
+                spec = "(";
+                for (int i = 0; i < stack_.size(); ++i) spec += stack_[i]->spec();
+            }
+            spec += ")";
+        }
+        return spec;
     }
-    return spec;
-  }
 
-  // Runs forward propagation of activations on the input line.
-  // See Network for a detailed discussion of the arguments.
-  virtual void Forward(bool debug, const NetworkIO& input,
-                       const TransposedArray* input_transpose,
-                       NetworkScratch* scratch, NetworkIO* output);
+    // Runs forward propagation of activations on the input line.
+    // See Network for a detailed discussion of the arguments.
+    virtual void Forward(bool debug, const NetworkIO& input,
+                         const TransposedArray* input_transpose,
+                         NetworkScratch* scratch, NetworkIO* output);
 
-  // Runs backward propagation of errors on the deltas line.
-  // See Network for a detailed discussion of the arguments.
-  virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                        NetworkScratch* scratch,
-                        NetworkIO* back_deltas);
+    // Runs backward propagation of errors on the deltas line.
+    // See Network for a detailed discussion of the arguments.
+    virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
+                          NetworkScratch* scratch,
+                          NetworkIO* back_deltas);
 
- private:
-  // If *this is a NT_REPLICATED, then it feeds a replicated network with
-  // identical inputs, and it would be extremely wasteful for them to each
-  // calculate and store the same transpose of the inputs, so Parallel does it
-  // and passes a pointer to the replicated network, allowing it to use the
-  // transpose on the next call to Backward.
-  TransposedArray transposed_input_;
+private:
+    // If *this is a NT_REPLICATED, then it feeds a replicated network with
+    // identical inputs, and it would be extremely wasteful for them to each
+    // calculate and store the same transpose of the inputs, so Parallel does it
+    // and passes a pointer to the replicated network, allowing it to use the
+    // transpose on the next call to Backward.
+    TransposedArray transposed_input_;
 };
 
 }  // namespace tesseract.

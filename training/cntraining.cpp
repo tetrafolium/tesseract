@@ -45,8 +45,8 @@ DECLARE_STRING_PARAM_FLAG(D);
           Public Function Prototypes
 ----------------------------------------------------------------------------*/
 int main (
-     int  argc,
-     char  **argv);
+    int  argc,
+    char  **argv);
 
 /*----------------------------------------------------------------------------
           Private Function Prototypes
@@ -62,11 +62,11 @@ PARAMDESC *ConvertToPARAMDESC(
 */
 
 void WriteProtos(
-     FILE  *File,
-     uinT16  N,
-     LIST  ProtoList,
-     BOOL8  WriteSigProtos,
-     BOOL8  WriteInsigProtos);
+    FILE  *File,
+    uinT16  N,
+    LIST  ProtoList,
+    BOOL8  WriteSigProtos,
+    BOOL8  WriteInsigProtos);
 
 /*----------------------------------------------------------------------------
           Global Data Definitions and Declarations
@@ -75,7 +75,7 @@ void WriteProtos(
 //-M 0.025   -B 0.05   -I 0.8   -C 1e-3
 CLUSTERCONFIG  CNConfig =
 {
-  elliptical, 0.025, 0.05, 0.8, 1e-3, 0
+    elliptical, 0.025, 0.05, 0.8, 1e-3, 0
 };
 
 /*----------------------------------------------------------------------------
@@ -131,78 +131,78 @@ CLUSTERCONFIG  CNConfig =
 * @note History: Fri Aug 18 08:56:17 1989, DSJ, Created.
 */
 int main(int argc, char *argv[]) {
-  // Set the global Config parameters before parsing the command line.
-  Config = CNConfig;
+    // Set the global Config parameters before parsing the command line.
+    Config = CNConfig;
 
-  const char  *PageName;
-  FILE  *TrainingPage;
-  LIST  CharList = NIL_LIST;
-  CLUSTERER *Clusterer = nullptr;
-  LIST    ProtoList = NIL_LIST;
-  LIST    NormProtoList = NIL_LIST;
-  LIST pCharList;
-  LABELEDLIST CharSample;
-  FEATURE_DEFS_STRUCT FeatureDefs;
-  InitFeatureDefs(&FeatureDefs);
+    const char  *PageName;
+    FILE  *TrainingPage;
+    LIST  CharList = NIL_LIST;
+    CLUSTERER *Clusterer = nullptr;
+    LIST    ProtoList = NIL_LIST;
+    LIST    NormProtoList = NIL_LIST;
+    LIST pCharList;
+    LABELEDLIST CharSample;
+    FEATURE_DEFS_STRUCT FeatureDefs;
+    InitFeatureDefs(&FeatureDefs);
 
-  ParseArguments(&argc, &argv);
-  int num_fonts = 0;
-  while ((PageName = GetNextFilename(argc, argv)) != nullptr) {
-    printf("Reading %s ...\n", PageName);
-    TrainingPage = Efopen(PageName, "rb");
-    ReadTrainingSamples(FeatureDefs, PROGRAM_FEATURE_TYPE, 100, nullptr,
-                        TrainingPage, &CharList);
-    fclose(TrainingPage);
-    ++num_fonts;
-  }
-  printf("Clustering ...\n");
-  // To allow an individual font to form a separate cluster,
-  // reduce the min samples:
-  // Config.MinSamples = 0.5 / num_fonts;
-  pCharList = CharList;
-  // The norm protos will count the source protos, so we keep them here in
-  // freeable_protos, so they can be freed later.
-  GenericVector<LIST> freeable_protos;
-  iterate(pCharList) {
-    //Cluster
-    CharSample = (LABELEDLIST)first_node(pCharList);
-    Clusterer =
-      SetUpForClustering(FeatureDefs, CharSample, PROGRAM_FEATURE_TYPE);
-    if (Clusterer == nullptr) {  // To avoid a SIGSEGV
-      fprintf(stderr, "Error: NULL clusterer!\n");
-      return 1;
+    ParseArguments(&argc, &argv);
+    int num_fonts = 0;
+    while ((PageName = GetNextFilename(argc, argv)) != nullptr) {
+        printf("Reading %s ...\n", PageName);
+        TrainingPage = Efopen(PageName, "rb");
+        ReadTrainingSamples(FeatureDefs, PROGRAM_FEATURE_TYPE, 100, nullptr,
+                            TrainingPage, &CharList);
+        fclose(TrainingPage);
+        ++num_fonts;
     }
-    float SavedMinSamples = Config.MinSamples;
-    // To disable the tendency to produce a single cluster for all fonts,
-    // make MagicSamples an impossible to achieve number:
-    // Config.MagicSamples = CharSample->SampleCount * 10;
-    Config.MagicSamples = CharSample->SampleCount;
-    while (Config.MinSamples > 0.001) {
-      ProtoList = ClusterSamples(Clusterer, &Config);
-      if (NumberOfProtos(ProtoList, 1, 0) > 0) {
-        break;
-      } else {
-        Config.MinSamples *= 0.95;
-        printf("0 significant protos for %s."
-               " Retrying clustering with MinSamples = %f%%\n",
-               CharSample->Label, Config.MinSamples);
-      }
+    printf("Clustering ...\n");
+    // To allow an individual font to form a separate cluster,
+    // reduce the min samples:
+    // Config.MinSamples = 0.5 / num_fonts;
+    pCharList = CharList;
+    // The norm protos will count the source protos, so we keep them here in
+    // freeable_protos, so they can be freed later.
+    GenericVector<LIST> freeable_protos;
+    iterate(pCharList) {
+        //Cluster
+        CharSample = (LABELEDLIST)first_node(pCharList);
+        Clusterer =
+            SetUpForClustering(FeatureDefs, CharSample, PROGRAM_FEATURE_TYPE);
+        if (Clusterer == nullptr) {  // To avoid a SIGSEGV
+            fprintf(stderr, "Error: NULL clusterer!\n");
+            return 1;
+        }
+        float SavedMinSamples = Config.MinSamples;
+        // To disable the tendency to produce a single cluster for all fonts,
+        // make MagicSamples an impossible to achieve number:
+        // Config.MagicSamples = CharSample->SampleCount * 10;
+        Config.MagicSamples = CharSample->SampleCount;
+        while (Config.MinSamples > 0.001) {
+            ProtoList = ClusterSamples(Clusterer, &Config);
+            if (NumberOfProtos(ProtoList, 1, 0) > 0) {
+                break;
+            } else {
+                Config.MinSamples *= 0.95;
+                printf("0 significant protos for %s."
+                       " Retrying clustering with MinSamples = %f%%\n",
+                       CharSample->Label, Config.MinSamples);
+            }
+        }
+        Config.MinSamples = SavedMinSamples;
+        AddToNormProtosList(&NormProtoList, ProtoList, CharSample->Label);
+        freeable_protos.push_back(ProtoList);
+        FreeClusterer(Clusterer);
     }
-    Config.MinSamples = SavedMinSamples;
-    AddToNormProtosList(&NormProtoList, ProtoList, CharSample->Label);
-    freeable_protos.push_back(ProtoList);
-    FreeClusterer(Clusterer);
-  }
-  FreeTrainingSamples(CharList);
-  int desc_index = ShortNameToFeatureType(FeatureDefs, PROGRAM_FEATURE_TYPE);
-  WriteNormProtos(FLAGS_D.c_str(), NormProtoList,
-                  FeatureDefs.FeatureDesc[desc_index]);
-  FreeNormProtoList(NormProtoList);
-  for (int i = 0; i < freeable_protos.size(); ++i) {
-    FreeProtoList(&freeable_protos[i]);
-  }
-  printf ("\n");
-  return 0;
+    FreeTrainingSamples(CharList);
+    int desc_index = ShortNameToFeatureType(FeatureDefs, PROGRAM_FEATURE_TYPE);
+    WriteNormProtos(FLAGS_D.c_str(), NormProtoList,
+                    FeatureDefs.FeatureDesc[desc_index]);
+    FreeNormProtoList(NormProtoList);
+    for (int i = 0; i < freeable_protos.size(); ++i) {
+        FreeProtoList(&freeable_protos[i]);
+    }
+    printf ("\n");
+    return 0;
 }  // main
 
 /*----------------------------------------------------------------------------
@@ -223,57 +223,57 @@ int main(int argc, char *argv[]) {
 */
 void WriteNormProtos(const char *Directory, LIST LabeledProtoList,
                      const FEATURE_DESC_STRUCT *feature_desc) {
-  FILE    *File;
-  STRING Filename;
-  LABELEDLIST LabeledProto;
-  int N;
+    FILE    *File;
+    STRING Filename;
+    LABELEDLIST LabeledProto;
+    int N;
 
-  Filename = "";
-  if (Directory != nullptr && Directory[0] != '\0') {
-    Filename += Directory;
-    Filename += "/";
-  }
-  Filename += "normproto";
-  printf ("\nWriting %s ...", Filename.string());
-  File = Efopen (Filename.string(), "wb");
-  fprintf(File, "%0d\n", feature_desc->NumParams);
-  WriteParamDesc(File, feature_desc->NumParams, feature_desc->ParamDesc);
-  iterate(LabeledProtoList)
-  {
-    LabeledProto = (LABELEDLIST) first_node (LabeledProtoList);
-    N = NumberOfProtos(LabeledProto->List, true, false);
-    if (N < 1) {
-      printf ("\nError! Not enough protos for %s: %d protos"
-              " (%d significant protos"
-              ", %d insignificant protos)\n",
-              LabeledProto->Label, N,
-              NumberOfProtos(LabeledProto->List, 1, 0),
-              NumberOfProtos(LabeledProto->List, 0, 1));
-      exit(1);
+    Filename = "";
+    if (Directory != nullptr && Directory[0] != '\0') {
+        Filename += Directory;
+        Filename += "/";
     }
-    fprintf(File, "\n%s %d\n", LabeledProto->Label, N);
-    WriteProtos(File, feature_desc->NumParams, LabeledProto->List, true, false);
-  }
-  fclose (File);
+    Filename += "normproto";
+    printf ("\nWriting %s ...", Filename.string());
+    File = Efopen (Filename.string(), "wb");
+    fprintf(File, "%0d\n", feature_desc->NumParams);
+    WriteParamDesc(File, feature_desc->NumParams, feature_desc->ParamDesc);
+    iterate(LabeledProtoList)
+    {
+        LabeledProto = (LABELEDLIST) first_node (LabeledProtoList);
+        N = NumberOfProtos(LabeledProto->List, true, false);
+        if (N < 1) {
+            printf ("\nError! Not enough protos for %s: %d protos"
+                    " (%d significant protos"
+                    ", %d insignificant protos)\n",
+                    LabeledProto->Label, N,
+                    NumberOfProtos(LabeledProto->List, 1, 0),
+                    NumberOfProtos(LabeledProto->List, 0, 1));
+            exit(1);
+        }
+        fprintf(File, "\n%s %d\n", LabeledProto->Label, N);
+        WriteProtos(File, feature_desc->NumParams, LabeledProto->List, true, false);
+    }
+    fclose (File);
 
 }  // WriteNormProtos
 
 /*-------------------------------------------------------------------------*/
 void WriteProtos(
-     FILE  *File,
-     uinT16  N,
-     LIST  ProtoList,
-     BOOL8  WriteSigProtos,
-     BOOL8  WriteInsigProtos)
+    FILE  *File,
+    uinT16  N,
+    LIST  ProtoList,
+    BOOL8  WriteSigProtos,
+    BOOL8  WriteInsigProtos)
 {
-  PROTOTYPE  *Proto;
+    PROTOTYPE  *Proto;
 
-  // write prototypes
-  iterate(ProtoList)
-  {
-    Proto = (PROTOTYPE *) first_node ( ProtoList );
-    if (( Proto->Significant && WriteSigProtos )  ||
-      ( ! Proto->Significant && WriteInsigProtos ) )
-      WritePrototype( File, N, Proto );
-  }
+    // write prototypes
+    iterate(ProtoList)
+    {
+        Proto = (PROTOTYPE *) first_node ( ProtoList );
+        if (( Proto->Significant && WriteSigProtos )  ||
+                ( ! Proto->Significant && WriteInsigProtos ) )
+            WritePrototype( File, N, Proto );
+    }
 }  // WriteProtos

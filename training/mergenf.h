@@ -44,7 +44,7 @@
 
 typedef struct
 {
-  FLOAT32	MinX, MaxX, MinY, MaxY;
+    FLOAT32	MinX, MaxX, MinY, MaxY;
 } FRECT;
 
 /**----------------------------------------------------------------------------
@@ -59,45 +59,45 @@ typedef struct
 					Public Function Prototypes
 ----------------------------------------------------------------------------**/
 FLOAT32 CompareProtos (
-     PROTO	p1,
-	 PROTO	p2);
+    PROTO	p1,
+    PROTO	p2);
 
 void ComputeMergedProto (
-     PROTO	p1,
-	 PROTO	p2,
-     FLOAT32	w1,
-	 FLOAT32	w2,
-     PROTO	MergedProto);
+    PROTO	p1,
+    PROTO	p2,
+    FLOAT32	w1,
+    FLOAT32	w2,
+    PROTO	MergedProto);
 
 int FindClosestExistingProto (
-     CLASS_TYPE	Class,
-     int       	NumMerged[],
-     PROTOTYPE	*Prototype);
+    CLASS_TYPE	Class,
+    int       	NumMerged[],
+    PROTOTYPE	*Prototype);
 
 void MakeNewFromOld (
-     PROTO	New,
-     PROTOTYPE	*Old);
+    PROTO	New,
+    PROTOTYPE	*Old);
 
 FLOAT32 SubfeatureEvidence (
-   FEATURE     Feature,
-   PROTO       Proto);
+    FEATURE     Feature,
+    PROTO       Proto);
 
 double EvidenceOf (
-  register double   Similarity);
+    register double   Similarity);
 
 BOOL8 DummyFastMatch (
-     FEATURE	Feature,
-     PROTO	Proto);
+    FEATURE	Feature,
+    PROTO	Proto);
 
 void ComputePaddedBoundingBox (
-     PROTO	Proto,
-     FLOAT32	TangentPad,
-	 FLOAT32	OrthogonalPad,
-     FRECT	*BoundingBox);
+    PROTO	Proto,
+    FLOAT32	TangentPad,
+    FLOAT32	OrthogonalPad,
+    FRECT	*BoundingBox);
 
 BOOL8 PointInside (
-     FRECT	*Rectangle,
-     FLOAT32	X,
-	 FLOAT32	Y);
+    FRECT	*Rectangle,
+    FLOAT32	X,
+    FLOAT32	Y);
 
 #endif  // TESSERACT_TRAINING_MERGENF_H_

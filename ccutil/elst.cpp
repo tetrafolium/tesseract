@@ -39,21 +39,21 @@
 
 void
 ELIST::internal_clear (          //destroy all links
-void (*zapper) (ELIST_LINK *)) {
-                                 //ptr to zapper functn
-  ELIST_LINK *ptr;
-  ELIST_LINK *next;
+    void (*zapper) (ELIST_LINK *)) {
+    //ptr to zapper functn
+    ELIST_LINK *ptr;
+    ELIST_LINK *next;
 
-  if (!empty ()) {
-    ptr = last->next;            //set to first
-    last->next = NULL;           //break circle
-    last = NULL;                 //set list empty
-    while (ptr) {
-      next = ptr->next;
-      zapper(ptr);
-      ptr = next;
+    if (!empty ()) {
+        ptr = last->next;            //set to first
+        last->next = NULL;           //break circle
+        last = NULL;                 //set list empty
+        while (ptr) {
+            next = ptr->next;
+            zapper(ptr);
+            ptr = next;
+        }
     }
-  }
 }
 
 /***********************************************************************
@@ -70,15 +70,15 @@ void (*zapper) (ELIST_LINK *)) {
  **********************************************************************/
 
 void ELIST::assign_to_sublist(                           //to this list
-                              ELIST_ITERATOR *start_it,  //from list start
-                              ELIST_ITERATOR *end_it) {  //from list end
-  const ERRCODE LIST_NOT_EMPTY =
-    "Destination list must be empty before extracting a sublist";
+    ELIST_ITERATOR *start_it,  //from list start
+    ELIST_ITERATOR *end_it) {  //from list end
+    const ERRCODE LIST_NOT_EMPTY =
+        "Destination list must be empty before extracting a sublist";
 
-  if (!empty ())
-    LIST_NOT_EMPTY.error ("ELIST.assign_to_sublist", ABORT, NULL);
+    if (!empty ())
+        LIST_NOT_EMPTY.error ("ELIST.assign_to_sublist", ABORT, NULL);
 
-  last = start_it->extract_sublist (end_it);
+    last = start_it->extract_sublist (end_it);
 }
 
 /***********************************************************************
@@ -88,12 +88,12 @@ void ELIST::assign_to_sublist(                           //to this list
  **********************************************************************/
 
 inT32 ELIST::length() const {  // count elements
-  ELIST_ITERATOR it(const_cast<ELIST*>(this));
-  inT32 count = 0;
+    ELIST_ITERATOR it(const_cast<ELIST*>(this));
+    inT32 count = 0;
 
-  for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ())
-    count++;
-  return count;
+    for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ())
+        count++;
+    return count;
 }
 
 /***********************************************************************
@@ -106,35 +106,35 @@ inT32 ELIST::length() const {  // count elements
 
 void
 ELIST::sort (                    //sort elements
-int comparator (                 //comparison routine
-const void *, const void *)) {
-  ELIST_ITERATOR it(this);
-  inT32 count;
-  ELIST_LINK **base;             //ptr array to sort
-  ELIST_LINK **current;
-  inT32 i;
+    int comparator (                 //comparison routine
+        const void *, const void *)) {
+    ELIST_ITERATOR it(this);
+    inT32 count;
+    ELIST_LINK **base;             //ptr array to sort
+    ELIST_LINK **current;
+    inT32 i;
 
-  /* Allocate an array of pointers, one per list element */
-  count = length ();
-  base = (ELIST_LINK **) malloc (count * sizeof (ELIST_LINK *));
+    /* Allocate an array of pointers, one per list element */
+    count = length ();
+    base = (ELIST_LINK **) malloc (count * sizeof (ELIST_LINK *));
 
-  /* Extract all elements, putting the pointers in the array */
-  current = base;
-  for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ()) {
-    *current = it.extract ();
-    current++;
-  }
+    /* Extract all elements, putting the pointers in the array */
+    current = base;
+    for (it.mark_cycle_pt (); !it.cycled_list (); it.forward ()) {
+        *current = it.extract ();
+        current++;
+    }
 
-  /* Sort the pointer array */
-  qsort ((char *) base, count, sizeof (*base), comparator);
+    /* Sort the pointer array */
+    qsort ((char *) base, count, sizeof (*base), comparator);
 
-  /* Rebuild the list from the sorted pointers */
-  current = base;
-  for (i = 0; i < count; i++) {
-    it.add_to_end (*current);
-    current++;
-  }
-  free(base);
+    /* Rebuild the list from the sorted pointers */
+    current = base;
+    for (i = 0; i < count; i++) {
+        it.add_to_end (*current);
+        current++;
+    }
+    free(base);
 }
 
 // Assuming list has been sorted already, insert new_link to
@@ -150,33 +150,33 @@ const void *, const void *)) {
 ELIST_LINK *ELIST::add_sorted_and_find(
     int comparator(const void*, const void*),
     bool unique, ELIST_LINK* new_link) {
-  // Check for adding at the end.
-  if (last == NULL || comparator(&last, &new_link) < 0) {
-    if (last == NULL) {
-      new_link->next = new_link;
+    // Check for adding at the end.
+    if (last == NULL || comparator(&last, &new_link) < 0) {
+        if (last == NULL) {
+            new_link->next = new_link;
+        } else {
+            new_link->next = last->next;
+            last->next = new_link;
+        }
+        last = new_link;
     } else {
-      new_link->next = last->next;
-      last->next = new_link;
+        // Need to use an iterator.
+        ELIST_ITERATOR it(this);
+        for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
+            ELIST_LINK* link = it.data();
+            int compare = comparator(&link, &new_link);
+            if (compare > 0) {
+                break;
+            } else if (unique && compare == 0) {
+                return link;
+            }
+        }
+        if (it.cycled_list())
+            it.add_to_end(new_link);
+        else
+            it.add_before_then_move(new_link);
     }
-    last = new_link;
-  } else {
-    // Need to use an iterator.
-    ELIST_ITERATOR it(this);
-    for (it.mark_cycle_pt(); !it.cycled_list(); it.forward()) {
-      ELIST_LINK* link = it.data();
-      int compare = comparator(&link, &new_link);
-      if (compare > 0) {
-        break;
-      } else if (unique && compare == 0) {
-        return link;
-      }
-    }
-    if (it.cycled_list())
-      it.add_to_end(new_link);
-    else
-      it.add_before_then_move(new_link);
-  }
-  return new_link;
+    return new_link;
 }
 
 /***********************************************************************
@@ -192,34 +192,34 @@ ELIST_LINK *ELIST::add_sorted_and_find(
  **********************************************************************/
 
 ELIST_LINK *ELIST_ITERATOR::forward() {
-  #ifndef NDEBUG
-  if (!list)
-    NO_LIST.error ("ELIST_ITERATOR::forward", ABORT, NULL);
-  #endif
-  if (list->empty ())
-    return NULL;
+#ifndef NDEBUG
+    if (!list)
+        NO_LIST.error ("ELIST_ITERATOR::forward", ABORT, NULL);
+#endif
+    if (list->empty ())
+        return NULL;
 
-  if (current) {                 //not removed so
-                                 //set previous
-    prev = current;
-    started_cycling = TRUE;
-    // In case next is deleted by another iterator, get next from current.
-    current = current->next;
-  } else {
-    if (ex_current_was_cycle_pt)
-      cycle_pt = next;
-    current = next;
-  }
-  next = current->next;
+    if (current) {                 //not removed so
+        //set previous
+        prev = current;
+        started_cycling = TRUE;
+        // In case next is deleted by another iterator, get next from current.
+        current = current->next;
+    } else {
+        if (ex_current_was_cycle_pt)
+            cycle_pt = next;
+        current = next;
+    }
+    next = current->next;
 
-  #ifndef NDEBUG
-  if (!current)
-    NULL_DATA.error ("ELIST_ITERATOR::forward", ABORT, NULL);
-  if (!next)
-    NULL_NEXT.error ("ELIST_ITERATOR::forward", ABORT,
-                     "This is: %p  Current is: %p", this, current);
-  #endif
-  return current;
+#ifndef NDEBUG
+    if (!current)
+        NULL_DATA.error ("ELIST_ITERATOR::forward", ABORT, NULL);
+    if (!next)
+        NULL_NEXT.error ("ELIST_ITERATOR::forward", ABORT,
+                         "This is: %p  Current is: %p", this, current);
+#endif
+    return current;
 }
 
 /***********************************************************************
@@ -231,30 +231,30 @@ ELIST_LINK *ELIST_ITERATOR::forward() {
  **********************************************************************/
 
 ELIST_LINK *ELIST_ITERATOR::data_relative(                //get data + or - ...
-                                          inT8 offset) {  //offset from current
-  ELIST_LINK *ptr;
+    inT8 offset) {  //offset from current
+    ELIST_LINK *ptr;
 
-  #ifndef NDEBUG
-  if (!list)
-    NO_LIST.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
-  if (list->empty ())
-    EMPTY_LIST.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
-  if (offset < -1)
-    BAD_PARAMETER.error ("ELIST_ITERATOR::data_relative", ABORT,
-      "offset < -l");
-  #endif
+#ifndef NDEBUG
+    if (!list)
+        NO_LIST.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
+    if (list->empty ())
+        EMPTY_LIST.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
+    if (offset < -1)
+        BAD_PARAMETER.error ("ELIST_ITERATOR::data_relative", ABORT,
+                             "offset < -l");
+#endif
 
-  if (offset == -1)
-    ptr = prev;
-  else
-    for (ptr = current ? current : prev; offset-- > 0; ptr = ptr->next);
+    if (offset == -1)
+        ptr = prev;
+    else
+        for (ptr = current ? current : prev; offset-- > 0; ptr = ptr->next);
 
-  #ifndef NDEBUG
-  if (!ptr)
-    NULL_DATA.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
-  #endif
+#ifndef NDEBUG
+    if (!ptr)
+        NULL_DATA.error ("ELIST_ITERATOR::data_relative", ABORT, NULL);
+#endif
 
-  return ptr;
+    return ptr;
 }
 
 /***********************************************************************
@@ -266,15 +266,15 @@ ELIST_LINK *ELIST_ITERATOR::data_relative(                //get data + or - ...
  **********************************************************************/
 
 ELIST_LINK *ELIST_ITERATOR::move_to_last() {
-  #ifndef NDEBUG
-  if (!list)
-    NO_LIST.error ("ELIST_ITERATOR::move_to_last", ABORT, NULL);
-  #endif
+#ifndef NDEBUG
+    if (!list)
+        NO_LIST.error ("ELIST_ITERATOR::move_to_last", ABORT, NULL);
+#endif
 
-  while (current != list->last)
-    forward();
+    while (current != list->last)
+        forward();
 
-  return current;
+    return current;
 }
 
 /***********************************************************************
@@ -288,90 +288,90 @@ ELIST_LINK *ELIST_ITERATOR::move_to_last() {
  **********************************************************************/
 
 void ELIST_ITERATOR::exchange(                             //positions of 2 links
-                              ELIST_ITERATOR *other_it) {  //other iterator
-  const ERRCODE DONT_EXCHANGE_DELETED =
-    "Can't exchange deleted elements of lists";
+    ELIST_ITERATOR *other_it) {  //other iterator
+    const ERRCODE DONT_EXCHANGE_DELETED =
+        "Can't exchange deleted elements of lists";
 
-  ELIST_LINK *old_current;
+    ELIST_LINK *old_current;
 
-  #ifndef NDEBUG
-  if (!list)
-    NO_LIST.error ("ELIST_ITERATOR::exchange", ABORT, NULL);
-  if (!other_it)
-    BAD_PARAMETER.error ("ELIST_ITERATOR::exchange", ABORT, "other_it NULL");
-  if (!(other_it->list))
-    NO_LIST.error ("ELIST_ITERATOR::exchange", ABORT, "other_it");
-  #endif
+#ifndef NDEBUG
+    if (!list)
+        NO_LIST.error ("ELIST_ITERATOR::exchange", ABORT, NULL);
+    if (!other_it)
+        BAD_PARAMETER.error ("ELIST_ITERATOR::exchange", ABORT, "other_it NULL");
+    if (!(other_it->list))
+        NO_LIST.error ("ELIST_ITERATOR::exchange", ABORT, "other_it");
+#endif
 
-  /* Do nothing if either list is empty or if both iterators reference the same
-  link */
+    /* Do nothing if either list is empty or if both iterators reference the same
+    link */
 
-  if ((list->empty ()) ||
-    (other_it->list->empty ()) || (current == other_it->current))
-    return;
+    if ((list->empty ()) ||
+            (other_it->list->empty ()) || (current == other_it->current))
+        return;
 
-  /* Error if either current element is deleted */
+    /* Error if either current element is deleted */
 
-  if (!current || !other_it->current)
-    DONT_EXCHANGE_DELETED.error ("ELIST_ITERATOR.exchange", ABORT, NULL);
+    if (!current || !other_it->current)
+        DONT_EXCHANGE_DELETED.error ("ELIST_ITERATOR.exchange", ABORT, NULL);
 
-  /* Now handle the 4 cases: doubleton list; non-doubleton adjacent elements
-  (other before this); non-doubleton adjacent elements (this before other);
-  non-adjacent elements. */
+    /* Now handle the 4 cases: doubleton list; non-doubleton adjacent elements
+    (other before this); non-doubleton adjacent elements (this before other);
+    non-adjacent elements. */
 
-                                 //adjacent links
-  if ((next == other_it->current) ||
-  (other_it->next == current)) {
-                                 //doubleton list
-    if ((next == other_it->current) &&
-    (other_it->next == current)) {
-      prev = next = current;
-      other_it->prev = other_it->next = other_it->current;
+    //adjacent links
+    if ((next == other_it->current) ||
+            (other_it->next == current)) {
+        //doubleton list
+        if ((next == other_it->current) &&
+                (other_it->next == current)) {
+            prev = next = current;
+            other_it->prev = other_it->next = other_it->current;
+        }
+        else {                       //non-doubleton with
+            //adjacent links
+            //other before this
+            if (other_it->next == current) {
+                other_it->prev->next = current;
+                other_it->current->next = next;
+                current->next = other_it->current;
+                other_it->next = other_it->current;
+                prev = current;
+            }
+            else {                     //this before other
+                prev->next = other_it->current;
+                current->next = other_it->next;
+                other_it->current->next = current;
+                next = current;
+                other_it->prev = other_it->current;
+            }
+        }
     }
-    else {                       //non-doubleton with
-                                 //adjacent links
-                                 //other before this
-      if (other_it->next == current) {
-        other_it->prev->next = current;
-        other_it->current->next = next;
-        current->next = other_it->current;
-        other_it->next = other_it->current;
-        prev = current;
-      }
-      else {                     //this before other
+    else {                         //no overlap
         prev->next = other_it->current;
         current->next = other_it->next;
-        other_it->current->next = current;
-        next = current;
-        other_it->prev = other_it->current;
-      }
+        other_it->prev->next = current;
+        other_it->current->next = next;
     }
-  }
-  else {                         //no overlap
-    prev->next = other_it->current;
-    current->next = other_it->next;
-    other_it->prev->next = current;
-    other_it->current->next = next;
-  }
 
-  /* update end of list pointer when necessary (remember that the 2 iterators
-    may iterate over different lists!) */
+    /* update end of list pointer when necessary (remember that the 2 iterators
+      may iterate over different lists!) */
 
-  if (list->last == current)
-    list->last = other_it->current;
-  if (other_it->list->last == other_it->current)
-    other_it->list->last = current;
+    if (list->last == current)
+        list->last = other_it->current;
+    if (other_it->list->last == other_it->current)
+        other_it->list->last = current;
 
-  if (current == cycle_pt)
-    cycle_pt = other_it->cycle_pt;
-  if (other_it->current == other_it->cycle_pt)
-    other_it->cycle_pt = cycle_pt;
+    if (current == cycle_pt)
+        cycle_pt = other_it->cycle_pt;
+    if (other_it->current == other_it->cycle_pt)
+        other_it->cycle_pt = cycle_pt;
 
-  /* The actual exchange - in all cases*/
+    /* The actual exchange - in all cases*/
 
-  old_current = current;
-  current = other_it->current;
-  other_it->current = old_current;
+    old_current = current;
+    current = other_it->current;
+    other_it->current = old_current;
 }
 
 /***********************************************************************
@@ -385,73 +385,73 @@ void ELIST_ITERATOR::exchange(                             //positions of 2 link
  **********************************************************************/
 
 ELIST_LINK *ELIST_ITERATOR::extract_sublist(                             //from this current
-                                            ELIST_ITERATOR *other_it) {  //to other current
-  #ifndef NDEBUG
-  const ERRCODE BAD_EXTRACTION_PTS =
-    "Can't extract sublist from points on different lists";
-  const ERRCODE DONT_EXTRACT_DELETED =
-    "Can't extract a sublist marked by deleted points";
-  #endif
-  const ERRCODE BAD_SUBLIST = "Can't find sublist end point in original list";
+    ELIST_ITERATOR *other_it) {  //to other current
+#ifndef NDEBUG
+    const ERRCODE BAD_EXTRACTION_PTS =
+        "Can't extract sublist from points on different lists";
+    const ERRCODE DONT_EXTRACT_DELETED =
+        "Can't extract a sublist marked by deleted points";
+#endif
+    const ERRCODE BAD_SUBLIST = "Can't find sublist end point in original list";
 
-  ELIST_ITERATOR temp_it = *this;
-  ELIST_LINK *end_of_new_list;
+    ELIST_ITERATOR temp_it = *this;
+    ELIST_LINK *end_of_new_list;
 
-  #ifndef NDEBUG
-  if (!other_it)
-    BAD_PARAMETER.error ("ELIST_ITERATOR::extract_sublist", ABORT,
-      "other_it NULL");
-  if (!list)
-    NO_LIST.error ("ELIST_ITERATOR::extract_sublist", ABORT, NULL);
-  if (list != other_it->list)
-    BAD_EXTRACTION_PTS.error ("ELIST_ITERATOR.extract_sublist", ABORT, NULL);
-  if (list->empty ())
-    EMPTY_LIST.error ("ELIST_ITERATOR::extract_sublist", ABORT, NULL);
+#ifndef NDEBUG
+    if (!other_it)
+        BAD_PARAMETER.error ("ELIST_ITERATOR::extract_sublist", ABORT,
+                             "other_it NULL");
+    if (!list)
+        NO_LIST.error ("ELIST_ITERATOR::extract_sublist", ABORT, NULL);
+    if (list != other_it->list)
+        BAD_EXTRACTION_PTS.error ("ELIST_ITERATOR.extract_sublist", ABORT, NULL);
+    if (list->empty ())
+        EMPTY_LIST.error ("ELIST_ITERATOR::extract_sublist", ABORT, NULL);
 
-  if (!current || !other_it->current)
-    DONT_EXTRACT_DELETED.error ("ELIST_ITERATOR.extract_sublist", ABORT,
-      NULL);
-  #endif
+    if (!current || !other_it->current)
+        DONT_EXTRACT_DELETED.error ("ELIST_ITERATOR.extract_sublist", ABORT,
+                                    NULL);
+#endif
 
-  ex_current_was_last = other_it->ex_current_was_last = FALSE;
-  ex_current_was_cycle_pt = FALSE;
-  other_it->ex_current_was_cycle_pt = FALSE;
+    ex_current_was_last = other_it->ex_current_was_last = FALSE;
+    ex_current_was_cycle_pt = FALSE;
+    other_it->ex_current_was_cycle_pt = FALSE;
 
-  temp_it.mark_cycle_pt ();
-  do {                           //walk sublist
-    if (temp_it.cycled_list())   // can't find end pt
-      BAD_SUBLIST.error ("ELIST_ITERATOR.extract_sublist", ABORT, NULL);
+    temp_it.mark_cycle_pt ();
+    do {                           //walk sublist
+        if (temp_it.cycled_list())   // can't find end pt
+            BAD_SUBLIST.error ("ELIST_ITERATOR.extract_sublist", ABORT, NULL);
 
-    if (temp_it.at_last ()) {
-      list->last = prev;
-      ex_current_was_last = other_it->ex_current_was_last = TRUE;
+        if (temp_it.at_last ()) {
+            list->last = prev;
+            ex_current_was_last = other_it->ex_current_was_last = TRUE;
+        }
+
+        if (temp_it.current == cycle_pt)
+            ex_current_was_cycle_pt = TRUE;
+
+        if (temp_it.current == other_it->cycle_pt)
+            other_it->ex_current_was_cycle_pt = TRUE;
+
+        temp_it.forward ();
     }
+    while (temp_it.prev != other_it->current);
 
-    if (temp_it.current == cycle_pt)
-      ex_current_was_cycle_pt = TRUE;
+    //circularise sublist
+    other_it->current->next = current;
+    end_of_new_list = other_it->current;
 
-    if (temp_it.current == other_it->cycle_pt)
-      other_it->ex_current_was_cycle_pt = TRUE;
-
-    temp_it.forward ();
-  }
-  while (temp_it.prev != other_it->current);
-
-                                 //circularise sublist
-  other_it->current->next = current;
-  end_of_new_list = other_it->current;
-
-                                 //sublist = whole list
-  if (prev == other_it->current) {
-    list->last = NULL;
-    prev = current = next = NULL;
-    other_it->prev = other_it->current = other_it->next = NULL;
-  }
-  else {
-    prev->next = other_it->next;
-    current = other_it->current = NULL;
-    next = other_it->next;
-    other_it->prev = prev;
-  }
-  return end_of_new_list;
+    //sublist = whole list
+    if (prev == other_it->current) {
+        list->last = NULL;
+        prev = current = next = NULL;
+        other_it->prev = other_it->current = other_it->next = NULL;
+    }
+    else {
+        prev->next = other_it->next;
+        current = other_it->current = NULL;
+        next = other_it->next;
+        other_it->prev = prev;
+    }
+    return end_of_new_list;
 }

@@ -26,10 +26,10 @@
 #include "mfoutline.h"
 
 typedef enum {
-  OutlineFeatX,
-  OutlineFeatY,
-  OutlineFeatLength,
-  OutlineFeatDir
+    OutlineFeatX,
+    OutlineFeatY,
+    OutlineFeatLength,
+    OutlineFeatDir
 } OUTLINE_FEAT_PARAM_NAME;
 
 #define MAX_OUTLINE_FEATURES  (100)

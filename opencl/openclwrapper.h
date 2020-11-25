@@ -207,7 +207,7 @@ typedef struct _GPUEnv
     cl_program mpArryPrograms[MAX_CLFILE_NUM]; //one program object maps one kernel source file
     char mArryKnelSrcFile[MAX_CLFILE_NUM][256], //the max len of kernel file name is 256
          mArrykernelNames[MAX_CLKERNEL_NUM][MAX_KERNEL_STRING_LEN + 1];
-         cl_kernel_function mpArryKnelFuncs[MAX_CLKERNEL_NUM];
+    cl_kernel_function mpArryKnelFuncs[MAX_CLKERNEL_NUM];
     int mnKernelCount, mnFileCount, // only one kernel file
         mnIsUserCreated; // 1: created , 0:no create and needed to create by opencl wrapper
     int mnKhrFp64Flag;
@@ -239,7 +239,7 @@ public:
     static l_uint32* pixReadFromTiffKernel(l_uint32 *tiffdata,l_int32 w,l_int32 h,l_int32 wpl, l_uint32 *line);
     static int composeRGBPixelCl(int *tiffdata,int *line,int h,int w);
 
-/* OpenCL implementations of Morphological operations*/
+    /* OpenCL implementations of Morphological operations*/
 
     //Initialiation of OCL buffers used in Morph operations
     static int initMorphCLAllocations(l_int32 wpl, l_int32 h, Pix *pixs);

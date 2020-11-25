@@ -19,13 +19,13 @@
 // use build option outside to define fp_t
 /////////////////////////////////////////////
 const char *kernel_src = KERNEL(
-\n#ifdef KHR_DP_EXTENSION\n
-\n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n
-\n#elif AMD_DP_EXTENSION\n
-\n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n
-\n#else\n
-\n#endif\n
-__kernel void composeRGBPixel(__global uint *tiffdata, int w, int h,int wpl, __global uint *output)
+                             \n#ifdef KHR_DP_EXTENSION\n
+                             \n#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n
+                             \n#elif AMD_DP_EXTENSION\n
+                             \n#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n
+                             \n#else\n
+                                 \n#endif\n
+                                 __kernel void composeRGBPixel(__global uint *tiffdata, int w, int h,int wpl, __global uint *output)
 {
     int i = get_global_id(1);
     int j = get_global_id(0);
@@ -41,11 +41,11 @@ __kernel void composeRGBPixel(__global uint *tiffdata, int w, int h,int wpl, __g
     bval = (((tiffword) >> 16) & 0xff);
     output[i*wpl+j] = (rval << (8 * (sizeof(uint) - 1 - 0))) | (gval << (8 * (sizeof(uint) - 1 - 1))) | (bval << (8 * (sizeof(uint) - 1 - 2)));
 }
-)
+                         )
 
 KERNEL(
-\n__kernel void pixSubtract_inplace(__global int *dword, __global int *sword,
-                            const int wpl, const int h)
+    \n__kernel void pixSubtract_inplace(__global int *dword, __global int *sword,
+                                        const int wpl, const int h)
 {
     const unsigned int row = get_global_id(1);
     const unsigned int col = get_global_id(0);
@@ -60,8 +60,8 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void pixSubtract(__global int *dword, __global int *sword,
-                            const int wpl, const int h, __global int *outword)
+    \n__kernel void pixSubtract(__global int *dword, __global int *sword,
+                                const int wpl, const int h, __global int *outword)
 {
     const unsigned int row = get_global_id(1);
     const unsigned int col = get_global_id(0);
@@ -76,8 +76,8 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoDilateHor_5x5(__global int *sword,__global int *dword,
-                            const int wpl, const int h)
+    \n__kernel void morphoDilateHor_5x5(__global int *sword,__global int *dword,
+                                        const int wpl, const int h)
 {
     const unsigned int pos = get_global_id(0);
     unsigned int prevword, nextword, currword,tempword;
@@ -106,20 +106,20 @@ KERNEL(
     //Loop unrolled
 
     //1 bit to left and 1 bit to right
-        //Get the max value on LHS of every pixel
-        tempword = (prevword << (31)) | ((currword >> 1));
-        destword |= tempword;
-        //Get max value on RHS of every pixel
-        tempword = (currword << 1) | (nextword >> (31));
-        destword |= tempword;
+    //Get the max value on LHS of every pixel
+    tempword = (prevword << (31)) | ((currword >> 1));
+    destword |= tempword;
+    //Get max value on RHS of every pixel
+    tempword = (currword << 1) | (nextword >> (31));
+    destword |= tempword;
 
     //2 bit to left and 2 bit to right
-        //Get the max value on LHS of every pixel
-        tempword = (prevword << (30)) | ((currword >> 2));
-        destword |= tempword;
-        //Get max value on RHS of every pixel
-        tempword = (currword << 2) | (nextword >> (30));
-        destword |= tempword;
+    //Get the max value on LHS of every pixel
+    tempword = (prevword << (30)) | ((currword >> 2));
+    destword |= tempword;
+    //Get max value on RHS of every pixel
+    tempword = (currword << 2) | (nextword >> (30));
+    destword |= tempword;
 
 
     *(dword + pos) = destword;
@@ -128,8 +128,8 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoDilateVer_5x5(__global int *sword,__global int *dword,
-                            const int wpl, const int h)
+    \n__kernel void morphoDilateVer_5x5(__global int *sword,__global int *dword,
+                                        const int wpl, const int h)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -169,7 +169,7 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoDilateHor(__global int *sword,__global int *dword,const int xp, const int xn, const int wpl, const int h)
+    \n__kernel void morphoDilateHor(__global int *sword,__global int *dword,const int xp, const int xn, const int wpl, const int h)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -309,10 +309,10 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoDilateHor_32word(__global int *sword,__global int *dword,
-                            const int halfwidth,
-                            const int wpl, const int h,
-                            const char isEven)
+    \n__kernel void morphoDilateHor_32word(__global int *sword,__global int *dword,
+            const int halfwidth,
+            const int wpl, const int h,
+            const char isEven)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -364,10 +364,10 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoDilateVer(__global int *sword,__global int *dword,
-                            const int yp,
-                            const int wpl, const int h,
-                            const int yn)
+    \n__kernel void morphoDilateVer(__global int *sword,__global int *dword,
+                                    const int yp,
+                                    const int wpl, const int h,
+                                    const int yn)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -398,8 +398,8 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoErodeHor_5x5(__global int *sword,__global int *dword,
-                            const int wpl, const int h)
+    \n__kernel void morphoErodeHor_5x5(__global int *sword,__global int *dword,
+                                       const int wpl, const int h)
 {
     const unsigned int pos = get_global_id(0);
     unsigned int prevword, nextword, currword,tempword;
@@ -427,20 +427,20 @@ KERNEL(
     //Loop unrolled
 
     //1 bit to left and 1 bit to right
-        //Get the min value on LHS of every pixel
-        tempword = (prevword << (31)) | ((currword >> 1));
-        destword &= tempword;
-        //Get min value on RHS of every pixel
-        tempword = (currword << 1) | (nextword >> (31));
-        destword &= tempword;
+    //Get the min value on LHS of every pixel
+    tempword = (prevword << (31)) | ((currword >> 1));
+    destword &= tempword;
+    //Get min value on RHS of every pixel
+    tempword = (currword << 1) | (nextword >> (31));
+    destword &= tempword;
 
     //2 bit to left and 2 bit to right
-        //Get the min value on LHS of every pixel
-        tempword = (prevword << (30)) | ((currword >> 2));
-        destword &= tempword;
-        //Get min value on RHS of every pixel
-        tempword = (currword << 2) | (nextword >> (30));
-        destword &= tempword;
+    //Get the min value on LHS of every pixel
+    tempword = (prevword << (30)) | ((currword >> 2));
+    destword &= tempword;
+    //Get min value on RHS of every pixel
+    tempword = (currword << 2) | (nextword >> (30));
+    destword &= tempword;
 
 
     *(dword + pos) = destword;
@@ -449,9 +449,9 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoErodeVer_5x5(__global int *sword,__global int *dword,
-                            const int wpl, const int h,
-                            const int fwmask, const int lwmask)
+    \n__kernel void morphoErodeVer_5x5(__global int *sword,__global int *dword,
+                                       const int wpl, const int h,
+                                       const int fwmask, const int lwmask)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -512,8 +512,8 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoErodeHor(__global int *sword,__global int *dword, const int xp, const int xn, const int wpl,
-                                const int h, const char isAsymmetric, const int rwmask, const int lwmask)
+    \n__kernel void morphoErodeHor(__global int *sword,__global int *dword, const int xp, const int xn, const int wpl,
+                                   const int h, const char isAsymmetric, const int rwmask, const int lwmask)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -677,11 +677,11 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoErodeHor_32word(__global int *sword,__global int *dword,
-                            const int halfwidth, const int wpl,
-                            const int h, const char clearBoundPixH,
-                            const int rwmask, const int lwmask,
-                            const char isEven)
+    \n__kernel void morphoErodeHor_32word(__global int *sword,__global int *dword,
+            const int halfwidth, const int wpl,
+            const int h, const char clearBoundPixH,
+            const int rwmask, const int lwmask,
+            const char isEven)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -744,10 +744,10 @@ KERNEL(
 )
 
 KERNEL(
-\n__kernel void morphoErodeVer(__global int *sword,__global int *dword,
-                            const int yp,
-                            const int wpl, const int h,
-                            const char clearBoundPixV, const int yn)
+    \n__kernel void morphoErodeVer(__global int *sword,__global int *dword,
+                                   const int yp,
+                                   const int wpl, const int h,
+                                   const char clearBoundPixV, const int yn)
 {
     const int col = get_global_id(0);
     const int row = get_global_id(1);
@@ -790,19 +790,19 @@ KERNEL(
 // bin0          bin1            bin2...         bin0...
 // rpt0,1,2...256  rpt0,1,2...
 KERNEL(
-\n#define HIST_REDUNDANCY 256\n
-\n#define GROUP_SIZE 256\n
-\n#define HIST_SIZE 256\n
-\n#define NUM_CHANNELS 4\n
-\n#define HR_UNROLL_SIZE 8 \n
-\n#define HR_UNROLL_TYPE uchar8 \n
+    \n#define HIST_REDUNDANCY 256\n
+    \n#define GROUP_SIZE 256\n
+    \n#define HIST_SIZE 256\n
+    \n#define NUM_CHANNELS 4\n
+    \n#define HR_UNROLL_SIZE 8 \n
+    \n#define HR_UNROLL_TYPE uchar8 \n
 
-__attribute__((reqd_work_group_size(256, 1, 1)))
-__kernel
-void kernel_HistogramRectAllChannels(
-    __global const uchar8 *data,
-    uint numPixels,
-    __global uint *histBuffer) {
+    __attribute__((reqd_work_group_size(256, 1, 1)))
+    __kernel
+    void kernel_HistogramRectAllChannels(
+        __global const uchar8 *data,
+        uint numPixels,
+__global uint *histBuffer) {
 
     // declare variables
     uchar8 pixels;
@@ -826,12 +826,12 @@ void kernel_HistogramRectAllChannels(
 
 KERNEL(
 // NUM_CHANNELS = 1
-__attribute__((reqd_work_group_size(256, 1, 1)))
-__kernel
-void kernel_HistogramRectOneChannel(
-    __global const uchar8 *data,
-    uint numPixels,
-    __global uint *histBuffer) {
+    __attribute__((reqd_work_group_size(256, 1, 1)))
+    __kernel
+    void kernel_HistogramRectOneChannel(
+        __global const uchar8 *data,
+        uint numPixels,
+__global uint *histBuffer) {
 
     // declare variables
     uchar8 pixels;
@@ -857,12 +857,12 @@ void kernel_HistogramRectOneChannel(
 // only supports 4 channels
 // each work group handles a single channel of a single histogram bin
 KERNEL(
-__attribute__((reqd_work_group_size(256, 1, 1)))
-__kernel
-void kernel_HistogramRectAllChannelsReduction(
-    int n, // unused pixel redundancy
-    __global uint *histBuffer,
-    __global int* histResult) {
+    __attribute__((reqd_work_group_size(256, 1, 1)))
+    __kernel
+    void kernel_HistogramRectAllChannelsReduction(
+        int n, // unused pixel redundancy
+        __global uint *histBuffer,
+__global int* histResult) {
 
     // declare variables
     int channel = get_group_id(0)/HIST_SIZE;
@@ -899,12 +899,12 @@ void kernel_HistogramRectAllChannelsReduction(
 
 KERNEL(
 // NUM_CHANNELS = 1
-__attribute__((reqd_work_group_size(256, 1, 1)))
-__kernel
-void kernel_HistogramRectOneChannelReduction(
-    int n, // unused pixel redundancy
-    __global uint *histBuffer,
-    __global int* histResult) {
+    __attribute__((reqd_work_group_size(256, 1, 1)))
+    __kernel
+    void kernel_HistogramRectOneChannelReduction(
+        int n, // unused pixel redundancy
+        __global uint *histBuffer,
+__global int* histResult) {
 
     // declare variables
     // int channel = get_group_id(0)/HIST_SIZE;
@@ -943,14 +943,14 @@ void kernel_HistogramRectOneChannelReduction(
 // imageData is input image (24-bits/pixel)
 // pix is output image (1-bit/pixel)
 KERNEL(
-\n#define CHAR_VEC_WIDTH 4 \n
-\n#define PIXELS_PER_WORD 32 \n
-\n#define PIXELS_PER_BURST 8 \n
-\n#define BURSTS_PER_WORD (PIXELS_PER_WORD/PIXELS_PER_BURST) \n
- typedef union {
-  uchar s[PIXELS_PER_BURST*NUM_CHANNELS];
-  uchar4 v[(PIXELS_PER_BURST*NUM_CHANNELS)/CHAR_VEC_WIDTH];
- } charVec;
+    \n#define CHAR_VEC_WIDTH 4 \n
+    \n#define PIXELS_PER_WORD 32 \n
+    \n#define PIXELS_PER_BURST 8 \n
+    \n#define BURSTS_PER_WORD (PIXELS_PER_WORD/PIXELS_PER_BURST) \n
+typedef union {
+    uchar s[PIXELS_PER_BURST*NUM_CHANNELS];
+    uchar4 v[(PIXELS_PER_BURST*NUM_CHANNELS)/CHAR_VEC_WIDTH];
+} charVec;
 
 __attribute__((reqd_work_group_size(256, 1, 1)))
 __kernel
@@ -1004,10 +1004,10 @@ void kernel_ThresholdRectToPix(
 \n#define PIXELS_PER_WORD 32 \n
 \n#define PIXELS_PER_BURST 8 \n
 \n#define BURSTS_PER_WORD (PIXELS_PER_WORD/PIXELS_PER_BURST) \n
- typedef union {
-  uchar s[PIXELS_PER_BURST*1];
-  uchar8 v[(PIXELS_PER_BURST*1)/CHAR_VEC_WIDTH];
- } charVec1;
+typedef union {
+    uchar s[PIXELS_PER_BURST*1];
+    uchar8 v[(PIXELS_PER_BURST*1)/CHAR_VEC_WIDTH];
+} charVec1;
 
 __attribute__((reqd_work_group_size(256, 1, 1)))
 __kernel
@@ -1039,21 +1039,21 @@ void kernel_ThresholdRectToPix_OneChan(
             charVec1 pixels;
             // for each char8 in burst
             pixels.v[0] = imageData[
-                    w*BURSTS_PER_WORD
-                  + b
-                  + 0 ];
+                              w*BURSTS_PER_WORD
+                              + b
+                              + 0 ];
 
             // for each pixel in burst
             for ( int p = 0; p < PIXELS_PER_BURST; p++) {
 
-                  //int littleEndianIdx = p ^ 3;
-                  //int bigEndianIdx = p;
-                  int idx =
-\n#ifdef __ENDIAN_LITTLE__\n
-                  p ^ 3;
-\n#else\n
-                  p;
-\n#endif\n
+                //int littleEndianIdx = p ^ 3;
+                //int bigEndianIdx = p;
+                int idx =
+                    \n#ifdef __ENDIAN_LITTLE__\n
+                    p ^ 3;
+                \n#else\n
+                    p;
+                \n#endif\n
                 unsigned char pixChan = pixels.s[idx];
                 if (pHi_Values[0] >= 0 && (pixChan > pThresholds[0]) == (pHi_Values[0] == 0)) {
                     const uint kTopBit = 0x80000000;
@@ -1066,7 +1066,7 @@ void kernel_ThresholdRectToPix_OneChan(
 }
 )
 
- ; // close char*
+; // close char*
 
 #endif  // USE_EXTERNAL_KERNEL
 #endif  // TESSERACT_OPENCL_OCLKERNELS_H_

@@ -34,38 +34,38 @@
  **********************************************************************/
 
 bool read_unlv_file(                    //print list of sides
-                     STRING name,        //basename of file
-                     inT32 xsize,        //image size
-                     inT32 ysize,        //image size
-                     BLOCK_LIST *blocks  //output list
-                    ) {
-  FILE *pdfp;                    //file pointer
-  BLOCK *block;                  //current block
-  int x;                         //current top-down coords
-  int y;
-  int width;                     //of current block
-  int height;
-  BLOCK_IT block_it = blocks;    //block iterator
+    STRING name,        //basename of file
+    inT32 xsize,        //image size
+    inT32 ysize,        //image size
+    BLOCK_LIST *blocks  //output list
+) {
+    FILE *pdfp;                    //file pointer
+    BLOCK *block;                  //current block
+    int x;                         //current top-down coords
+    int y;
+    int width;                     //of current block
+    int height;
+    BLOCK_IT block_it = blocks;    //block iterator
 
-  name += UNLV_EXT;              //add extension
-  if ((pdfp = fopen (name.string (), "rb")) == NULL) {
-    return false;                //didn't read one
-  } else {
-    while (tfscanf(pdfp, "%d %d %d %d %*s", &x, &y, &width, &height) >= 4) {
-                                 //make rect block
-      block = new BLOCK (name.string (), TRUE, 0, 0,
-                         (inT16) x, (inT16) (ysize - y - height),
-                         (inT16) (x + width), (inT16) (ysize - y));
-                                 //on end of list
-      block_it.add_to_end (block);
+    name += UNLV_EXT;              //add extension
+    if ((pdfp = fopen (name.string (), "rb")) == NULL) {
+        return false;                //didn't read one
+    } else {
+        while (tfscanf(pdfp, "%d %d %d %d %*s", &x, &y, &width, &height) >= 4) {
+            //make rect block
+            block = new BLOCK (name.string (), TRUE, 0, 0,
+                               (inT16) x, (inT16) (ysize - y - height),
+                               (inT16) (x + width), (inT16) (ysize - y));
+            //on end of list
+            block_it.add_to_end (block);
+        }
+        fclose(pdfp);
     }
-    fclose(pdfp);
-  }
-  return true;
+    return true;
 }
 
 void FullPageBlock(int width, int height, BLOCK_LIST *blocks) {
-  BLOCK_IT block_it(blocks);
-  BLOCK* block = new BLOCK("", TRUE, 0, 0, 0, 0, width, height);
-  block_it.add_to_end(block);
+    BLOCK_IT block_it(blocks);
+    BLOCK* block = new BLOCK("", TRUE, 0, 0, 0, 0, width, height);
+    block_it.add_to_end(block);
 }

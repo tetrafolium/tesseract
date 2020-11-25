@@ -26,7 +26,7 @@ const double CCStruct::kDescenderFraction = 0.25;
 const double CCStruct::kXHeightFraction = 0.5;
 const double CCStruct::kAscenderFraction = 0.25;
 const double CCStruct::kXHeightCapRatio = CCStruct::kXHeightFraction /
-    (CCStruct::kXHeightFraction + CCStruct::kAscenderFraction);
+        (CCStruct::kXHeightFraction + CCStruct::kAscenderFraction);
 
 CCStruct::CCStruct() {}
 

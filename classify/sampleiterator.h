@@ -90,104 +90,104 @@ struct UnicharAndFonts;
 // know and shouldn't care. It is just learning shapes with compact class ids
 // in the range [0, it.CompactCharsetSize()).
 class SampleIterator {
- public:
-  SampleIterator();
-  ~SampleIterator();
+public:
+    SampleIterator();
+    ~SampleIterator();
 
-  void Clear();
+    void Clear();
 
-  // See class comment for arguments.
-  void Init(const IndexMapBiDi* charset_map,
-            const ShapeTable* shape_table,
-            bool randomize,
-            TrainingSampleSet* sample_set);
+    // See class comment for arguments.
+    void Init(const IndexMapBiDi* charset_map,
+              const ShapeTable* shape_table,
+              bool randomize,
+              TrainingSampleSet* sample_set);
 
-  // Iterator functions designed for use with a simple for loop:
-  // for (it.Begin(); !it.AtEnd(); it.Next()) {
-  //   const TrainingSample& sample = it.GetSample();
-  //   int class_id = it.GetCompactClassID();
-  //   ...
-  // }
-  void Begin();
-  bool AtEnd() const;
-  const TrainingSample& GetSample() const;
-  TrainingSample* MutableSample() const;
-  // Returns the total index (from the original set of samples) of the current
-  // sample.
-  int GlobalSampleIndex() const;
-  // Returns the index of the current sample in compact charset space, so
-  // in a 2-class problem between x and y, the returned indices will all be
-  // 0 or 1, and have nothing to do with the unichar_ids.
-  // If the charset_map_ is NULL, then this is equal to GetSparseClassID().
-  int GetCompactClassID() const;
-  // Returns the index of the current sample in sparse charset space, so
-  // in a 2-class problem between x and y, the returned indices will all be
-  // x or y, where x and y may be unichar_ids (no shape_table_) or shape_ids
-  // with a shape_table_.
-  int GetSparseClassID() const;
-  // Moves on to the next indexable sample. If the end is reached, leaves
-  // the state such that AtEnd() is true.
-  void Next();
+    // Iterator functions designed for use with a simple for loop:
+    // for (it.Begin(); !it.AtEnd(); it.Next()) {
+    //   const TrainingSample& sample = it.GetSample();
+    //   int class_id = it.GetCompactClassID();
+    //   ...
+    // }
+    void Begin();
+    bool AtEnd() const;
+    const TrainingSample& GetSample() const;
+    TrainingSample* MutableSample() const;
+    // Returns the total index (from the original set of samples) of the current
+    // sample.
+    int GlobalSampleIndex() const;
+    // Returns the index of the current sample in compact charset space, so
+    // in a 2-class problem between x and y, the returned indices will all be
+    // 0 or 1, and have nothing to do with the unichar_ids.
+    // If the charset_map_ is NULL, then this is equal to GetSparseClassID().
+    int GetCompactClassID() const;
+    // Returns the index of the current sample in sparse charset space, so
+    // in a 2-class problem between x and y, the returned indices will all be
+    // x or y, where x and y may be unichar_ids (no shape_table_) or shape_ids
+    // with a shape_table_.
+    int GetSparseClassID() const;
+    // Moves on to the next indexable sample. If the end is reached, leaves
+    // the state such that AtEnd() is true.
+    void Next();
 
-  // Returns the size of the compact charset space.
-  int CompactCharsetSize() const;
-  // Returns the size of the sparse charset space.
-  int SparseCharsetSize() const;
+    // Returns the size of the compact charset space.
+    int CompactCharsetSize() const;
+    // Returns the size of the sparse charset space.
+    int SparseCharsetSize() const;
 
-  const IndexMapBiDi& charset_map() const {
-    return *charset_map_;
-  }
-  const ShapeTable* shape_table() const {
-    return shape_table_;
-  }
-  // Sample set operations.
-  const TrainingSampleSet* sample_set() const {
-    return sample_set_;
-  }
+    const IndexMapBiDi& charset_map() const {
+        return *charset_map_;
+    }
+    const ShapeTable* shape_table() const {
+        return shape_table_;
+    }
+    // Sample set operations.
+    const TrainingSampleSet* sample_set() const {
+        return sample_set_;
+    }
 
-  // A set of functions that do something to all the samples accessed by the
-  // iterator, as it is currently setup.
+    // A set of functions that do something to all the samples accessed by the
+    // iterator, as it is currently setup.
 
-  // Apply the supplied feature_space/feature_map transform to all samples
-  // accessed by this iterator.
-  void MapSampleFeatures(const IntFeatureMap& feature_map);
+    // Apply the supplied feature_space/feature_map transform to all samples
+    // accessed by this iterator.
+    void MapSampleFeatures(const IntFeatureMap& feature_map);
 
-  // Adjust the weights of all the samples to be uniform in the given charset.
-  // Returns the number of samples in the iterator.
-  int UniformSamples();
+    // Adjust the weights of all the samples to be uniform in the given charset.
+    // Returns the number of samples in the iterator.
+    int UniformSamples();
 
-  // Normalize the weights of all the samples defined by the iterator so they
-  // sum to 1. Returns the minimum assigned sample weight.
-  double NormalizeSamples();
+    // Normalize the weights of all the samples defined by the iterator so they
+    // sum to 1. Returns the minimum assigned sample weight.
+    double NormalizeSamples();
 
- private:
-  // Helper returns the current UnicharAndFont shape_entry.
-  const UnicharAndFonts* GetShapeEntry() const;
+private:
+    // Helper returns the current UnicharAndFont shape_entry.
+    const UnicharAndFonts* GetShapeEntry() const;
 
-  // Map to subset the actual charset space.
-  const IndexMapBiDi* charset_map_;
-  // Shape table to recombine character classes into shapes
-  const ShapeTable* shape_table_;
-  // The samples to iterate over.
-  TrainingSampleSet* sample_set_;
-  // Flag to control randomizing the sample features.
-  bool randomize_;
-  // Shape table owned by this used to iterate character classes.
-  ShapeTable* owned_shape_table_;
+    // Map to subset the actual charset space.
+    const IndexMapBiDi* charset_map_;
+    // Shape table to recombine character classes into shapes
+    const ShapeTable* shape_table_;
+    // The samples to iterate over.
+    TrainingSampleSet* sample_set_;
+    // Flag to control randomizing the sample features.
+    bool randomize_;
+    // Shape table owned by this used to iterate character classes.
+    ShapeTable* owned_shape_table_;
 
-  // Top-level iteration. Shape index in sparse charset_map space.
-  int shape_index_;
-  int num_shapes_;
-  // Index to the character class within a shape.
-  int shape_char_index_;
-  int num_shape_chars_;
-  // Index to the font within a shape/class pair.
-  int shape_font_index_;
-  int num_shape_fonts_;
-  // The lowest level iteration. sample_index_/num_samples_ counts samples
-  // in the current shape/class/font combination.
-  int sample_index_;
-  int num_samples_;
+    // Top-level iteration. Shape index in sparse charset_map space.
+    int shape_index_;
+    int num_shapes_;
+    // Index to the character class within a shape.
+    int shape_char_index_;
+    int num_shape_chars_;
+    // Index to the font within a shape/class pair.
+    int shape_font_index_;
+    int num_shape_fonts_;
+    // The lowest level iteration. sample_index_/num_samples_ counts samples
+    // in the current shape/class/font combination.
+    int sample_index_;
+    int num_samples_;
 };
 
 }  // namespace tesseract.

@@ -23,7 +23,7 @@
 #include          "blobs.h"
 #include          "pgedit.h"
 
-                                 //progress monitor
+//progress monitor
 extern ETEXT_DESC *global_monitor;
 
 #endif

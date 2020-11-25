@@ -21,34 +21,40 @@
 // SIMD-based faster dot product functions. Intended to be a single static
 // object, but it does no real harm to have more than one.
 class SIMDDetect {
- public:
-  // Returns true if AVX is available on this system.
-  static inline bool IsAVXAvailable() { return detector.avx_available_; }
-  // Returns true if AVX2 (integer support) is available on this system.
-  static inline bool IsAVX2Available() { return detector.avx2_available_; }
-  // Returns true if AVX512 Foundation (float) is available on this system.
-  static inline bool IsAVX512FAvailable() {
-    return detector.avx512F_available_;
-  }
-  // Returns true if AVX512 integer is available on this system.
-  static inline bool IsAVX512BWAvailable() {
-    return detector.avx512BW_available_;
-  }
-  // Returns true if SSE4.1 is available on this system.
-  static inline bool IsSSEAvailable() { return detector.sse_available_; }
+public:
+    // Returns true if AVX is available on this system.
+    static inline bool IsAVXAvailable() {
+        return detector.avx_available_;
+    }
+    // Returns true if AVX2 (integer support) is available on this system.
+    static inline bool IsAVX2Available() {
+        return detector.avx2_available_;
+    }
+    // Returns true if AVX512 Foundation (float) is available on this system.
+    static inline bool IsAVX512FAvailable() {
+        return detector.avx512F_available_;
+    }
+    // Returns true if AVX512 integer is available on this system.
+    static inline bool IsAVX512BWAvailable() {
+        return detector.avx512BW_available_;
+    }
+    // Returns true if SSE4.1 is available on this system.
+    static inline bool IsSSEAvailable() {
+        return detector.sse_available_;
+    }
 
- private:
-  // Constructor, must set all static member variables.
-  SIMDDetect();
+private:
+    // Constructor, must set all static member variables.
+    SIMDDetect();
 
- private:
-  // Singleton.
-  static SIMDDetect detector;
-  // If true, then AVX has been detected.
-  static TESS_API bool avx_available_;
-  static TESS_API bool avx2_available_;
-  static TESS_API bool avx512F_available_;
-  static TESS_API bool avx512BW_available_;
-  // If true, then SSe4.1 has been detected.
-  static TESS_API bool sse_available_;
+private:
+    // Singleton.
+    static SIMDDetect detector;
+    // If true, then AVX has been detected.
+    static TESS_API bool avx_available_;
+    static TESS_API bool avx2_available_;
+    static TESS_API bool avx512F_available_;
+    static TESS_API bool avx512BW_available_;
+    // If true, then SSe4.1 has been detected.
+    static TESS_API bool sse_available_;
 };
