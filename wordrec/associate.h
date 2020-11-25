@@ -32,7 +32,7 @@ class WERD_RES;
 
 namespace tesseract {
 
-// Statisitcs about character widths, gaps and seams.
+// Statistics about character widths, gaps and seams.
 struct AssociateStats {
   AssociateStats() { Clear(); }
 

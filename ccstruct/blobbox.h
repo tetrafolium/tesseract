@@ -75,7 +75,7 @@ enum BlobSpecialTextType {
   BSTT_NONE,    // No special.
   BSTT_ITALIC,  // Italic style.
   BSTT_DIGIT,   // Digit symbols.
-  BSTT_MATH,    // Mathmatical symobls (not including digit).
+  BSTT_MATH,    // Mathmatical symbols (not including digit).
   BSTT_UNCLEAR, // Characters with low recognition rate.
   BSTT_SKIP,    // Characters that we skip labeling (usually too small).
   BSTT_COUNT

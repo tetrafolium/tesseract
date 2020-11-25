@@ -55,7 +55,7 @@ MasterTrainer::MasterTrainer(NormalizationMode norm_mode, bool shape_analysis,
                              bool replicate_samples, int debug_level)
     : norm_mode_(norm_mode), samples_(fontinfo_table_),
       junk_samples_(fontinfo_table_), verify_samples_(fontinfo_table_),
-      charsetsize_(0), enable_shape_anaylsis_(shape_analysis),
+      charsetsize_(0), enable_shape_analysis_(shape_analysis),
       enable_replication_(replicate_samples), fragments_(NULL),
       prev_unichar_id_(-1), debug_level_(debug_level) {}
 
@@ -216,13 +216,13 @@ void MasterTrainer::LoadPageImages(const char *filename) {
 
 // Cleans up the samples after initial load from the tr files, and prior to
 // saving the MasterTrainer:
-// Remaps fragmented chars if running shape anaylsis.
+// Remaps fragmented chars if running shape analysis.
 // Sets up the samples appropriately for class/fontwise access.
 // Deletes outlier samples.
 void MasterTrainer::PostLoadCleanup() {
   if (debug_level_ > 0)
     tprintf("PostLoadCleanup...\n");
-  if (enable_shape_anaylsis_)
+  if (enable_shape_analysis_)
     ReplaceFragmentedSamples();
   SampleIterator sample_it;
   sample_it.Init(NULL, NULL, true, &verify_samples_);

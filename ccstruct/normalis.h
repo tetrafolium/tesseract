@@ -17,8 +17,8 @@
  *
  **********************************************************************/
 
-#ifndef NORMALIS_H
-#define NORMALIS_H
+#ifndef NORMALS_H
+#define NORMALS_H
 
 #include "genericvector.h"
 #include "host.h"

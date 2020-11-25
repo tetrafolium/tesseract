@@ -194,7 +194,7 @@ public:
   void program_editup(const char *textbase, TessdataManager *init_classifier,
                       TessdataManager *init_dict);
   void cc_recog(WERD_RES *word);
-  void program_editdown(inT32 elasped_time);
+  void program_editdown(inT32 elapsed_time);
   void set_pass1();
   void set_pass2();
   int end_recog();

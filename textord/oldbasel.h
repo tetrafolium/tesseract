@@ -40,7 +40,7 @@ extern double_VAR_H(textord_oldbl_jumplimit, 0.15,
 int get_blob_coords(   // get boxes
     TO_ROW *row,       // row to use
     inT32 lineheight,  // block level
-    TBOX *blobcoords,  // ouput boxes
+    TBOX *blobcoords,  // output boxes
     BOOL8 &holed_line, // lost a lot of blobs
     int &outcount      // no of real blobs
 );

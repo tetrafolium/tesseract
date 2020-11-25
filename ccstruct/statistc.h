@@ -17,8 +17,8 @@
  *
  **********************************************************************/
 
-#ifndef TESSERACT_CCSTRUCT_STATISTC_H_
-#define TESSERACT_CCSTRUCT_STATISTC_H_
+#ifndef TESSERACT_CCSTRUCT_STATISTIC_H_
+#define TESSERACT_CCSTRUCT_STATISTIC_H_
 
 #include "host.h"
 #include "kdpair.h"
@@ -164,4 +164,4 @@ void swap_entries(void *array,  // array of entries
                   inT32 index1, // entries to swap
                   inT32 index2);
 
-#endif // TESSERACT_CCSTRUCT_STATISTC_H_
+#endif // TESSERACT_CCSTRUCT_STATISTIC_H_
