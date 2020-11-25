@@ -13,7 +13,7 @@ inspecode:
     thresholds: { num-issues: 179 }
 
   cppcheck:         ### for C++
-    thresholds: { num-issues: 22 }
+    thresholds: { num-issues: 40 }
 
   cpplint:          ### for C++
     options:
