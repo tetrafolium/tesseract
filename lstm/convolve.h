@@ -32,42 +32,40 @@ namespace tesseract {
 // out-of-input areas.
 class Convolve : public Network {
 public:
-    // The area of convolution is 2*half_x + 1 by 2*half_y + 1, forcing it to
-    // always be odd, so the center is the current pixel.
-    Convolve(const STRING& name, int ni, int half_x, int half_y);
-    virtual ~Convolve();
+  // The area of convolution is 2*half_x + 1 by 2*half_y + 1, forcing it to
+  // always be odd, so the center is the current pixel.
+  Convolve(const STRING &name, int ni, int half_x, int half_y);
+  virtual ~Convolve();
 
-    virtual STRING spec() const {
-        STRING spec;
-        spec.add_str_int("C", half_x_ * 2 + 1);
-        spec.add_str_int(",", half_y_ * 2 + 1);
-        return spec;
-    }
+  virtual STRING spec() const {
+    STRING spec;
+    spec.add_str_int("C", half_x_ * 2 + 1);
+    spec.add_str_int(",", half_y_ * 2 + 1);
+    return spec;
+  }
 
-    // Writes to the given file. Returns false in case of error.
-    virtual bool Serialize(TFile* fp) const;
-    // Reads from the given file. Returns false in case of error.
-    virtual bool DeSerialize(TFile* fp);
+  // Writes to the given file. Returns false in case of error.
+  virtual bool Serialize(TFile *fp) const;
+  // Reads from the given file. Returns false in case of error.
+  virtual bool DeSerialize(TFile *fp);
 
-    // Runs forward propagation of activations on the input line.
-    // See Network for a detailed discussion of the arguments.
-    virtual void Forward(bool debug, const NetworkIO& input,
-                         const TransposedArray* input_transpose,
-                         NetworkScratch* scratch, NetworkIO* output);
+  // Runs forward propagation of activations on the input line.
+  // See Network for a detailed discussion of the arguments.
+  virtual void Forward(bool debug, const NetworkIO &input,
+                       const TransposedArray *input_transpose,
+                       NetworkScratch *scratch, NetworkIO *output);
 
-    // Runs backward propagation of errors on the deltas line.
-    // See Network for a detailed discussion of the arguments.
-    virtual bool Backward(bool debug, const NetworkIO& fwd_deltas,
-                          NetworkScratch* scratch,
-                          NetworkIO* back_deltas);
+  // Runs backward propagation of errors on the deltas line.
+  // See Network for a detailed discussion of the arguments.
+  virtual bool Backward(bool debug, const NetworkIO &fwd_deltas,
+                        NetworkScratch *scratch, NetworkIO *back_deltas);
 
 protected:
-    // Serialized data.
-    inT32 half_x_;
-    inT32 half_y_;
+  // Serialized data.
+  inT32 half_x_;
+  inT32 half_y_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-
-#endif  // TESSERACT_LSTM_SUBSAMPLE_H_
+#endif // TESSERACT_LSTM_SUBSAMPLE_H_

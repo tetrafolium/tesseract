@@ -15,15 +15,15 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   EFIO_H
-#define   EFIO_H
+#ifndef EFIO_H
+#define EFIO_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------**/
 #include <stdio.h>
 
-#define FOPENERROR      3000
+#define FOPENERROR 3000
 
 /**----------------------------------------------------------------------------
           Public Function Prototype

@@ -15,17 +15,17 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   DANERROR_H
-#define   DANERROR_H
+#ifndef DANERROR_H
+#define DANERROR_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------**/
-#define NOERROR       0
-#define DO_NOTHING      0
+#define NOERROR 0
+#define DO_NOTHING 0
 
 typedef int TRAPERROR;
-typedef void (*VOID_PROC) ();
+typedef void (*VOID_PROC)();
 
 /**----------------------------------------------------------------------------
           Public Function Prototypes

@@ -40,54 +40,52 @@ namespace tesseract {
 // getting moved around on the heap.
 class DoublePtr {
 public:
-    DoublePtr() : other_end_(NULL) {}
-    // Copy constructor steals the partner off src and is therefore a non
-    // const reference arg.
-    // Copying a const DoublePtr generates a compiler error.
-    DoublePtr(DoublePtr& src) {
-        other_end_ = src.other_end_;
-        if (other_end_ != NULL) {
-            other_end_->other_end_ = this;
-            src.other_end_ = NULL;
-        }
+  DoublePtr() : other_end_(NULL) {}
+  // Copy constructor steals the partner off src and is therefore a non
+  // const reference arg.
+  // Copying a const DoublePtr generates a compiler error.
+  DoublePtr(DoublePtr &src) {
+    other_end_ = src.other_end_;
+    if (other_end_ != NULL) {
+      other_end_->other_end_ = this;
+      src.other_end_ = NULL;
     }
-    // Operator= steals the partner off src, and therefore needs src to be a non-
-    // const reference.
-    // Assigning from a const DoublePtr generates a compiler error.
-    void operator=(DoublePtr& src) {
-        Disconnect();
-        other_end_ = src.other_end_;
-        if (other_end_ != NULL) {
-            other_end_->other_end_ = this;
-            src.other_end_ = NULL;
-        }
+  }
+  // Operator= steals the partner off src, and therefore needs src to be a non-
+  // const reference.
+  // Assigning from a const DoublePtr generates a compiler error.
+  void operator=(DoublePtr &src) {
+    Disconnect();
+    other_end_ = src.other_end_;
+    if (other_end_ != NULL) {
+      other_end_->other_end_ = this;
+      src.other_end_ = NULL;
     }
+  }
 
-    // Connects this and other, discarding any existing connections.
-    void Connect(DoublePtr* other) {
-        other->Disconnect();
-        Disconnect();
-        other->other_end_ = this;
-        other_end_ = other;
+  // Connects this and other, discarding any existing connections.
+  void Connect(DoublePtr *other) {
+    other->Disconnect();
+    Disconnect();
+    other->other_end_ = this;
+    other_end_ = other;
+  }
+  // Disconnects this and other, making OtherEnd() return NULL for both.
+  void Disconnect() {
+    if (other_end_ != NULL) {
+      other_end_->other_end_ = NULL;
+      other_end_ = NULL;
     }
-    // Disconnects this and other, making OtherEnd() return NULL for both.
-    void Disconnect() {
-        if (other_end_ != NULL) {
-            other_end_->other_end_ = NULL;
-            other_end_ = NULL;
-        }
-    }
-    // Returns the pointer to the other end of the double pointer.
-    DoublePtr* OtherEnd() const {
-        return other_end_;
-    }
+  }
+  // Returns the pointer to the other end of the double pointer.
+  DoublePtr *OtherEnd() const { return other_end_; }
 
 private:
-    // Pointer to the other end of the link. It is always true that either
-    // other_end_ == NULL or other_end_->other_end_ == this.
-    DoublePtr* other_end_;
+  // Pointer to the other end of the link. It is always true that either
+  // other_end_ == NULL or other_end_->other_end_ == this.
+  DoublePtr *other_end_;
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // THIRD_PARTY_TESSERACT_CCUTIL_DOUBLEPTR_H_
+#endif // THIRD_PARTY_TESSERACT_CCUTIL_DOUBLEPTR_H_

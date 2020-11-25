@@ -43,43 +43,40 @@
  * - #NOTENOUGHMEMORY  unable to allocate Size bytes
  * - #ILLEGALMALLOCREQUEST negative or zero request size
  * @note History: 4/3/89, DSJ, Created.
-*/
+ */
 void *Emalloc(int Size) {
-    void *Buffer;
+  void *Buffer;
 
-    if (Size <= 0)
-        DoError (ILLEGALMALLOCREQUEST, "Illegal malloc request size");
-    Buffer = (void *) malloc (Size);
-    if (Buffer == NULL) {
-        DoError (NOTENOUGHMEMORY, "Not enough memory");
-        return (NULL);
-    }
-    else
-        return (Buffer);
+  if (Size <= 0)
+    DoError(ILLEGALMALLOCREQUEST, "Illegal malloc request size");
+  Buffer = (void *)malloc(Size);
+  if (Buffer == NULL) {
+    DoError(NOTENOUGHMEMORY, "Not enough memory");
+    return (NULL);
+  } else
+    return (Buffer);
 
-}                                /* Emalloc */
-
+} /* Emalloc */
 
 /*---------------------------------------------------------------------------*/
 void *Erealloc(void *ptr, int size) {
-    void *Buffer;
+  void *Buffer;
 
-    if (size < 0 || (size == 0 && ptr == NULL))
-        DoError (ILLEGALMALLOCREQUEST, "Illegal realloc request size");
+  if (size < 0 || (size == 0 && ptr == NULL))
+    DoError(ILLEGALMALLOCREQUEST, "Illegal realloc request size");
 
-    Buffer = (void *) realloc (ptr, size);
-    if (Buffer == NULL && size != 0)
-        DoError (NOTENOUGHMEMORY, "Not enough memory");
-    return (Buffer);
+  Buffer = (void *)realloc(ptr, size);
+  if (Buffer == NULL && size != 0)
+    DoError(NOTENOUGHMEMORY, "Not enough memory");
+  return (Buffer);
 
-}                                /* Erealloc */
-
+} /* Erealloc */
 
 /*---------------------------------------------------------------------------*/
 void Efree(void *ptr) {
-    if (ptr == NULL)
-        DoError (ILLEGALMALLOCREQUEST, "Attempted to free NULL ptr");
+  if (ptr == NULL)
+    DoError(ILLEGALMALLOCREQUEST, "Attempted to free NULL ptr");
 
-    free(ptr);
+  free(ptr);
 
-}                                /* Efree */
+} /* Efree */

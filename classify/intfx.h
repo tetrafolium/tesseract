@@ -15,8 +15,8 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   INTFX_H
-#define   INTFX_H
+#ifndef INTFX_H
+#define INTFX_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
@@ -33,13 +33,13 @@ class TrainingSample;
 }
 
 struct INT_FX_RESULT_STRUCT {
-    inT32 Length;                  // total length of all outlines
-    inT16 Xmean, Ymean;            // center of mass of all outlines
-    inT16 Rx, Ry;                  // radius of gyration
-    inT16 NumBL, NumCN;            // number of features extracted
-    inT16 Width;                   // Width of blob in BLN coords.
-    uinT8 YBottom;                 // Bottom of blob in BLN coords.
-    uinT8 YTop;                    // Top of blob in BLN coords.
+  inT32 Length;       // total length of all outlines
+  inT16 Xmean, Ymean; // center of mass of all outlines
+  inT16 Rx, Ry;       // radius of gyration
+  inT16 NumBL, NumCN; // number of features extracted
+  inT16 Width;        // Width of blob in BLN coords.
+  uinT8 YBottom;      // Bottom of blob in BLN coords.
+  uinT8 YTop;         // Top of blob in BLN coords.
 };
 
 // The standard feature length
@@ -60,16 +60,15 @@ namespace tesseract {
 // TODO(rays) BlobToTrainingSample must remain a global function until
 // the FlexFx and FeatureDescription code can be removed and LearnBlob
 // made a member of Classify.
-TrainingSample* BlobToTrainingSample(
-    const TBLOB& blob, bool nonlinear_norm, INT_FX_RESULT_STRUCT* fx_info,
-    GenericVector<INT_FEATURE_STRUCT>* bl_features);
-}
+TrainingSample *
+BlobToTrainingSample(const TBLOB &blob, bool nonlinear_norm,
+                     INT_FX_RESULT_STRUCT *fx_info,
+                     GenericVector<INT_FEATURE_STRUCT> *bl_features);
+} // namespace tesseract
 
 // Deprecated! Prefer tesseract::Classify::ExtractFeatures instead.
-bool ExtractIntFeat(const TBLOB& blob,
-                    bool nonlinear_norm,
-                    INT_FEATURE_ARRAY BLFeat,
-                    INT_FEATURE_ARRAY CNFeat,
-                    INT_FX_RESULT_STRUCT* Results);
+bool ExtractIntFeat(const TBLOB &blob, bool nonlinear_norm,
+                    INT_FEATURE_ARRAY BLFeat, INT_FEATURE_ARRAY CNFeat,
+                    INT_FX_RESULT_STRUCT *Results);
 
 #endif

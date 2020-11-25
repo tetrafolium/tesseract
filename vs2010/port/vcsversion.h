@@ -8,4 +8,3 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #define GIT_REV "4.00.00dev"
-

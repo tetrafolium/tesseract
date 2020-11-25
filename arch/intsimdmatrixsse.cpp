@@ -18,27 +18,27 @@
 
 #include "intsimdmatrixsse.h"
 
+#include "dotproductsse.h"
 #include <stdint.h>
 #include <vector>
-#include "dotproductsse.h"
 
 namespace tesseract {
 
 #ifdef __SSE4_1__
 // Computes part of matrix.vector v = Wu. Computes 1 result.
-static void PartialMatrixDotVector1(const int8_t* wi, const double* scales,
-                                    const int8_t* u, int num_in, int num_out,
-                                    double* v) {
-    int total = IntDotProductSSE(u, wi, num_in);
-    // Add in the bias and correct for integer values.
-    *v = (static_cast<double>(total) / MAX_INT8 + wi[num_in]) * *scales;
+static void PartialMatrixDotVector1(const int8_t *wi, const double *scales,
+                                    const int8_t *u, int num_in, int num_out,
+                                    double *v) {
+  int total = IntDotProductSSE(u, wi, num_in);
+  // Add in the bias and correct for integer values.
+  *v = (static_cast<double>(total) / MAX_INT8 + wi[num_in]) * *scales;
 }
-#endif  // __SSE4_1__
+#endif // __SSE4_1__
 
 IntSimdMatrixSSE::IntSimdMatrixSSE() {
 #ifdef __SSE4_1__
-    partial_funcs_ = {PartialMatrixDotVector1};
-#endif  // __SSE4_1__
+  partial_funcs_ = {PartialMatrixDotVector1};
+#endif // __SSE4_1__
 }
 
-}  // namespace tesseract.
+} // namespace tesseract.

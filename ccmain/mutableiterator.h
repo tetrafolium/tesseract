@@ -43,24 +43,21 @@ class Tesseract;
 
 class MutableIterator : public ResultIterator {
 public:
-    // See argument descriptions in ResultIterator()
-    MutableIterator(PAGE_RES* page_res, Tesseract* tesseract,
-                    int scale, int scaled_yres,
-                    int rect_left, int rect_top,
-                    int rect_width, int rect_height)
-        : ResultIterator(
-              LTRResultIterator(page_res, tesseract, scale, scaled_yres, rect_left,
-                                rect_top, rect_width, rect_height)) {}
-    virtual ~MutableIterator() {}
+  // See argument descriptions in ResultIterator()
+  MutableIterator(PAGE_RES *page_res, Tesseract *tesseract, int scale,
+                  int scaled_yres, int rect_left, int rect_top, int rect_width,
+                  int rect_height)
+      : ResultIterator(LTRResultIterator(page_res, tesseract, scale,
+                                         scaled_yres, rect_left, rect_top,
+                                         rect_width, rect_height)) {}
+  virtual ~MutableIterator() {}
 
-    // See PageIterator and ResultIterator for most calls.
+  // See PageIterator and ResultIterator for most calls.
 
-    // Return access to Tesseract internals.
-    const PAGE_RES_IT *PageResIt() const {
-        return it_;
-    }
+  // Return access to Tesseract internals.
+  const PAGE_RES_IT *PageResIt() const { return it_; }
 };
 
-}  // namespace tesseract.
+} // namespace tesseract.
 
-#endif  // TESSERACT_CCMAIN_MUTABLEITERATOR_H_
+#endif // TESSERACT_CCMAIN_MUTABLEITERATOR_H_

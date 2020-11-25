@@ -34,63 +34,63 @@ class ScrollView;
 
 class SVMenuNode {
 public:
-    // Creating the (empty) root menu node.
-    SVMenuNode();
+  // Creating the (empty) root menu node.
+  SVMenuNode();
 
-    // Destructor for every node.
-    ~SVMenuNode();
+  // Destructor for every node.
+  ~SVMenuNode();
 
-    // Create a new sub menu node with just a caption.  This is used to create
-    // nodes which act as parent nodes to other nodes (e.g. submenus).
-    SVMenuNode* AddChild(const char* txt);
+  // Create a new sub menu node with just a caption.  This is used to create
+  // nodes which act as parent nodes to other nodes (e.g. submenus).
+  SVMenuNode *AddChild(const char *txt);
 
-    // Create a "normal" menu node which is associated with a command event.
-    void AddChild(const char* txt, int command_event);
+  // Create a "normal" menu node which is associated with a command event.
+  void AddChild(const char *txt, int command_event);
 
-    // Create a flag menu node.
-    void AddChild(const char* txt, int command_event, int tv);
+  // Create a flag menu node.
+  void AddChild(const char *txt, int command_event, int tv);
 
-    // Create a menu node with an associated value (which might be changed
-    // through the gui).
-    void AddChild(const char* txt, int command_event, const char* val);
+  // Create a menu node with an associated value (which might be changed
+  // through the gui).
+  void AddChild(const char *txt, int command_event, const char *val);
 
-    // Create a menu node with an associated value and description_.
-    void AddChild(const char* txt, int command_event,
-                  const char* val, const char* desc);
+  // Create a menu node with an associated value and description_.
+  void AddChild(const char *txt, int command_event, const char *val,
+                const char *desc);
 
-    // Build a menu structure for the server and send the necessary messages.
-    // Should be called on the root node. If menu_bar is true, a menu_bar menu
-    // is built (e.g. on top of the window), if it is false a popup menu is
-    // built which gets shown by right clicking on the window.
-    void BuildMenu(ScrollView *sv, bool menu_bar = true);
+  // Build a menu structure for the server and send the necessary messages.
+  // Should be called on the root node. If menu_bar is true, a menu_bar menu
+  // is built (e.g. on top of the window), if it is false a popup menu is
+  // built which gets shown by right clicking on the window.
+  void BuildMenu(ScrollView *sv, bool menu_bar = true);
 
 private:
-    // Constructor holding the actual node data.
-    SVMenuNode(int command_event, const char* txt, int tv,
-               bool check_box_entry, const char* val, const char* desc);
+  // Constructor holding the actual node data.
+  SVMenuNode(int command_event, const char *txt, int tv, bool check_box_entry,
+             const char *val, const char *desc);
 
-    // Adds a new menu node to the current node.
-    void AddChild(SVMenuNode* svmn);
+  // Adds a new menu node to the current node.
+  void AddChild(SVMenuNode *svmn);
 
-    // The parent node of this node.
-    SVMenuNode* parent_;
-    // The first child of this node.
-    SVMenuNode* child_;
-    // The next "sibling" of this node (e.g. same parent).
-    SVMenuNode* next_;
-    // Whether this menu node actually is a flag.
-    bool is_check_box_entry_;
+  // The parent node of this node.
+  SVMenuNode *parent_;
+  // The first child of this node.
+  SVMenuNode *child_;
+  // The next "sibling" of this node (e.g. same parent).
+  SVMenuNode *next_;
+  // Whether this menu node actually is a flag.
+  bool is_check_box_entry_;
 
-    // The command event associated with a specific menu node. Should be unique.
-    int cmd_event_;
-    // The caption associated with a specific menu node.
-    STRING text_;
-    // The value of the flag (if this menu node is a flag).
-    bool toggle_value_;
-    // The value of the menu node. (optional)
-    STRING value_;
-    // A description_ of the value. (optional)
-    STRING description_;
+  // The command event associated with a specific menu node. Should be unique.
+  int cmd_event_;
+  // The caption associated with a specific menu node.
+  STRING text_;
+  // The value of the flag (if this menu node is a flag).
+  bool toggle_value_;
+  // The value of the menu node. (optional)
+  STRING value_;
+  // A description_ of the value. (optional)
+  STRING description_;
 };
 
-#endif  // TESSERACT_VIEWER_SVMNODE_H_
+#endif // TESSERACT_VIEWER_SVMNODE_H_

@@ -15,25 +15,29 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   MF_H
-#define   MF_H
+#ifndef MF_H
+#define MF_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------**/
-#include "ocrfeatures.h"
 #include "blobs.h"
+#include "ocrfeatures.h"
 
 typedef enum {
-    MFXPosition, MFYPosition,
-    MFLength, MFDirection, MFBulge1, MFBulge2,
-    MFCount  // For array sizes.
+  MFXPosition,
+  MFYPosition,
+  MFLength,
+  MFDirection,
+  MFBulge1,
+  MFBulge2,
+  MFCount // For array sizes.
 } MF_PARAM_NAME;
 
 typedef float MicroFeature[MFCount];
 /*----------------------------------------------------------------------------
           Private Function Prototypes
 -----------------------------------------------------------------------------*/
-FEATURE_SET ExtractMicros(TBLOB* Blob, const DENORM& cn_denorm);
+FEATURE_SET ExtractMicros(TBLOB *Blob, const DENORM &cn_denorm);
 
 #endif

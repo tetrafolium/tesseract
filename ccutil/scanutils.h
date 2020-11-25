@@ -19,8 +19,8 @@
 #ifndef TESSERACT_CCUTIL_SCANUTILS_H_
 #define TESSERACT_CCUTIL_SCANUTILS_H_
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -34,24 +34,24 @@
  * @note Note that scientific floating-point notation is not supported.
  *
  */
-int tfscanf(FILE* stream, const char *format, ...);
+int tfscanf(FILE *stream, const char *format, ...);
 
 #ifdef EMBEDDED
 
 // Attempts to parse the given file stream s as an integer of the base
 // 'base'. Returns the first successfully parsed integer as a uintmax_t, or
 // 0, if none was found.
-uintmax_t streamtoumax(FILE* s, int base);
+uintmax_t streamtoumax(FILE *s, int base);
 
 // Parse a file stream according to the given format. See the fscanf manpage
 // for more information, as this function attempts to mimic its behavior.
 // Note that scientific loating-point notation is not supported.
-int fscanf(FILE* stream, const char *format, ...);
+int fscanf(FILE *stream, const char *format, ...);
 
 // Parse a file stream according to the given format. See the fscanf manpage
 // for more information, as this function attempts to mimic its behavior.
 // Note that scientific loating-point notation is not supported.
-int vfscanf(FILE* stream, const char *format, va_list ap);
+int vfscanf(FILE *stream, const char *format, va_list ap);
 
 // Create a file at the specified path. See the creat manpage for more
 // information, as this function attempts to mimic its behavior.
@@ -60,8 +60,8 @@ int creat(const char *pathname, mode_t mode);
 // Convert the specified C-String to a float. Returns the first parsed float,
 // or 0.0 if no floating point value could be found. Note that scientific
 // floating-point notation is not supported.
-double strtofloat(const char* s);
+double strtofloat(const char *s);
 
-#endif  // EMBEDDED
+#endif // EMBEDDED
 
-#endif  // TESSERACT_CCUTIL_SCANUTILS_H_
+#endif // TESSERACT_CCUTIL_SCANUTILS_H_

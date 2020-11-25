@@ -17,18 +17,12 @@
  *
  **********************************************************************/
 
-#ifndef           DOCQUAL_H
-#define           DOCQUAL_H
+#ifndef DOCQUAL_H
+#define DOCQUAL_H
 
-#include          "control.h"
+#include "control.h"
 
-enum GARBAGE_LEVEL
-{
-    G_NEVER_CRUNCH,
-    G_OK,
-    G_DODGY,
-    G_TERRIBLE
-};
+enum GARBAGE_LEVEL { G_NEVER_CRUNCH, G_OK, G_DODGY, G_TERRIBLE };
 
 inT16 word_blob_quality(WERD_RES *word, ROW *row);
 void reject_whole_page(PAGE_RES_IT &page_res_it);

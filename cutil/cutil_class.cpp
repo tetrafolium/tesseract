@@ -20,10 +20,8 @@
 
 namespace tesseract {
 
-CUtil::CUtil() {
-}
+CUtil::CUtil() {}
 
-CUtil::~CUtil() {
-}
+CUtil::~CUtil() {}
 
-}  // namespace tesseract
+} // namespace tesseract

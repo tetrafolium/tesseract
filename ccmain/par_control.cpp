@@ -20,55 +20,52 @@
 #include "tesseractclass.h"
 #ifdef _OPENMP
 #include <omp.h>
-#endif  // _OPENMP
+#endif // _OPENMP
 
 namespace tesseract {
 
 struct BlobData {
-    BlobData() : blob(NULL), choices(NULL) {}
-    BlobData(int index, Tesseract* tess, const WERD_RES& word)
-        : blob(word.chopped_word->blobs[index]),
-          tesseract(tess),
-          choices(&(*word.ratings)(index, index)) {}
+  BlobData() : blob(NULL), choices(NULL) {}
+  BlobData(int index, Tesseract *tess, const WERD_RES &word)
+      : blob(word.chopped_word->blobs[index]), tesseract(tess),
+        choices(&(*word.ratings)(index, index)) {}
 
-    TBLOB* blob;
-    Tesseract* tesseract;
-    BLOB_CHOICE_LIST** choices;
+  TBLOB *blob;
+  Tesseract *tesseract;
+  BLOB_CHOICE_LIST **choices;
 };
 
-void Tesseract::PrerecAllWordsPar(const GenericVector<WordData>& words) {
-    // Prepare all the blobs.
-    GenericVector<BlobData> blobs;
-    for (int w = 0; w < words.size(); ++w) {
-        if (words[w].word->ratings != NULL &&
-                words[w].word->ratings->get(0, 0) == NULL) {
-            for (int s = 0; s < words[w].lang_words.size(); ++s) {
-                Tesseract* sub = s < sub_langs_.size() ? sub_langs_[s] : this;
-                const WERD_RES& word = *words[w].lang_words[s];
-                for (int b = 0; b < word.chopped_word->NumBlobs(); ++b) {
-                    blobs.push_back(BlobData(b, sub, word));
-                }
-            }
+void Tesseract::PrerecAllWordsPar(const GenericVector<WordData> &words) {
+  // Prepare all the blobs.
+  GenericVector<BlobData> blobs;
+  for (int w = 0; w < words.size(); ++w) {
+    if (words[w].word->ratings != NULL &&
+        words[w].word->ratings->get(0, 0) == NULL) {
+      for (int s = 0; s < words[w].lang_words.size(); ++s) {
+        Tesseract *sub = s < sub_langs_.size() ? sub_langs_[s] : this;
+        const WERD_RES &word = *words[w].lang_words[s];
+        for (int b = 0; b < word.chopped_word->NumBlobs(); ++b) {
+          blobs.push_back(BlobData(b, sub, word));
         }
+      }
     }
-    // Pre-classify all the blobs.
-    if (tessedit_parallelize > 1) {
+  }
+  // Pre-classify all the blobs.
+  if (tessedit_parallelize > 1) {
 #ifdef _OPENMP
-        #pragma omp parallel for num_threads(10)
-#endif  // _OPENMP
-        for (int b = 0; b < blobs.size(); ++b) {
-            *blobs[b].choices =
-                blobs[b].tesseract->classify_blob(blobs[b].blob, "par", White, NULL);
-        }
-    } else {
-        // TODO(AMD) parallelize this.
-        for (int b = 0; b < blobs.size(); ++b) {
-            *blobs[b].choices =
-                blobs[b].tesseract->classify_blob(blobs[b].blob, "par", White, NULL);
-        }
+#pragma omp parallel for num_threads(10)
+#endif // _OPENMP
+    for (int b = 0; b < blobs.size(); ++b) {
+      *blobs[b].choices =
+          blobs[b].tesseract->classify_blob(blobs[b].blob, "par", White, NULL);
     }
+  } else {
+    // TODO(AMD) parallelize this.
+    for (int b = 0; b < blobs.size(); ++b) {
+      *blobs[b].choices =
+          blobs[b].tesseract->classify_blob(blobs[b].blob, "par", White, NULL);
+    }
+  }
 }
 
-}  // namespace tesseract.
-
-
+} // namespace tesseract.

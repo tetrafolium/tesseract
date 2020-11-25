@@ -24,54 +24,55 @@
 #include <stdio.h>
 
 #include "baseapi.h"
+#include "dict.h"
 #include "helpers.h"
 #include "strngs.h"
-#include "dict.h"
 #include "tesseractclass.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
-    // Parse input arguments.
-    if (argc != 4 && (argc != 6 || strcmp(argv[1], "-l") != 0)) {
-        printf("Usage: %s [-l lang] tessdata_dir wordlist_file"
-               " output_ambiguious_wordlist_file\n", argv[0]);
-        return 1;
-    }
-    int argv_offset = 0;
-    STRING lang;
-    if (argc == 6) {
-        lang = argv[2];
-        argv_offset = 2;
-    } else {
-        lang = "eng";
-    }
-    const char *tessdata_dir = argv[++argv_offset];
-    const char *input_file_str = argv[++argv_offset];
-    const char *output_file_str = argv[++argv_offset];
+  // Parse input arguments.
+  if (argc != 4 && (argc != 6 || strcmp(argv[1], "-l") != 0)) {
+    printf("Usage: %s [-l lang] tessdata_dir wordlist_file"
+           " output_ambiguious_wordlist_file\n",
+           argv[0]);
+    return 1;
+  }
+  int argv_offset = 0;
+  STRING lang;
+  if (argc == 6) {
+    lang = argv[2];
+    argv_offset = 2;
+  } else {
+    lang = "eng";
+  }
+  const char *tessdata_dir = argv[++argv_offset];
+  const char *input_file_str = argv[++argv_offset];
+  const char *output_file_str = argv[++argv_offset];
 
-    // Initialize Tesseract.
-    tesseract::TessBaseAPI api;
-    GenericVector<STRING> vars_vec;
-    GenericVector<STRING> vars_values;
-    vars_vec.push_back("output_ambig_words_file");
-    vars_values.push_back(output_file_str);
-    api.Init(tessdata_dir, lang.string(), tesseract::OEM_TESSERACT_ONLY, nullptr,
-             0, &vars_vec, &vars_values, false);
-    tesseract::Dict &dict = api.tesseract()->getDict();
-    FILE *input_file = fopen(input_file_str, "rb");
-    if (input_file == nullptr) {
-        tprintf("Failed to open input wordlist file %s\n", input_file_str);
-        exit(1);
-    }
-    char str[CHARS_PER_LINE];
+  // Initialize Tesseract.
+  tesseract::TessBaseAPI api;
+  GenericVector<STRING> vars_vec;
+  GenericVector<STRING> vars_values;
+  vars_vec.push_back("output_ambig_words_file");
+  vars_values.push_back(output_file_str);
+  api.Init(tessdata_dir, lang.string(), tesseract::OEM_TESSERACT_ONLY, nullptr,
+           0, &vars_vec, &vars_values, false);
+  tesseract::Dict &dict = api.tesseract()->getDict();
+  FILE *input_file = fopen(input_file_str, "rb");
+  if (input_file == nullptr) {
+    tprintf("Failed to open input wordlist file %s\n", input_file_str);
+    exit(1);
+  }
+  char str[CHARS_PER_LINE];
 
-    // Read word list and call Dict::NoDangerousAmbig() for each word
-    // to record ambiguities in the output file.
-    while (fgets(str, CHARS_PER_LINE, input_file) != nullptr) {
-        chomp_string(str);  // remove newline
-        WERD_CHOICE word(str, dict.getUnicharset());
-        dict.NoDangerousAmbig(&word, nullptr, false, nullptr);
-    }
-    // Clean up.
-    fclose(input_file);
+  // Read word list and call Dict::NoDangerousAmbig() for each word
+  // to record ambiguities in the output file.
+  while (fgets(str, CHARS_PER_LINE, input_file) != nullptr) {
+    chomp_string(str); // remove newline
+    WERD_CHOICE word(str, dict.getUnicharset());
+    dict.NoDangerousAmbig(&word, nullptr, false, nullptr);
+  }
+  // Clean up.
+  fclose(input_file);
 }

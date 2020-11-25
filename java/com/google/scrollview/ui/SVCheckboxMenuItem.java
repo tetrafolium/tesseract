@@ -22,39 +22,37 @@ package com.google.scrollview.ui;
 import com.google.scrollview.ScrollView;
 import com.google.scrollview.events.SVEvent;
 import com.google.scrollview.events.SVEventType;
-
 import javax.swing.JCheckBoxMenuItem;
 
 /**
  * Constructs a new menulistitem which possesses a flag that can be toggled.
  */
 class SVCheckboxMenuItem extends SVAbstractMenuItem {
-    public String value = null;
-    public String desc = null;
-    public boolean bvalue;
+  public String value = null;
+  public String desc = null;
+  public boolean bvalue;
 
-    SVCheckboxMenuItem(int id, String name, boolean val) {
-        super(id, name, new JCheckBoxMenuItem(name, val));
-        bvalue = val;
-    }
+  SVCheckboxMenuItem(int id, String name, boolean val) {
+    super(id, name, new JCheckBoxMenuItem(name, val));
+    bvalue = val;
+  }
 
-    /** What to do when user clicks on this item. */
-    @Override
-    public void performAction(SVWindow window, SVEventType eventType) {
-        // Checkbox entry - trigger and send event.
-        if (bvalue) {
-            bvalue = false;
-        } else {
-            bvalue = true;
-        }
-        SVEvent svme = new SVEvent(eventType, window, id, getValue());
-        ScrollView.addMessage(svme);
+  /** What to do when user clicks on this item. */
+  @Override
+  public void performAction(SVWindow window, SVEventType eventType) {
+    // Checkbox entry - trigger and send event.
+    if (bvalue) {
+      bvalue = false;
+    } else {
+      bvalue = true;
     }
+    SVEvent svme = new SVEvent(eventType, window, id, getValue());
+    ScrollView.addMessage(svme);
+  }
 
-    /** Returns the actual value of the MenuListItem. */
-    @Override
-    public String getValue() {
-        return Boolean.toString(bvalue);
-    }
+  /** Returns the actual value of the MenuListItem. */
+  @Override
+  public String getValue() {
+    return Boolean.toString(bvalue);
+  }
 }
-

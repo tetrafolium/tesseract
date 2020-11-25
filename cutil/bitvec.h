@@ -15,8 +15,8 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   BITVEC_H
-#define   BITVEC_H
+#ifndef BITVEC_H
+#define BITVEC_H
 
 #include "host.h"
 
@@ -24,44 +24,46 @@
           Include Files and Type Defines
 -----------------------------------------------------------------------------*/
 // TODO(rays) Rename BITSINLONG to BITSINuinT32, and use sizeof.
-#define BITSINLONG      32       /**< no of bits in a long */
+#define BITSINLONG 32 /**< no of bits in a long */
 typedef uinT32 *BIT_VECTOR;
 
 /*-----------------------------------------------------------------------------
           Public Function Prototypes
 -----------------------------------------------------------------------------*/
-#define zero_all_bits(array, length)         \
-  {                                          \
-    int index; /*temporary index*/           \
-                                             \
-    for (index = 0; index < length; index++) \
-      array[index] = 0; /*zero all bits*/    \
+#define zero_all_bits(array, length)                                           \
+  {                                                                            \
+    int index; /*temporary index*/                                             \
+                                                                               \
+    for (index = 0; index < length; index++)                                   \
+      array[index] = 0; /*zero all bits*/                                      \
   }
 
-#define set_all_bits(array, length)          \
-  {                                          \
-    int index; /*temporary index*/           \
-                                             \
-    for (index = 0; index < length; index++) \
-      array[index] = ~0; /*set all bits*/    \
+#define set_all_bits(array, length)                                            \
+  {                                                                            \
+    int index; /*temporary index*/                                             \
+                                                                               \
+    for (index = 0; index < length; index++)                                   \
+      array[index] = ~0; /*set all bits*/                                      \
   }
 
-#define copy_all_bits(source, dest, length)          \
-  {                                                  \
-    int index; /*temporary index*/                   \
-                                                     \
-    for (index = 0; index < length; index++)         \
-      dest[index] = source[index]; /*copy all bits*/ \
+#define copy_all_bits(source, dest, length)                                    \
+  {                                                                            \
+    int index; /*temporary index*/                                             \
+                                                                               \
+    for (index = 0; index < length; index++)                                   \
+      dest[index] = source[index]; /*copy all bits*/                           \
   }
 
-#define SET_BIT(array,bit) (array[bit/BITSINLONG]|=1<<(bit&(BITSINLONG-1)))
+#define SET_BIT(array, bit)                                                    \
+  (array[bit / BITSINLONG] |= 1 << (bit & (BITSINLONG - 1)))
 
-#define reset_bit(array,bit) (array[bit/BITSINLONG]&=~(1<<(bit&(BITSINLONG-1))))
+#define reset_bit(array, bit)                                                  \
+  (array[bit / BITSINLONG] &= ~(1 << (bit & (BITSINLONG - 1))))
 
-#define test_bit(array,bit) (array[bit/BITSINLONG] & (1<<(bit&(BITSINLONG-1))))
+#define test_bit(array, bit)                                                   \
+  (array[bit / BITSINLONG] & (1 << (bit & (BITSINLONG - 1))))
 
-#define WordsInVectorOfSize(NumBits) \
-(((NumBits) + BITSINLONG - 1) / BITSINLONG)
+#define WordsInVectorOfSize(NumBits) (((NumBits) + BITSINLONG - 1) / BITSINLONG)
 
 /*--------------------------------------------------------------------------
         Public Function Prototypes

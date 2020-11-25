@@ -35,15 +35,15 @@ typedef GenericHeap<MatrixCoordPair> PainPointHeap;
 
 // Types of pain points (ordered in the decreasing level of importance).
 enum LMPainPointsType {
-    LM_PPTYPE_BLAMER,
-    LM_PPTYPE_AMBIG,
-    LM_PPTYPE_PATH,
-    LM_PPTYPE_SHAPE,
+  LM_PPTYPE_BLAMER,
+  LM_PPTYPE_AMBIG,
+  LM_PPTYPE_PATH,
+  LM_PPTYPE_SHAPE,
 
-    LM_PPTYPE_NUM
+  LM_PPTYPE_NUM
 };
 
-static const char * const LMPainPointsTypeName[] = {
+static const char *const LMPainPointsTypeName[] = {
     "LM_PPTYPE_BLAMER",
     "LM_PPTYPE_AMBIGS",
     "LM_PPTYPE_PATH",
@@ -52,87 +52,86 @@ static const char * const LMPainPointsTypeName[] = {
 
 class LMPainPoints {
 public:
+  static const float kDefaultPainPointPriorityAdjustment;
+  // If there is a significant drop in character ngram probability or a
+  // dangerous ambiguity make the thresholds on what blob combinations
+  // can be classified looser.
+  static const float kLooseMaxCharWhRatio;
+  // Returns a description of the type of a pain point.
+  static const char *PainPointDescription(LMPainPointsType type) {
+    return LMPainPointsTypeName[type];
+  }
 
-    static const float kDefaultPainPointPriorityAdjustment;
-    // If there is a significant drop in character ngram probability or a
-    // dangerous ambiguity make the thresholds on what blob combinations
-    // can be classified looser.
-    static const float kLooseMaxCharWhRatio;
-    // Returns a description of the type of a pain point.
-    static const char* PainPointDescription(LMPainPointsType type) {
-        return LMPainPointsTypeName[type];
-    }
-
-    LMPainPoints(int max, float rat, bool fp, const Dict *d, int deb) :
-        max_heap_size_(max), max_char_wh_ratio_(rat), fixed_pitch_(fp),
+  LMPainPoints(int max, float rat, bool fp, const Dict *d, int deb)
+      : max_heap_size_(max), max_char_wh_ratio_(rat), fixed_pitch_(fp),
         dict_(d), debug_level_(deb) {}
-    ~LMPainPoints() {}
+  ~LMPainPoints() {}
 
-    // Returns true if the heap of pain points of pp_type is not empty().
-    inline bool HasPainPoints(LMPainPointsType pp_type) const {
-        return !pain_points_heaps_[pp_type].empty();
-    }
+  // Returns true if the heap of pain points of pp_type is not empty().
+  inline bool HasPainPoints(LMPainPointsType pp_type) const {
+    return !pain_points_heaps_[pp_type].empty();
+  }
 
-    // Dequeues the next pain point from the pain points queue and copies
-    // its contents and priority to *pp and *priority.
-    // Returns LM_PPTYPE_NUM if pain points queue is empty, otherwise the type.
-    LMPainPointsType Deque(MATRIX_COORD *pp, float *priority);
+  // Dequeues the next pain point from the pain points queue and copies
+  // its contents and priority to *pp and *priority.
+  // Returns LM_PPTYPE_NUM if pain points queue is empty, otherwise the type.
+  LMPainPointsType Deque(MATRIX_COORD *pp, float *priority);
 
-    // Clears pain points heap.
-    void Clear() {
-        for (int h = 0; h < LM_PPTYPE_NUM; ++h) pain_points_heaps_[h].clear();
-    }
+  // Clears pain points heap.
+  void Clear() {
+    for (int h = 0; h < LM_PPTYPE_NUM; ++h)
+      pain_points_heaps_[h].clear();
+  }
 
-    // For each cell, generate a "pain point" if the cell is not classified
-    // and has a left or right neighbor that was classified.
-    void GenerateInitial(WERD_RES *word_res);
+  // For each cell, generate a "pain point" if the cell is not classified
+  // and has a left or right neighbor that was classified.
+  void GenerateInitial(WERD_RES *word_res);
 
-    // Generate pain points from the given path.
-    void GenerateFromPath(float rating_cert_scale, ViterbiStateEntry *vse,
+  // Generate pain points from the given path.
+  void GenerateFromPath(float rating_cert_scale, ViterbiStateEntry *vse,
+                        WERD_RES *word_res);
+
+  // Generate pain points from dangerous ambiguities in best choice.
+  void GenerateFromAmbigs(const DANGERR &fixpt, ViterbiStateEntry *vse,
                           WERD_RES *word_res);
 
-    // Generate pain points from dangerous ambiguities in best choice.
-    void GenerateFromAmbigs(const DANGERR &fixpt, ViterbiStateEntry *vse,
-                            WERD_RES *word_res);
+  // Generate a pain point for the blamer.
+  bool GenerateForBlamer(double max_char_wh_ratio, WERD_RES *word_res, int col,
+                         int row) {
+    return GeneratePainPoint(col, row, LM_PPTYPE_BLAMER, 0.0, false,
+                             max_char_wh_ratio, word_res);
+  }
 
-    // Generate a pain point for the blamer.
-    bool GenerateForBlamer(double max_char_wh_ratio, WERD_RES *word_res,
-                           int col, int row) {
-        return GeneratePainPoint(col, row, LM_PPTYPE_BLAMER, 0.0, false,
-                                 max_char_wh_ratio, word_res);
-    }
+  // Adds a pain point to classify chunks_record->ratings(col, row).
+  // Returns true if a new pain point was added to an appropriate heap.
+  // Pain point priority is set to special_priority for pain points of
+  // LM_PPTYPE_AMBIG or LM_PPTYPE_PATH, for other pain points
+  // AssociateStats::gap_sum is used.
+  bool GeneratePainPoint(int col, int row, LMPainPointsType pp_type,
+                         float special_priority, bool ok_to_extend,
+                         float max_char_wh_ratio, WERD_RES *word_res);
 
-    // Adds a pain point to classify chunks_record->ratings(col, row).
-    // Returns true if a new pain point was added to an appropriate heap.
-    // Pain point priority is set to special_priority for pain points of
-    // LM_PPTYPE_AMBIG or LM_PPTYPE_PATH, for other pain points
-    // AssociateStats::gap_sum is used.
-    bool GeneratePainPoint(int col, int row, LMPainPointsType pp_type,
-                           float special_priority, bool ok_to_extend,
-                           float max_char_wh_ratio,
-                           WERD_RES *word_res);
-
-    // Adjusts the pain point coordinates to cope with expansion of the ratings
-    // matrix due to a split of the blob with the given index.
-    void RemapForSplit(int index);
+  // Adjusts the pain point coordinates to cope with expansion of the ratings
+  // matrix due to a split of the blob with the given index.
+  void RemapForSplit(int index);
 
 private:
-    // Priority queues containing pain points generated by the language model
-    // The priority is set by the language model components, adjustments like
-    // seam cost and width priority are factored into the priority.
-    PainPointHeap pain_points_heaps_[LM_PPTYPE_NUM];
-    // Maximum number of points to keep in the heap.
-    int max_heap_size_;
-    // Maximum character width/height ratio.
-    float max_char_wh_ratio_;
-    // Set to true if fixed pitch should be assumed.
-    bool fixed_pitch_;
-    // Cached pointer to dictionary.
-    const Dict *dict_;
-    // Debug level for print statements.
-    int debug_level_;
+  // Priority queues containing pain points generated by the language model
+  // The priority is set by the language model components, adjustments like
+  // seam cost and width priority are factored into the priority.
+  PainPointHeap pain_points_heaps_[LM_PPTYPE_NUM];
+  // Maximum number of points to keep in the heap.
+  int max_heap_size_;
+  // Maximum character width/height ratio.
+  float max_char_wh_ratio_;
+  // Set to true if fixed pitch should be assumed.
+  bool fixed_pitch_;
+  // Cached pointer to dictionary.
+  const Dict *dict_;
+  // Debug level for print statements.
+  int debug_level_;
 };
 
-}  // namespace tesseract
+} // namespace tesseract
 
-#endif  // TESSERACT_WORDREC_PAIN_POINTS_H_
+#endif // TESSERACT_WORDREC_PAIN_POINTS_H_

@@ -15,20 +15,19 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  ******************************************************************************/
-#ifndef   FPOINT_H
-#define   FPOINT_H
+#ifndef FPOINT_H
+#define FPOINT_H
 
 /**----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------**/
 #include "host.h"
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
 /* define data structure to hold 2D points or vectors using floating point */
-typedef struct
-{
-    FLOAT32 x, y;
+typedef struct {
+  FLOAT32 x, y;
 } FPOINT;
 typedef FPOINT FVECTOR;
 
@@ -36,13 +35,12 @@ typedef FPOINT FVECTOR;
             Macros
 ----------------------------------------------------------------------------**/
 /* macros for computing miscellaneous functions of 2 points */
-#define XDelta(A,B)   ( (B).x - (A).x )
-#define YDelta(A,B)   ( (B).y - (A).y )
-#define SlopeFrom(A,B)    ( YDelta(A,B) / XDelta(A,B) )
-#define AngleFrom(A,B)		( atan2((double) YDelta(A,B),		\
-					(double) XDelta(A,B) ) )
+#define XDelta(A, B) ((B).x - (A).x)
+#define YDelta(A, B) ((B).y - (A).y)
+#define SlopeFrom(A, B) (YDelta(A, B) / XDelta(A, B))
+#define AngleFrom(A, B) (atan2((double)YDelta(A, B), (double)XDelta(A, B)))
 
-#define XIntersectionOf(A,B,X)  ( SlopeFrom(A,B) * ((X) - A.x) + A.y)
+#define XIntersectionOf(A, B, X) (SlopeFrom(A, B) * ((X)-A.x) + A.y)
 
 /*-------------------------------------------------------------------------
         Public Function Prototypes

@@ -18,8 +18,8 @@
 #ifndef TESSERACT_CCUTIL_HOST_H_
 #define TESSERACT_CCUTIL_HOST_H_
 
-#include <limits>
 #include "platform.h"
+#include <limits>
 /* _WIN32 */
 #ifdef _WIN32
 #include <windows.h>
@@ -27,8 +27,8 @@
 #undef max
 #endif
 
-#include <cinttypes>  // PRId32, ...
-#include <cstdint>    // int32_t, ...
+#include <cinttypes> // PRId32, ...
+#include <cstdint>   // int32_t, ...
 
 // definitions of portable data types (numbers and characters)
 typedef int8_t inT8;
@@ -57,36 +57,36 @@ typedef unsigned char BOOL8;
 
 #endif /* _WIN32 */
 
-#define MAX_INT8  0x7f
+#define MAX_INT8 0x7f
 #define MAX_INT16 0x7fff
 #define MAX_INT32 0x7fffffff
 #define MAX_UINT8 0xff
-#define MAX_UINT16  0xffff
-#define MAX_UINT32  0xffffffff
+#define MAX_UINT16 0xffff
+#define MAX_UINT32 0xffffffff
 #define MAX_FLOAT32 std::numeric_limits<float>::max()
 
 #define MIN_INT8 static_cast<inT8>(0x80)
 #define MIN_INT16 static_cast<inT16>(0x8000)
 #define MIN_INT32 static_cast<inT32>(0x80000000)
 #define MIN_UINT8 0x00
-#define MIN_UINT16  0x0000
-#define MIN_UINT32  0x00000000
+#define MIN_UINT16 0x0000
+#define MIN_UINT32 0x00000000
 // Minimum positive value ie 1e-37ish.
 #define MIN_FLOAT32 std::numeric_limits<float>::min()
 
 // Defines
 #ifndef TRUE
-#define TRUE            1
+#define TRUE 1
 #endif
 
 #ifndef FALSE
-#define FALSE           0
+#define FALSE 0
 #endif
 
 // Return true if x is within tolerance of y
-template<class T> bool NearlyEqual(T x, T y, T tolerance) {
-    T diff = x - y;
-    return diff <= tolerance && -diff <= tolerance;
+template <class T> bool NearlyEqual(T x, T y, T tolerance) {
+  T diff = x - y;
+  return diff <= tolerance && -diff <= tolerance;
 }
 
-#endif  // TESSERACT_CCUTIL_HOST_H_
+#endif // TESSERACT_CCUTIL_HOST_H_

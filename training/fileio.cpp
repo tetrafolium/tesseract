@@ -23,8 +23,8 @@
 #include <unistd.h>
 #endif
 
-#include <stdlib.h>
 #include <cstdio>
+#include <stdlib.h>
 #include <string>
 
 #include "fileio.h"
@@ -35,162 +35,155 @@ namespace tesseract {
 ///////////////////////////////////////////////////////////////////////////////
 // File::
 ///////////////////////////////////////////////////////////////////////////////
-FILE* File::Open(const string& filename, const string& mode) {
-    return fopen(filename.c_str(), mode.c_str());
+FILE *File::Open(const string &filename, const string &mode) {
+  return fopen(filename.c_str(), mode.c_str());
 }
 
-FILE* File::OpenOrDie(const string& filename,
-                      const string& mode) {
-    FILE* stream = fopen(filename.c_str(), mode.c_str());
-    if (stream == nullptr) {
-        tprintf("Unable to open '%s' in mode '%s'\n", filename.c_str(),
-                mode.c_str());
-    }
-    return stream;
+FILE *File::OpenOrDie(const string &filename, const string &mode) {
+  FILE *stream = fopen(filename.c_str(), mode.c_str());
+  if (stream == nullptr) {
+    tprintf("Unable to open '%s' in mode '%s'\n", filename.c_str(),
+            mode.c_str());
+  }
+  return stream;
 }
 
-void File::WriteStringToFileOrDie(const string& str,
-                                  const string& filename) {
-    FILE* stream = fopen(filename.c_str(), "wb");
-    if (stream == nullptr) {
-        tprintf("Unable to open '%s' for writing\n", filename.c_str());
-        return;
-    }
-    fputs(str.c_str(), stream);
-    ASSERT_HOST(fclose(stream) == 0);
+void File::WriteStringToFileOrDie(const string &str, const string &filename) {
+  FILE *stream = fopen(filename.c_str(), "wb");
+  if (stream == nullptr) {
+    tprintf("Unable to open '%s' for writing\n", filename.c_str());
+    return;
+  }
+  fputs(str.c_str(), stream);
+  ASSERT_HOST(fclose(stream) == 0);
 }
 
-bool File::Readable(const string& filename) {
-    FILE* stream = fopen(filename.c_str(), "rb");
-    if (stream == nullptr) {
-        return false;
-    }
-    fclose(stream);
-    return true;
+bool File::Readable(const string &filename) {
+  FILE *stream = fopen(filename.c_str(), "rb");
+  if (stream == nullptr) {
+    return false;
+  }
+  fclose(stream);
+  return true;
 }
 
-bool File::ReadFileToString(const string& filename, string* out) {
-    FILE* stream = File::Open(filename.c_str(), "rb");
-    if (stream == nullptr) return false;
-    InputBuffer in(stream);
-    *out = "";
-    in.Read(out);
-    return in.CloseFile();
+bool File::ReadFileToString(const string &filename, string *out) {
+  FILE *stream = File::Open(filename.c_str(), "rb");
+  if (stream == nullptr)
+    return false;
+  InputBuffer in(stream);
+  *out = "";
+  in.Read(out);
+  return in.CloseFile();
 }
 
-string File::JoinPath(const string& prefix, const string& suffix) {
-    return (prefix.empty() || prefix[prefix.size() - 1] == '/')
-           ? prefix + suffix
-           : prefix + "/" + suffix;
+string File::JoinPath(const string &prefix, const string &suffix) {
+  return (prefix.empty() || prefix[prefix.size() - 1] == '/')
+             ? prefix + suffix
+             : prefix + "/" + suffix;
 }
 
-bool File::Delete(const char* pathname) {
-    const int status = unlink(pathname);
-    if (status != 0) {
-        tprintf("ERROR: Unable to delete file %s\n", pathname);
-        return false;
-    }
-    return true;
+bool File::Delete(const char *pathname) {
+  const int status = unlink(pathname);
+  if (status != 0) {
+    tprintf("ERROR: Unable to delete file %s\n", pathname);
+    return false;
+  }
+  return true;
 }
 
 #ifdef _WIN32
-bool File::DeleteMatchingFiles(const char* pattern) {
-    WIN32_FIND_DATA data;
-    BOOL result = TRUE;
-    HANDLE handle = FindFirstFile(pattern, &data);
-    bool all_deleted = true;
-    if (handle != INVALID_HANDLE_VALUE) {
-        for (; result; result = FindNextFile(handle, &data)) {
-            all_deleted &= File::Delete(data.cFileName);
-        }
-        FindClose(handle);
+bool File::DeleteMatchingFiles(const char *pattern) {
+  WIN32_FIND_DATA data;
+  BOOL result = TRUE;
+  HANDLE handle = FindFirstFile(pattern, &data);
+  bool all_deleted = true;
+  if (handle != INVALID_HANDLE_VALUE) {
+    for (; result; result = FindNextFile(handle, &data)) {
+      all_deleted &= File::Delete(data.cFileName);
     }
-    return all_deleted;
+    FindClose(handle);
+  }
+  return all_deleted;
 }
 #else
-bool File::DeleteMatchingFiles(const char* pattern) {
-    glob_t pglob;
-    char **paths;
-    bool all_deleted = true;
-    if (glob(pattern, 0, nullptr, &pglob) == 0) {
-        for (paths = pglob.gl_pathv; *paths != nullptr; paths++) {
-            all_deleted &= File::Delete(*paths);
-        }
-        globfree(&pglob);
+bool File::DeleteMatchingFiles(const char *pattern) {
+  glob_t pglob;
+  char **paths;
+  bool all_deleted = true;
+  if (glob(pattern, 0, nullptr, &pglob) == 0) {
+    for (paths = pglob.gl_pathv; *paths != nullptr; paths++) {
+      all_deleted &= File::Delete(*paths);
     }
-    return all_deleted;
+    globfree(&pglob);
+  }
+  return all_deleted;
 }
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // InputBuffer::
 ///////////////////////////////////////////////////////////////////////////////
-InputBuffer::InputBuffer(FILE* stream)
-    : stream_(stream) {
-    fseek(stream_, 0, SEEK_END);
-    filesize_ = ftell(stream_);
-    fseek(stream_, 0, SEEK_SET);
+InputBuffer::InputBuffer(FILE *stream) : stream_(stream) {
+  fseek(stream_, 0, SEEK_END);
+  filesize_ = ftell(stream_);
+  fseek(stream_, 0, SEEK_SET);
 }
 
-InputBuffer::InputBuffer(FILE* stream, size_t)
-    : stream_(stream) {
-    fseek(stream_, 0, SEEK_END);
-    filesize_ = ftell(stream_);
-    fseek(stream_, 0, SEEK_SET);
+InputBuffer::InputBuffer(FILE *stream, size_t) : stream_(stream) {
+  fseek(stream_, 0, SEEK_END);
+  filesize_ = ftell(stream_);
+  fseek(stream_, 0, SEEK_SET);
 }
 
 InputBuffer::~InputBuffer() {
-    if (stream_ != nullptr) {
-        fclose(stream_);
-    }
+  if (stream_ != nullptr) {
+    fclose(stream_);
+  }
 }
 
-bool InputBuffer::Read(string* out) {
-    char buf[BUFSIZ + 1];
-    int l;
-    while ((l = fread(buf, 1, BUFSIZ, stream_)) > 0) {
-        if (ferror(stream_)) {
-            clearerr(stream_);
-            return false;
-        }
-        buf[l] = 0;
-        out->append(buf);
+bool InputBuffer::Read(string *out) {
+  char buf[BUFSIZ + 1];
+  int l;
+  while ((l = fread(buf, 1, BUFSIZ, stream_)) > 0) {
+    if (ferror(stream_)) {
+      clearerr(stream_);
+      return false;
     }
-    return true;
+    buf[l] = 0;
+    out->append(buf);
+  }
+  return true;
 }
 
 bool InputBuffer::CloseFile() {
-    int ret = fclose(stream_);
-    stream_ = nullptr;
-    return ret == 0;
+  int ret = fclose(stream_);
+  stream_ = nullptr;
+  return ret == 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // OutputBuffer::
 ///////////////////////////////////////////////////////////////////////////////
 
-OutputBuffer::OutputBuffer(FILE* stream)
-    : stream_(stream) {
-}
+OutputBuffer::OutputBuffer(FILE *stream) : stream_(stream) {}
 
-OutputBuffer::OutputBuffer(FILE* stream, size_t)
-    : stream_(stream) {
-}
+OutputBuffer::OutputBuffer(FILE *stream, size_t) : stream_(stream) {}
 
 OutputBuffer::~OutputBuffer() {
-    if (stream_ != nullptr) {
-        fclose(stream_);
-    }
+  if (stream_ != nullptr) {
+    fclose(stream_);
+  }
 }
 
-void OutputBuffer::WriteString(const string& str) {
-    fputs(str.c_str(), stream_);
+void OutputBuffer::WriteString(const string &str) {
+  fputs(str.c_str(), stream_);
 }
 
 bool OutputBuffer::CloseFile() {
-    int ret = fclose(stream_);
-    stream_ = nullptr;
-    return ret == 0;
+  int ret = fclose(stream_);
+  stream_ = nullptr;
+  return ret == 0;
 }
 
-}  // namespace tesseract
+} // namespace tesseract

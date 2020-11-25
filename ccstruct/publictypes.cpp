@@ -20,7 +20,7 @@
 #include "publictypes.h"
 
 /** String name for each block type. Keep in sync with PolyBlockType. */
-const char* kPolyBlockNames[] = {
+const char *kPolyBlockNames[] = {
     "Unknown",
     "Flowing Text",
     "Heading Text",
@@ -36,5 +36,5 @@ const char* kPolyBlockNames[] = {
     "Horizontal Line",
     "Vertical Line",
     "Noise",
-    ""  // End marker for testing that sizes match.
+    "" // End marker for testing that sizes match.
 };

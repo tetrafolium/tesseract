@@ -21,63 +21,56 @@
 /*----------------------------------------------------------------------------
           Include Files and Type Defines
 ----------------------------------------------------------------------------*/
-#include "oldlist.h"
 #include "intproto.h"
+#include "oldlist.h"
 #include <stdio.h>
 
-typedef struct
-{
-    uinT16 ProtoId;
-    uinT16 dummy;
-    PROTO_STRUCT Proto;
+typedef struct {
+  uinT16 ProtoId;
+  uinT16 dummy;
+  PROTO_STRUCT Proto;
 }
-
 
 TEMP_PROTO_STRUCT;
 typedef TEMP_PROTO_STRUCT *TEMP_PROTO;
 
-typedef struct
-{
-    uinT8 NumTimesSeen;
-    uinT8 ProtoVectorSize;
-    PROTO_ID MaxProtoId;
-    BIT_VECTOR Protos;
-    int FontinfoId;  // font information inferred from pre-trained templates
+typedef struct {
+  uinT8 NumTimesSeen;
+  uinT8 ProtoVectorSize;
+  PROTO_ID MaxProtoId;
+  BIT_VECTOR Protos;
+  int FontinfoId; // font information inferred from pre-trained templates
 } TEMP_CONFIG_STRUCT;
 typedef TEMP_CONFIG_STRUCT *TEMP_CONFIG;
 
-typedef struct
-{
-    UNICHAR_ID *Ambigs;
-    int FontinfoId;  // font information inferred from pre-trained templates
+typedef struct {
+  UNICHAR_ID *Ambigs;
+  int FontinfoId; // font information inferred from pre-trained templates
 } PERM_CONFIG_STRUCT;
 typedef PERM_CONFIG_STRUCT *PERM_CONFIG;
 
-typedef union
-{
-    TEMP_CONFIG Temp;
-    PERM_CONFIG Perm;
+typedef union {
+  TEMP_CONFIG Temp;
+  PERM_CONFIG Perm;
 } ADAPTED_CONFIG;
 
-typedef struct
-{
-    uinT8 NumPermConfigs;
-    uinT8 MaxNumTimesSeen;  // maximum number of times any TEMP_CONFIG was seen
-    uinT8 dummy[2];         // (cut at matcher_min_examples_for_prototyping)
-    BIT_VECTOR PermProtos;
-    BIT_VECTOR PermConfigs;
-    LIST TempProtos;
-    ADAPTED_CONFIG Config[MAX_NUM_CONFIGS];
+typedef struct {
+  uinT8 NumPermConfigs;
+  uinT8 MaxNumTimesSeen; // maximum number of times any TEMP_CONFIG was seen
+  uinT8 dummy[2];        // (cut at matcher_min_examples_for_prototyping)
+  BIT_VECTOR PermProtos;
+  BIT_VECTOR PermConfigs;
+  LIST TempProtos;
+  ADAPTED_CONFIG Config[MAX_NUM_CONFIGS];
 } ADAPT_CLASS_STRUCT;
 typedef ADAPT_CLASS_STRUCT *ADAPT_CLASS;
 
-typedef struct
-{
-    INT_TEMPLATES Templates;
-    int NumNonEmptyClasses;
-    uinT8 NumPermClasses;
-    uinT8 dummy[3];
-    ADAPT_CLASS Class[MAX_NUM_CLASSES];
+typedef struct {
+  INT_TEMPLATES Templates;
+  int NumNonEmptyClasses;
+  uinT8 NumPermClasses;
+  uinT8 dummy[3];
+  ADAPT_CLASS Class[MAX_NUM_CLASSES];
 } ADAPT_TEMPLATES_STRUCT;
 typedef ADAPT_TEMPLATES_STRUCT *ADAPT_TEMPLATES;
 
@@ -86,29 +79,25 @@ typedef ADAPT_TEMPLATES_STRUCT *ADAPT_TEMPLATES;
 ----------------------------------------------------------------------------*/
 #define NumNonEmptyClassesIn(Template) ((Template)->NumNonEmptyClasses)
 
-#define IsEmptyAdaptedClass(Class) ((Class)->NumPermConfigs == 0 &&      \
-(Class)->TempProtos == NIL_LIST)
+#define IsEmptyAdaptedClass(Class)                                             \
+  ((Class)->NumPermConfigs == 0 && (Class)->TempProtos == NIL_LIST)
 
-#define ConfigIsPermanent(Class,ConfigId)		\
-(test_bit ((Class)->PermConfigs, ConfigId))
+#define ConfigIsPermanent(Class, ConfigId)                                     \
+  (test_bit((Class)->PermConfigs, ConfigId))
 
-#define MakeConfigPermanent(Class,ConfigId)	\
-(SET_BIT ((Class)->PermConfigs, ConfigId))
+#define MakeConfigPermanent(Class, ConfigId)                                   \
+  (SET_BIT((Class)->PermConfigs, ConfigId))
 
-#define MakeProtoPermanent(Class,ProtoId)	\
-(SET_BIT ((Class)->PermProtos, ProtoId))
+#define MakeProtoPermanent(Class, ProtoId)                                     \
+  (SET_BIT((Class)->PermProtos, ProtoId))
 
-#define TempConfigFor(Class,ConfigId)	\
-((Class)->Config[ConfigId].Temp)
+#define TempConfigFor(Class, ConfigId) ((Class)->Config[ConfigId].Temp)
 
-#define PermConfigFor(Class,ConfigId)	\
-((Class)->Config[ConfigId].Perm)
+#define PermConfigFor(Class, ConfigId) ((Class)->Config[ConfigId].Perm)
 
-#define IncreaseConfidence(TempConfig)	\
-((TempConfig)->NumTimesSeen++)
+#define IncreaseConfidence(TempConfig) ((TempConfig)->NumTimesSeen++)
 
-void AddAdaptedClass(ADAPT_TEMPLATES Templates,
-                     ADAPT_CLASS Class,
+void AddAdaptedClass(ADAPT_TEMPLATES Templates, ADAPT_CLASS Class,
                      CLASS_ID ClassId);
 
 void FreeTempProto(void *arg);
